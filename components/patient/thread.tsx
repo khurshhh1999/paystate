@@ -17,6 +17,7 @@ const RECEIPT: Record<Action, string> = {
   offer_financial_assistance: "Financial assistance application started.",
   send_document: "Receipt or itemized statement sent.",
   stop_messages: "Text messages stopped. Paper statements continue.",
+  update_contact: "Contact details updated.",
 };
 
 function Bubble({ from, children }: { from: "patient" | "practice"; children: React.ReactNode }) {

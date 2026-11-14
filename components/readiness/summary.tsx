@@ -4,11 +4,23 @@
 import { money } from "@/components/ui";
 import type { Summary } from "./compute";
 
-function Figure({ value, label, tone = "", note }: { value: number; label: string; tone?: string; note?: string }) {
+export function Figure({
+  value,
+  label,
+  tone = "",
+  note,
+  wrap = false,
+}: {
+  value: number;
+  label: string;
+  tone?: string;
+  note?: string;
+  wrap?: boolean; // let the label wrap where three figures share a narrow row
+}) {
   return (
     <div className="min-w-0 py-3">
       <p className={"num text-[26px] font-medium leading-none " + tone}>{value}</p>
-      <p className="mt-1.5 whitespace-nowrap text-[13.5px] text-ink-2">{label}</p>
+      <p className={"mt-1.5 text-[13.5px] text-ink-2 " + (wrap ? "" : "whitespace-nowrap")}>{label}</p>
       {note && <p className="mt-0.5 text-[13px] text-ink-2">{note}</p>}
     </div>
   );

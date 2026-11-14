@@ -6,6 +6,7 @@ import { formatDate } from "@/components/bench";
 import { TRAFFIC } from "@/components/traffic/compute";
 import { TrafficMix } from "@/components/traffic/traffic-mix";
 import { GateCheck } from "@/components/traffic/gate-check";
+import { MissesChanged } from "@/components/traffic/misses-changed";
 
 export const metadata: Metadata = {
   title: "Traffic set · Paystate",
@@ -38,6 +39,8 @@ export default function TrafficPage() {
       </header>
 
       <TrafficMix runDate={formatDate(TRAFFIC.generatedAt)} />
+
+      <MissesChanged />
 
       <GateCheck />
 

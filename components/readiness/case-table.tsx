@@ -10,6 +10,7 @@ import type { FeedId } from "@/lib/types";
 import { EmptyDot, OUTCOME_LABEL, OutcomeBadge, OutcomeDot, type Outcome } from "@/components/ui";
 import { Transcript } from "@/components/case/transcript";
 import type { CaseRow } from "./compute";
+import { GATE_TONE, gateLabel } from "./gate-summary";
 
 const FEED_LABEL = Object.fromEntries(FEEDS.map((f) => [f.id, f.label])) as Record<FeedId, string>;
 
@@ -27,12 +28,13 @@ export function CaseTable({ rows, trialsPerCase }: { rows: CaseRow[]; trialsPerC
   return (
     <div>
       <div className="table-scroll">
-        <table className="ledger min-w-[760px]">
+        <table className="ledger min-w-[880px]">
           <thead>
             <tr>
               <th scope="col">Patient asks</th>
               <th scope="col">Recorded runs</th>
               <th scope="col">What happens</th>
+              <th scope="col">Gate</th>
               <th scope="col">Still missing</th>
               <th scope="col">
                 <span className="sr-only">Conversation</span>
@@ -64,6 +66,14 @@ export function CaseTable({ rows, trialsPerCase }: { rows: CaseRow[]; trialsPerC
                     <td className={r.standing === "wrong" ? "text-wrong" : r.standing === "unrun" ? "text-ink-3" : ""}>
                       {r.happens}
                     </td>
+                    <td className="whitespace-nowrap">
+                      <span className={GATE_TONE[r.gate.now.status]}>{gateLabel(r.gate.now)}</span>
+                      {r.gate.allowsUnowed && (
+                        <span className="mt-0.5 block text-[12.5px] text-wrong">
+                          Full record: {gateLabel(r.gate.full).replace(/^\w/, (c) => c.toLowerCase())}
+                        </span>
+                      )}
+                    </td>
                     <td>
                       {r.missing.length === 0 ? (
                         <span className="text-ink-3">Nothing</span>
@@ -88,7 +98,7 @@ export function CaseTable({ rows, trialsPerCase }: { rows: CaseRow[]; trialsPerC
                   </tr>
                   {isOpen && r.sample && (
                     <tr id={`conv-${id}`}>
-                      <td colSpan={5} className="bg-paper">
+                      <td colSpan={6} className="bg-paper">
                         <div className="max-w-[720px] py-2">
                           <Transcript turns={r.sample.transcript} agentLabel="Assistant" />
                           <div className="mt-4 border-t border-rule pt-3">

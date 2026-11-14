@@ -5,6 +5,9 @@
 //   node scripts/run-traffic.mjs                     full run, 2 trials, at most 340 model calls
 //   node scripts/run-traffic.mjs --trials 1
 //   node scripts/run-traffic.mjs --only stop-texts   rerun one case, merge into the file
+//   node scripts/run-traffic.mjs --only a,b,c --note "why"
+//                                                    rerun several; the trials they replace are kept
+//                                                    under `previous` (first replacement only)
 //   node scripts/run-traffic.mjs --max-calls 100     stop starting conversations near this budget
 //   node scripts/run-traffic.mjs --dry-run           print the plan, make no calls
 
@@ -27,8 +30,9 @@ const { MODEL } = await import("../lib/run.mjs");
 const { callStats, setCallCap } = await import("../lib/anthropic.mjs");
 
 const args = parseArgs(process.argv.slice(2));
-const cases = args.only ? TRAFFIC_CASES.filter((c) => c.id === args.only) : TRAFFIC_CASES;
-if (args.only && cases.length === 0) die(`Unknown case "${args.only}". Known cases: ${TRAFFIC_CASES.map((c) => c.id).join(", ")}`);
+const unknown = (args.only ?? []).filter((id) => !TRAFFIC_CASES.some((c) => c.id === id));
+if (unknown.length) die(`Unknown case(s) ${unknown.map((u) => `"${u}"`).join(", ")}. Known cases: ${TRAFFIC_CASES.map((c) => c.id).join(", ")}`);
+const cases = args.only ? TRAFFIC_CASES.filter((c) => args.only.includes(c.id)) : TRAFFIC_CASES;
 
 // Trial 1 of every case, heaviest first, then trial 2, so an early stop loses the least.
 const byWeight = [...cases].sort((a, b) => b.weight - a.weight);
@@ -104,10 +108,33 @@ let file = fresh;
 if (args.only && fs.existsSync(OUT)) {
   const existing = JSON.parse(fs.readFileSync(OUT, "utf8"));
   file = { ...fresh, ...existing, runs: { ...existing.runs } };
+  if (existing.previous) file.previous = { ...existing.previous };
 }
+const replaced = [];
 for (const kase of cases) {
   const trials = (collected[kase.id] ?? []).filter(Boolean);
-  if (trials.length) file.runs[kase.id] = trials;
+  if (!trials.length) continue;
+  // Keep the trials a rerun replaces, but only the first time, so later reruns never overwrite
+  // the original run.
+  if (args.only && file.runs[kase.id]?.length) {
+    file.previous ??= {};
+    file.previous[kase.id] ??= file.runs[kase.id];
+  }
+  file.runs[kase.id] = trials;
+  replaced.push(kase.id);
+}
+if (args.only && replaced.length) {
+  const before = file.rerun?.cases ?? [];
+  file.rerun = {
+    cases: [...before, ...replaced.filter((id) => !before.includes(id))],
+    at: new Date().toISOString(),
+    note: args.note ?? file.rerun?.note ?? "",
+  };
+}
+if (!args.only) {
+  // A full run starts over: nothing is a rerun any more.
+  delete file.previous;
+  delete file.rerun;
 }
 file.model = MODEL;
 file.view = "full";
@@ -188,7 +215,7 @@ async function pool(items, size, worker) {
 }
 
 function parseArgs(argv) {
-  const out = { trials: 2, only: null, maxCalls: 340, dryRun: false };
+  const out = { trials: 2, only: null, note: null, maxCalls: 340, dryRun: false };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     const val = () => {
@@ -199,12 +226,18 @@ function parseArgs(argv) {
     if (a === "--trials") {
       out.trials = Number(val());
       if (!Number.isInteger(out.trials) || out.trials < 1) die("--trials must be a positive whole number.");
-    } else if (a === "--only") out.only = val();
+    } else if (a === "--only") {
+      out.only = val()
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (!out.only.length) die("--only needs at least one case id.");
+    } else if (a === "--note") out.note = val();
     else if (a === "--max-calls") {
       out.maxCalls = Number(val());
       if (!Number.isInteger(out.maxCalls) || out.maxCalls < 1) die("--max-calls must be a positive whole number.");
     } else if (a === "--dry-run") out.dryRun = true;
-    else die(`Unknown argument "${a}". Use --trials N, --only caseId, --max-calls N, --dry-run.`);
+    else die(`Unknown argument "${a}". Use --trials N, --only caseId[,caseId...], --note text, --max-calls N, --dry-run.`);
   }
   return out;
 }

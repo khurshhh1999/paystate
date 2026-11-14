@@ -21,6 +21,10 @@ export interface TrafficData {
   maxPatientTurns: number;
   calls: number;
   runs: Record<string, TrafficTrial[]>;
+  // Set when some cases were run again after a change: the trials those reruns replaced
+  // (the original run, never overwritten by a later rerun) and which cases were rerun.
+  previous?: Record<string, TrafficTrial[]>;
+  rerun?: { cases: string[]; at: string; note: string };
 }
 
 export const TRAFFIC = trafficJson as unknown as TrafficData;
@@ -55,7 +59,7 @@ export function presetWeights(mix: MixId): Weights {
   return rescale(base);
 }
 
-const isRight = (t: TrafficTrial) => t.verdict.outcome === "resolved" || t.verdict.outcome === "correct_handoff";
+export const isRight = (t: TrafficTrial) => t.verdict.outcome === "resolved" || t.verdict.outcome === "correct_handoff";
 
 export interface ResultSummary {
   trials: number;
@@ -99,6 +103,22 @@ export function summarize(data: TrafficData, weights: Weights): ResultSummary {
     casesMissing: TRAFFIC_CASES.length - casesRun,
     weightedRate: wSum > 0 ? wScore / wSum : null,
   };
+}
+
+/** The run as it stood before any rerun: the original trials put back over the current ones. */
+export function firstRun(data: TrafficData): TrafficData | null {
+  const previous = data.previous ?? {};
+  if (Object.keys(previous).length === 0) return null;
+  return { ...data, runs: { ...data.runs, ...previous }, previous: undefined, rerun: undefined };
+}
+
+/** Cases that were run again, heaviest first, with their original and current trials. */
+export function rerunCases(data: TrafficData): { kase: TrafficCase; before: TrafficTrial[]; after: TrafficTrial[] }[] {
+  const previous = data.previous ?? {};
+  return [...TRAFFIC_CASES]
+    .filter((c) => previous[c.id]?.length)
+    .sort((a, b) => b.weight - a.weight)
+    .map((kase) => ({ kase, before: previous[kase.id], after: trialsOf(data, kase.id) }));
 }
 
 /** The conversation to show for a case: a wrong collect if there is one, then a dead end, then the first. */
