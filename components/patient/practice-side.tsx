@@ -1,13 +1,15 @@
 "use client";
-// What the practice sees beside the thread: the record the assistant reads from, and the
-// staff queue entry once a conversation is handed off.
+// What the practice sees beside the thread: the record the assistant reads from, the payment
+// gate on that record, and the staff queue entry once a conversation is handed off.
 
 import Link from "next/link";
 import type { Case, Ticket, View } from "@/lib/types";
 import { recordForView } from "@/lib/prompts.mjs";
+import { paymentGate } from "@/lib/gate.mjs";
 import { Button, ErrorText, Panel, Segmented } from "@/components/ui";
 import { RecordView } from "@/components/case/record-view";
 import { TicketCard } from "./ticket-card";
+import { GateLine } from "./gate-line";
 
 export type FeedSetting = "full" | "statement";
 
@@ -37,7 +39,10 @@ export function PracticeSide({
   onRetryTicket: () => void;
   hasReply: boolean;
 }) {
-  const record = moneyFirst(recordForView(kase, view as View));
+  const seen = recordForView(kase, view as View);
+  const record = moneyFirst(seen);
+  const gate = paymentGate(seen);
+  const balance = typeof seen.statement_balance === "number" ? seen.statement_balance : null;
 
   return (
     <section aria-labelledby="practice-side" className="flex min-w-0 flex-col gap-6 text-[14px]">
@@ -73,6 +78,7 @@ export function PracticeSide({
               : "The statement balance only. Try both ways."}
           </span>
         </div>
+        <GateLine gate={gate} balance={balance} />
         {/* The column is narrower than the record's default 200px label width allows for. */}
         <Panel className="px-4 py-1 sm:[&>dl>div]:grid-cols-[132px_minmax(0,1fr)] sm:[&>dl>div]:gap-x-4">
           <RecordView record={record} />

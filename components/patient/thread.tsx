@@ -15,6 +15,8 @@ const RECEIPT: Record<Action, string> = {
   send_pay_link: "Payment link sent.",
   update_insurance: "New insurance saved to the account.",
   offer_financial_assistance: "Financial assistance application started.",
+  send_document: "Receipt or itemized statement sent.",
+  stop_messages: "Text messages stopped. Paper statements continue.",
 };
 
 function Bubble({ from, children }: { from: "patient" | "practice"; children: React.ReactNode }) {
@@ -124,6 +126,7 @@ export function Thread({
                 {(t.actions ?? []).map((a) => (
                   <Receipt key={a}>{RECEIPT[a]}</Receipt>
                 ))}
+                {(t.gate?.removed?.length ?? 0) > 0 && <Receipt>A payment step was blocked by the gate.</Receipt>}
               </div>
             ),
           )}
