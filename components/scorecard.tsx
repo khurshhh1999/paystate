@@ -75,7 +75,7 @@ function Cell({ s, version, view, results }: { s: VersionSummary; version: Versi
             {s.wrong_collect > 0 && (
               <span className="text-ink-2">
                 {" "}
-                · <span className="fig">{money(s.wrongCollectDollars)}</span> not owed, each time the twelve cases are
+                · <span className="tabular-nums">{money(s.wrongCollectDollars)}</span> not owed, each time the twelve cases are
                 run
               </span>
             )}
@@ -116,7 +116,7 @@ export function Scorecard({ results }: { results: Results }) {
               <p className="text-[13px] text-ink-2">{VIEW_NOTE[view]}</p>
               {total > 0 && (
                 <p className="mt-2 text-[14px]">
-                  <span className="fig font-medium">
+                  <span className="tabular-nums font-medium">
                     {right} of {total}
                   </span>{" "}
                   <span className="text-ink-2">right across both</span>

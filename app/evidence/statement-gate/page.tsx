@@ -63,8 +63,8 @@ export default function OutreachPage() {
 
       <section className="flex flex-col gap-4">
         <p className="prose-col text-[17px] leading-[1.5]">
-          Of <span className="fig">{n(panel.accounts)}</span> synthetic open balances,{" "}
-          <span className="fig">{n(union.caught)}</span> tripped at least one rule. They carry{" "}
+          Of <span className="tabular-nums">{n(panel.accounts)}</span> synthetic open balances,{" "}
+          <span className="tabular-nums">{n(union.caught)}</span> tripped at least one rule. They carry{" "}
           <Money value={union.statementDollars} /> on statements that should not go out as written, of which{" "}
           <Money value={union.inQuestionDollars} /> is not owed as stated.
         </p>
@@ -72,7 +72,7 @@ export default function OutreachPage() {
           The panel is synthetic and the incidence rates are assumptions, not measured rates:{" "}
           {triggers.map((t, i) => (
             <span key={t.id}>
-              rule {t.number} <span className="fig">{pct(t.assumedRate)}</span>
+              rule {t.number} <span className="tabular-nums">{pct(t.assumedRate)}</span>
               {i < triggers.length - 1 ? ", " : "."}
             </span>
           ))}{" "}
@@ -127,7 +127,7 @@ export default function OutreachPage() {
         </div>
 
         <p className="prose-col text-[14px] text-ink-2">
-          The panel also holds <span className="fig">{n(nearMissTotal)}</span> near misses: accounts that look like
+          The panel also holds <span className="tabular-nums">{n(nearMissTotal)}</span> near misses: accounts that look like
           a trigger but are payable, such as a CO denial already written off or a Medicare patient whose Medicaid
           category is SLMB, which does not carry the QMB billing protection.{" "}
           {allChecksClean

@@ -103,11 +103,6 @@ h1, h2, h3 {
   font-variant-numeric: tabular-nums;
 }
 
-/* Figures inside a sentence: same face as the text, digits still the same width. */
-.fig {
-  font-variant-numeric: tabular-nums;
-}
-
 /* Running prose: keep the measure readable. */
 .prose-col {
   max-width: 64ch;

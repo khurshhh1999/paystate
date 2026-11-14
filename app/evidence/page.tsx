@@ -87,7 +87,7 @@ export default function BenchPage() {
           {capital(spell(CASES.length))} patient situations
           {graded > 0 ? (
             <>
-              , <span className="fig">{graded}</span> graded conversations: {full.total} with the full account record,{" "}
+              , <span className="tabular-nums">{graded}</span> graded conversations: {full.total} with the full account record,{" "}
               {statement.total} with only what the statement prints and {feeds} with some feeds removed.
             </>
           ) : (
@@ -98,7 +98,7 @@ export default function BenchPage() {
           {ranFull && (
             <>
               With the full record, the assistant reached the right outcome in{" "}
-              <span className="fig text-ink">
+              <span className="tabular-nums text-ink">
                 {full.right} of {full.total}
               </span>
               .{" "}
@@ -107,13 +107,13 @@ export default function BenchPage() {
           {ranStatement && (
             <>
               Shown only the statement, it reached{" "}
-              <span className="fig text-ink">
+              <span className="tabular-nums text-ink">
                 {statement.right} of {statement.total}
               </span>
               {statement.wrong > 0 ? (
                 <>
                   , and offered to take payment for a bill the patient did not owe in{" "}
-                  <span className="fig text-wrong">{statement.wrong}</span>{" "}
+                  <span className="tabular-nums text-wrong">{statement.wrong}</span>{" "}
                   {statement.wrong === 1 ? "conversation" : "conversations"}.
                 </>
               ) : (

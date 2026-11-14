@@ -254,18 +254,18 @@ export default function DecisionsPage() {
               <>
                 {" "}
                 With only the statement balance and the check on, the assistant was right in{" "}
-                <span className="fig">
+                <span className="tabular-nums">
                   {none.on.right} of {none.on.total}
                 </span>{" "}
                 conversations and{" "}
-                <span className="fig">
+                <span className="tabular-nums">
                   {none.on.handoffs}
                 </span>{" "}
                 ended with staff. With everything connected it was right in{" "}
-                <span className="fig">
+                <span className="tabular-nums">
                   {all.on.right} of {all.on.total}
                 </span>
-                , and <span className="fig">{all.on.handoffs}</span> still ended with staff, because most of these cases
+                , and <span className="tabular-nums">{all.on.handoffs}</span> still ended with staff, because most of these cases
                 need someone to correct the account. With the check off and no remittance, it offered to
                 take payment on a claim the practice had filed late.
               </>
