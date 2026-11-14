@@ -3,6 +3,7 @@
 
 import { CASES } from "./cases.mjs";
 import { ACTIONS, AGENT_PROMPTS, FORMAT } from "./prompts.mjs";
+import { isView } from "./feeds.mjs";
 import { checkLimits, clientIp } from "./limits.mjs";
 import type { Action, Case, Turn, View } from "./types";
 
@@ -79,10 +80,10 @@ export function resolveCase(body: Record<string, unknown>): Case {
 export function resolveView(body: Record<string, unknown>): View {
   const { view } = body;
   if (view === undefined || view === null) return "full";
-  if (view !== "full" && view !== "statement") {
-    throw new ApiError(400, 'view must be "full" or "statement".');
+  if (!isView(view)) {
+    throw new ApiError(400, 'view must be "full", "statement" or "feeds:" followed by feed ids joined with "+".');
   }
-  return view;
+  return view as View;
 }
 
 /**

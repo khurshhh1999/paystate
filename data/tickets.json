@@ -1,0 +1,591 @@
+{
+  "generatedAt": "2026-11-14T19:55:03.517Z",
+  "model": "claude-sonnet-5-5",
+  "tickets": [
+    {
+      "id": "rec-hardship",
+      "kind": "financial_assistance",
+      "amount": 1840,
+      "reason": "Patient lost his job in September, has no income, and cannot pay the correct $1,840 patient-responsibility balance (PR-1 $1,310 deductible, PR-2 $530 coinsurance); no assistance application is on file.",
+      "told_patient": "Billing staff will take his financial assistance application Mon-Fri 8am-5pm Central, he may be asked about household size and income, and the hold stops statements and he owes nothing today.",
+      "captured": [
+        {
+          "label": "Balance",
+          "value": "$1,840 ($1,310 deductible + $530 coinsurance)"
+        },
+        {
+          "label": "Employment status",
+          "value": "Lost job in September; no income currently"
+        },
+        {
+          "label": "Payer",
+          "value": "Cigna Open Access, in network"
+        },
+        {
+          "label": "Dates of service",
+          "value": "2026-07-08 to 2026-08-19"
+        },
+        {
+          "label": "Account hold",
+          "value": "Placed by assistant; statements and reminders paused"
+        }
+      ],
+      "next_step": "Contact Marcus Bell to take the financial assistance application, collecting household size and recent income to check against the 300% FPL threshold.",
+      "caseId": "hardship",
+      "patient": "Marcus Bell, 38",
+      "balance": 1840,
+      "hold": true,
+      "createdAt": "2026-11-12T08:12:00-06:00",
+      "transcript": [
+        {
+          "role": "patient",
+          "text": "I lost my job in September. I can't pay $1,840 right now."
+        },
+        {
+          "role": "agent",
+          "text": "I'm sorry to hear about your job, Marcus. That's a hard spot, and thank you for telling me.\n\nYour balance is correct as billed: $1,310 deductible and $530 coinsurance from your Cigna plan. Since you can't make payments right now, I won't set up a plan. We have a financial assistance program that lowers bills for households at or below 300% of the federal poverty level, and your recent job loss may help your case. I'm putting a hold on your account so statements and reminders stop while this is reviewed. Billing staff take applications Mon-Fri 8am-5pm Central, and I'm passing your account to them now.",
+          "actions": [
+            "offer_financial_assistance",
+            "place_hold",
+            "handoff_to_staff"
+          ]
+        },
+        {
+          "role": "patient",
+          "text": "A plan won't work. I have no income at all right now."
+        },
+        {
+          "role": "agent",
+          "text": "I understand, Marcus, and I won't push a payment plan. With no income right now, financial assistance is the right path. The application is short, and billing staff will walk you through it. It's taken Mon-Fri 8am-5pm Central, and your request is already queued for them. They may ask about your household size and recent income, so it helps to have that handy. Your account stays on hold, so no statements or reminders will come while this is pending. You don't need to pay anything today. Is there anything else I can help with?",
+          "actions": [
+            "offer_financial_assistance",
+            "place_hold",
+            "handoff_to_staff"
+          ]
+        }
+      ],
+      "source": "recorded"
+    },
+    {
+      "id": "rec-new-insurance",
+      "kind": "refile_insurance",
+      "amount": 386,
+      "reason": "Aetna denied the 8/12/2026 visit with PR-27 because coverage ended 6/30/2026; patient says he has had new BCBS Illinois coverage since July, so the claim needs filing to BCBS.",
+      "told_patient": "Staff will confirm BCBS coverage and bill it, he may owe much less than $386, his account is on hold, and he should not pay anything yet.",
+      "captured": [
+        {
+          "label": "Insurer",
+          "value": "Blue Cross Blue Shield of Illinois"
+        },
+        {
+          "label": "Member ID",
+          "value": "XWP883201945"
+        },
+        {
+          "label": "Group number",
+          "value": "0047731"
+        },
+        {
+          "label": "Date of service",
+          "value": "2026-08-12"
+        },
+        {
+          "label": "Prior coverage end date",
+          "value": "2026-06-30"
+        },
+        {
+          "label": "Denial code",
+          "value": "PR-27"
+        }
+      ],
+      "next_step": "Verify BCBS eligibility for 2026-08-12 using the member ID and group number, then file the 99213 and 87880 claim to BCBS.",
+      "caseId": "new-insurance",
+      "patient": "Tyler Okafor, 29",
+      "balance": 386,
+      "hold": true,
+      "createdAt": "2026-11-12T08:47:00-06:00",
+      "transcript": [
+        {
+          "role": "patient",
+          "text": "I've had insurance through my new job since July. Why am I being billed the full $386?"
+        },
+        {
+          "role": "agent",
+          "text": "Thanks for asking, Tyler. Aetna denied this visit because the plan on file ended June 30, and your visit was August 12. That's why the full $386 landed on you. If your new job's plan was active in August, the claim likely just went to the wrong insurer. Please send me the insurance company name, member ID, and group number from your new card, and I'll add them to your account so staff can bill the right plan. I'm placing a hold so you won't get statements or reminders, and please don't pay anything yet. Staff will follow up within their next business hours.",
+          "actions": [
+            "place_hold",
+            "update_insurance",
+            "handoff_to_staff"
+          ]
+        },
+        {
+          "role": "patient",
+          "text": "It's Blue Cross Blue Shield of Illinois, member ID XWP883201945, group 0047731."
+        },
+        {
+          "role": "agent",
+          "text": "Thank you, Tyler. I've added Blue Cross Blue Shield of Illinois, member ID XWP883201945, group 0047731, to your account. Our billing staff will confirm your coverage and send the August 12 visit to BCBS. If it's covered, you'll only owe whatever your plan says is your share, which could be much less than $386.\n\nYour account stays on hold, so you won't get statements or reminders while this is sorted out. Please don't pay anything right now. Staff are available Monday to Friday, 8am to 5pm Central, and will follow up once the claim is reprocessed.",
+          "actions": [
+            "update_insurance",
+            "place_hold",
+            "handoff_to_staff"
+          ]
+        }
+      ],
+      "source": "recorded"
+    },
+    {
+      "id": "rec-qmb",
+      "kind": "add_secondary",
+      "amount": 94.18,
+      "reason": "Remit shows PR-2 coinsurance of $94.18 on 2026-09-03 Medicare claim; eligibility shows active Medicaid QMB, which is not on file as secondary, so the patient should not owe it.",
+      "told_patient": "She should not pay the $94.18, a hold stops statements, it won't go to collections, and staff will fix the account, bill Medicaid, and contact her if they need more.",
+      "captured": [
+        {
+          "label": "Patient",
+          "value": "Eleanor Vasquez"
+        },
+        {
+          "label": "Service",
+          "value": "CPT 99214 + 93000, DOS 2026-09-03"
+        },
+        {
+          "label": "Medicare remit",
+          "value": "CO-45 $142.10; PR-2 $94.18; payer paid $376.72"
+        },
+        {
+          "label": "Medicaid aid category",
+          "value": "QMB (active per eligibility check)"
+        },
+        {
+          "label": "Patient concern",
+          "value": "Fears collections; offered $20/month; assistant declined any payment"
+        },
+        {
+          "label": "Medicaid member number",
+          "value": "Not provided; assistant asked for it, so get it from the eligibility check or the patient"
+        }
+      ],
+      "next_step": "Add Medicaid (QMB) as secondary on the account, bill it for the $94.18 coinsurance, then clear the balance and release the hold.",
+      "caseId": "qmb",
+      "patient": "Eleanor Vasquez, 72",
+      "balance": 94.18,
+      "hold": true,
+      "createdAt": "2026-11-12T09:31:00-06:00",
+      "transcript": [
+        {
+          "role": "patient",
+          "text": "I got a bill for $94.18. I'm on Medicare and Medicaid and I've never had to pay before."
+        },
+        {
+          "role": "agent",
+          "text": "Mrs. Vasquez, thank you for checking before paying. Your record shows you have Medicaid in the QMB category. Under QMB rules, providers generally can't bill you for Medicare coinsurance, so this $94.18 shouldn't be yours to pay. It looks like Medicaid was never added as your secondary coverage on our end. Please don't pay this bill. I've put a hold so statements and reminders stop, and I'm sending this to our billing staff to correct your account and bill Medicaid. They're available Mon-Fri 8am-5pm Central. If you have your Medicaid ID card handy, please share the member number.",
+          "actions": [
+            "place_hold",
+            "handoff_to_staff"
+          ]
+        },
+        {
+          "role": "patient",
+          "text": "I don't want this going to collections. I can pay $20 a month if I have to."
+        },
+        {
+          "role": "agent",
+          "text": "Mrs. Vasquez, I understand the worry, and I want to ease it. This bill will not go to collections. The hold I placed stops statements and reminders while staff fix your account. Because of your QMB coverage, you should not owe this $94.18, so I can't accept any payment, even $20 a month. Please don't pay anything on it. I've noted your concern for our billing staff. They'll correct the account and bill Medicaid, and they'll reach out if they need anything else from you. If you can share your Medicaid member number, that will help them.",
+          "actions": [
+            "handoff_to_staff"
+          ]
+        }
+      ],
+      "source": "recorded"
+    },
+    {
+      "id": "rec-surprise-bill",
+      "kind": "correct_balance",
+      "amount": 1890,
+      "reason": "Out-of-network anesthesia at an in-network hospital for a scheduled surgery on 2026-08-27; Aetna EOB sets patient cost-sharing at $420.00, but the statement balance is $2,310.",
+      "told_patient": "Only $420.00 looks owed, the other $1,890 should not be billed to him, statements are on hold, and staff will correct the balance and confirm the final amount.",
+      "captured": [
+        {
+          "label": "Payer",
+          "value": "Aetna Open Access"
+        },
+        {
+          "label": "Date of service",
+          "value": "2026-08-27"
+        },
+        {
+          "label": "CPT code",
+          "value": "00790"
+        },
+        {
+          "label": "Billed",
+          "value": "$3,400.00"
+        },
+        {
+          "label": "Payer paid",
+          "value": "$1,090.00"
+        },
+        {
+          "label": "Patient cost-sharing per EOB (in-network",
+          "value": "$420.00"
+        },
+        {
+          "label": "Current statement balance",
+          "value": "$2,310.00"
+        },
+        {
+          "label": "Amount to remove from patient balance",
+          "value": "$1,890.00"
+        }
+      ],
+      "next_step": "Adjust the patient balance from $2,310 to $420.00, release the statement hold, and contact the patient to confirm the final amount.",
+      "caseId": "surprise-bill",
+      "patient": "Jordan Meyers, 46",
+      "balance": 2310,
+      "hold": true,
+      "createdAt": "2026-11-12T10:05:00-06:00",
+      "transcript": [
+        {
+          "role": "patient",
+          "text": "The hospital was in my network. Why do I owe $2,310 for anesthesia?"
+        },
+        {
+          "role": "agent",
+          "text": "Good question, and you're right to ask. Your surgery was at an in-network hospital, but the anesthesia provider was out of network. Federal surprise-billing protections generally limit what you can be billed in that situation to your in-network cost-sharing, which Aetna calculated as $420.00. The $2,310 statement balance looks like it's above that, so I can't ask for payment on it as stated. I'm placing a hold so statements and reminders stop, and I'm sending this to our billing staff to review and correct the balance. They're available Mon-Fri 8am-5pm Central. You don't need to pay anything right now.",
+          "actions": [
+            "place_hold",
+            "handoff_to_staff"
+          ]
+        },
+        {
+          "role": "patient",
+          "text": "So what do I actually owe?"
+        },
+        {
+          "role": "agent",
+          "text": "Based on Aetna's explanation of benefits, your cost-sharing for this service is $420.00. That's the most you should owe, and it's the only part that looks clearly owed. The other $1,890 of the statement balance shouldn't be billed to you.\n\nI haven't taken any payment, and you don't have to pay anything today. Staff will review the account and correct the balance, and they can confirm the final amount and set up the $420.00 payment once it's fixed. If you'd like to pay that part now, I can send a link. Would you like that?",
+          "actions": []
+        }
+      ],
+      "source": "recorded"
+    },
+    {
+      "id": "rec-unposted-copay",
+      "kind": "apply_payment",
+      "amount": 40,
+      "reason": "Patient's $40 card payment (receipt FD-118204, 2026-09-03) was posted unapplied because no charge was open; the 2026-09-19 adjudication later billed the same $40 copay (PR-3).",
+      "told_patient": "He owes nothing more, should ignore the statement, has a hold on statements and reminders, and staff will apply the payment by the next business day.",
+      "captured": [
+        {
+          "label": "Receipt number",
+          "value": "FD-118204"
+        },
+        {
+          "label": "Payment date",
+          "value": "2026-09-03"
+        },
+        {
+          "label": "Payment type",
+          "value": "card payment, front desk"
+        },
+        {
+          "label": "Date of service",
+          "value": "2026-09-03"
+        },
+        {
+          "label": "Adjudication posted",
+          "value": "2026-09-19"
+        },
+        {
+          "label": "Remit code",
+          "value": "PR-3 (copay) $40"
+        }
+      ],
+      "next_step": "Apply the unapplied $40 payment (FD-118204) to the 9/3 99213 copay charge, confirm the statement balance is $0, then release the statement hold.",
+      "caseId": "unposted-copay",
+      "patient": "Sam Castellano, 52",
+      "balance": 40,
+      "hold": true,
+      "createdAt": "2026-11-12T11:18:00-06:00",
+      "transcript": [
+        {
+          "role": "patient",
+          "text": "I paid my $40 copay at the front desk. Why am I being billed for it again?"
+        },
+        {
+          "role": "agent",
+          "text": "You're right, Sam. Our records show your $40 copay was paid at the front desk on 9/3 (receipt FD-118204). It was posted before the insurance claim was processed, so it never got matched to the charge. That's our error, and you don't owe anything more. Please don't pay this statement. I've put a hold so you won't get further statements or reminders, and I'm sending this to our billing staff to apply your payment and correct the balance. They're in Monday to Friday, 8am to 5pm Central, so they'll handle it by the next business day.",
+          "actions": [
+            "place_hold",
+            "handoff_to_staff"
+          ]
+        },
+        {
+          "role": "patient",
+          "text": "It's on my card statement, September 3rd."
+        },
+        {
+          "role": "agent",
+          "text": "Thanks, Sam, that matches what we have. The $40 card payment on September 3rd (receipt FD-118204) is in our records. It just wasn't applied to your visit. You don't need to send any proof or pay anything more. Our billing staff will apply that payment to the charge and clear the balance, and the hold stays in place so you won't get statements or reminders in the meantime. If you still see a balance after a few business days, message us and we'll check right away.",
+          "actions": []
+        }
+      ],
+      "source": "recorded"
+    },
+    {
+      "id": "rec-deceased",
+      "kind": "bereavement",
+      "amount": 1126,
+      "reason": "Robert Hensley died 2026-10-02, but the EHR still shows him active and four SMS reminders went out 10/09 through 10/30 on a $1,126 Medicare PR-2 coinsurance balance.",
+      "told_patient": "Reminders are stopped, no payment is requested now, staff will call her to discuss the account and her question about responsibility, next business day if closed.",
+      "captured": [
+        {
+          "label": "Contact",
+          "value": "Carol Hensley, spouse"
+        },
+        {
+          "label": "Date of death",
+          "value": "2026-10-02"
+        },
+        {
+          "label": "Patient",
+          "value": "Robert Hensley"
+        },
+        {
+          "label": "Balance",
+          "value": "$1,126 (Medicare Part B coinsurance, PR-2)"
+        },
+        {
+          "label": "Reminders sent after death",
+          "value": "10/09, 10/16, 10/23, 10/30"
+        },
+        {
+          "label": "Hold",
+          "value": "Placed by assistant"
+        }
+      ],
+      "next_step": "Call Mrs. Hensley to offer condolences and answer her question about responsibility for the balance, and update Robert's EHR status to deceased.",
+      "caseId": "deceased",
+      "patient": "Carol Hensley, spouse of patient Robert Hensley",
+      "balance": 1126,
+      "hold": true,
+      "createdAt": "2026-11-12T12:40:00-06:00",
+      "transcript": [
+        {
+          "role": "patient",
+          "text": "My husband Robert passed away on October 2nd. I keep getting texts about his bill."
+        },
+        {
+          "role": "agent",
+          "text": "Mrs. Hensley, I am so sorry for the loss of your husband. I am also sorry that the reminder texts kept coming after his passing. That should not have happened.\n\nI have stopped all reminders on Robert's account. I will not ask you for any payment. I also can't advise on who is responsible for his account, so I am passing this to our billing staff, who will contact you directly. They are available Monday to Friday, 8am to 5pm Central, and your request will be queued for the next business day if we are closed now.\n\nAgain, my condolences to you and your family.",
+          "actions": [
+            "place_hold",
+            "handoff_to_staff"
+          ]
+        },
+        {
+          "role": "patient",
+          "text": "Do I have to pay this?"
+        },
+        {
+          "role": "agent",
+          "text": "Mrs. Hensley, I'm sorry you're worrying about this on top of everything else. I can't answer legal questions about who is responsible for Robert's account, so I don't want to guess and risk giving you wrong information. Please don't send any payment right now.\n\nOur billing staff can go over the account with you and answer this properly. Reminders are stopped, and I've passed along your question so they can call you. They are available Monday to Friday, 8am to 5pm Central, and if we are closed, it will be handled the next business day.",
+          "actions": [
+            "place_hold",
+            "handoff_to_staff"
+          ]
+        }
+      ],
+      "source": "recorded"
+    },
+    {
+      "id": "rec-preventive",
+      "kind": "charge_review",
+      "amount": 35,
+      "reason": "Patient disputes the correct $35 PR-3 copay on 99213-25, billed same day as her covered preventive visit after a knee exam, x-ray order and prescription; she says she wasn't told.",
+      "told_patient": "A hold is on her account so no statements or reminders go out, she shouldn't pay the $35 yet, and billing staff will follow up after review.",
+      "captured": [
+        {
+          "label": "Date of service",
+          "value": "2026-09-10"
+        },
+        {
+          "label": "Disputed CPT",
+          "value": "99213-25"
+        },
+        {
+          "label": "Denial/adjustment code",
+          "value": "PR-3 copay"
+        },
+        {
+          "label": "Payer",
+          "value": "Blue Shield PPO"
+        },
+        {
+          "label": "Patient's stated reason",
+          "value": "Not told that mentioning her knee would be billed as a separate visit"
+        }
+      ],
+      "next_step": "Review the 99213-25 charge and visit note against her complaint, decide whether to uphold or adjust the $35, and call her with the outcome.",
+      "caseId": "preventive",
+      "patient": "Renee Thompson, 55",
+      "balance": 35,
+      "hold": true,
+      "createdAt": "2026-11-12T13:26:00-06:00",
+      "transcript": [
+        {
+          "role": "patient",
+          "text": "My annual physical is supposed to be free. Why do I have a $35 bill?"
+        },
+        {
+          "role": "agent",
+          "text": "Good question, Renee. Your annual exam was covered at 100%, so you owe nothing for it. The $35 is a copay for a second, separate visit billed the same day. During your physical you also mentioned knee pain, and the doctor examined your knee, ordered an x-ray, and prescribed medication. That extra work is billed as a problem visit, and your plan applies a $35 copay to it. The charge is correct as billed, and you owe it.\n\nWould you like a secure link to pay the $35 now? If you'd rather dispute it, I can place a hold and send it to our billing staff for review.",
+          "actions": []
+        },
+        {
+          "role": "patient",
+          "text": "Nobody told me that mentioning my knee would cost extra. I want this reviewed."
+        },
+        {
+          "role": "agent",
+          "text": "Of course, Renee. You have every right to ask for a review, and I'm sorry no one explained this ahead of time. I've placed a hold on your account, so you won't get statements or reminders while it's under review. Please don't pay the $35 for now. I'm sending your request to our billing staff with the reason: you're disputing the same-day problem visit copay because you weren't told that discussing your knee would be billed separately. Staff are available Monday to Friday, 8am to 5pm Central, and will follow up with you after reviewing your visit.",
+          "actions": [
+            "place_hold",
+            "handoff_to_staff"
+          ]
+        }
+      ],
+      "source": "recorded"
+    },
+    {
+      "id": "rec-work-injury",
+      "kind": "rebill_liability",
+      "amount": 742,
+      "reason": "Cigna denied the 2026-09-25 visit with CARC CO-19 as work-related and workers' compensation liability; the intake form lists Dalton Freight and the patient supplied the carrier and claim number.",
+      "told_patient": "He owes nothing now, should not pay, the account is on hold so statements stop, and staff will bill Liberty Mutual directly next business day.",
+      "captured": [
+        {
+          "label": "Workers' comp carrier",
+          "value": "Liberty Mutual"
+        },
+        {
+          "label": "Workers' comp claim number",
+          "value": "WC-2291-447"
+        },
+        {
+          "label": "Employer",
+          "value": "Dalton Freight"
+        },
+        {
+          "label": "Date of service",
+          "value": "2026-09-25"
+        },
+        {
+          "label": "Denial",
+          "value": "Cigna PPO, CARC CO-19, $742"
+        }
+      ],
+      "next_step": "Bill Liberty Mutual under claim WC-2291-447 for the 2026-09-25 visit, then release the account hold once the claim is accepted.",
+      "caseId": "work-injury",
+      "patient": "Luis Herrera, 44",
+      "balance": 742,
+      "hold": true,
+      "createdAt": "2026-11-12T14:02:00-06:00",
+      "transcript": [
+        {
+          "role": "patient",
+          "text": "I hurt my shoulder at work. Why are you billing me $742?"
+        },
+        {
+          "role": "agent",
+          "text": "Mr. Herrera, you shouldn't owe this $742 right now. Because the injury happened at work, Cigna denied the claim, saying workers' compensation is responsible for it. That makes this bill the workers' comp carrier's to pay, not yours. Please don't pay anything. I'm putting a hold on your account so statements and reminders stop.\n\nOur billing staff will need your workers' comp claim number (our form has it blank) and the name of the carrier or adjuster, if you have them. If you haven't filed a claim yet, tell your employer, Dalton Freight, so they can start one. I'll pass this to staff with those details.",
+          "actions": [
+            "place_hold",
+            "handoff_to_staff"
+          ]
+        },
+        {
+          "role": "patient",
+          "text": "My employer's carrier is Liberty Mutual. The claim number is WC-2291-447."
+        },
+        {
+          "role": "agent",
+          "text": "Thank you, Mr. Herrera. I've added Liberty Mutual and claim number WC-2291-447 to your account. Our billing staff will bill Liberty Mutual directly for this visit.\n\nYour hold stays in place, so you won't get statements or reminders about the $742 while that's sorted out. Please don't pay anything toward it. If you get a bill or call from anyone about this visit, let us know.\n\nI've passed everything to billing staff with the reason: work injury, Cigna denied as workers' comp liability, and the claim details are now on file. They're available Monday to Friday, 8am to 5pm Central, and will pick this up on the next business day if it's after hours.",
+          "actions": [
+            "update_insurance",
+            "place_hold",
+            "handoff_to_staff"
+          ]
+        }
+      ],
+      "source": "recorded"
+    },
+    {
+      "id": "rec-timely-filing",
+      "kind": "write_off",
+      "amount": 318,
+      "reason": "Aetna denied the claim CO-29 because it was first filed 2026-07-21, 168 days after the 2026-02-03 service against a 90-day limit; the practice's late filing makes the $318 non-billable to the patient.",
+      "told_patient": "She does not owe the $318, no payment was taken, a hold stops statements and reminders, and staff will correct the balance and write it off.",
+      "captured": [
+        {
+          "label": "Date of service",
+          "value": "2026-02-03"
+        },
+        {
+          "label": "First submission date",
+          "value": "2026-07-21"
+        },
+        {
+          "label": "Days to file",
+          "value": "168 (payer limit 90)"
+        },
+        {
+          "label": "Denial code",
+          "value": "CO-29"
+        },
+        {
+          "label": "Payer",
+          "value": "Aetna Open Access"
+        },
+        {
+          "label": "Statement balance",
+          "value": "$318"
+        }
+      ],
+      "next_step": "Write off the $318 as a timely-filing adjustment, zero the patient balance, then release the account hold.",
+      "caseId": "timely-filing",
+      "patient": "Angela Brooks, 60",
+      "balance": 318,
+      "hold": true,
+      "createdAt": "2026-11-12T15:15:00-06:00",
+      "transcript": [
+        {
+          "role": "patient",
+          "text": "I got a bill for $318 for a visit back in February. I thought insurance handled it. Can I just pay it and be done?"
+        },
+        {
+          "role": "agent",
+          "text": "Hi Angela, please don't pay this just yet. Our records show the claim was sent to Aetna after their filing deadline, and they denied it for that reason. Because we filed late, that $318 is our responsibility under our contract with Aetna, not something you owe. The statement was wrong to bill you.\n\nI'm placing a hold on your account so you won't receive more statements or reminders, and I'm passing this to our billing staff to correct the balance. They're available Mon-Fri 8am-5pm Central and will follow up. You don't need to do anything else right now.",
+          "actions": [
+            "place_hold",
+            "handoff_to_staff"
+          ]
+        },
+        {
+          "role": "patient",
+          "text": "Honestly I'd rather just pay it than deal with this."
+        },
+        {
+          "role": "agent",
+          "text": "I understand wanting this done, Angela, and I appreciate the offer. But I can't take a payment on this one. The $318 was denied because of our late filing, so it isn't your debt, and paying it would mean paying for our mistake.\n\nYou don't have to do anything. The hold is in place, so no more statements or reminders will come, and our billing staff will correct the balance and write it off. If you ever get another bill for this visit, reply here and we'll look into it right away.",
+          "actions": [
+            "place_hold",
+            "handoff_to_staff"
+          ]
+        }
+      ],
+      "source": "recorded"
+    }
+  ]
+}

@@ -3,7 +3,9 @@
 export type Outcome = "resolved" | "correct_handoff" | "dead_end" | "wrong_collect";
 export type Version = "v1" | "v2";
 // How much of the account record the agent is shown. See recordForView in prompts.mjs.
-export type View = "full" | "statement";
+export type FeedId = "remittance" | "eligibility" | "ledger" | "visit";
+// "feeds:remittance+ledger" is the statement plus those feeds.
+export type View = "full" | "statement" | `feeds:${string}`;
 
 export type Action =
   | "send_pay_link"
@@ -55,6 +57,38 @@ export interface Results {
   trials: number;
   runs: Record<Version, Record<string, Trial[]>>; // full record. runs.v1["qmb"] = [trial, trial, trial]
   statementRuns?: Record<Version, Record<string, Trial[]>>; // same cases, agent shown the statement only
+  // Statement plus some feeds. feedRuns.v2["qmb"]["eligibility"] = [trial, trial, trial]
+  feedRuns?: Record<Version, Record<string, Record<string, Trial[]>>>;
+}
+
+// A handoff as billing staff receive it. Written by the model from the transcript and the record.
+export type TicketKind =
+  | "refile_insurance"
+  | "add_secondary"
+  | "apply_payment"
+  | "rebill_liability"
+  | "write_off"
+  | "correct_balance"
+  | "financial_assistance"
+  | "charge_review"
+  | "bereavement"
+  | "other";
+
+export interface Ticket {
+  id: string;
+  caseId: string;
+  patient: string;
+  balance: number;
+  kind: TicketKind;
+  amount: number; // dollars in question
+  reason: string; // why this needs a person, citing the record
+  told_patient: string; // what the patient has already been told
+  captured: { label: string; value: string }[]; // details the patient gave, so staff do not ask again
+  next_step: string; // the one thing staff should do
+  hold: boolean; // statements and reminders paused
+  createdAt: string; // ISO
+  transcript: Turn[];
+  source: "recorded" | "live";
 }
 
 export interface VersionSummary {
