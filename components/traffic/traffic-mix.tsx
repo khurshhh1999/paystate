@@ -6,7 +6,19 @@
 import { useMemo, useState } from "react";
 import { TRAFFIC_CASES, MIX_NOTE } from "@/lib/traffic.mjs";
 import { Segmented } from "@/components/ui";
-import { caseRows, hasRuns, presetWeights, summarize, TRAFFIC, type MixId, type Weights } from "./compute";
+import {
+  caseRows,
+  firstRun,
+  hasRuns,
+  isHard,
+  isRight,
+  presetWeights,
+  rerunCases,
+  summarize,
+  TRAFFIC,
+  type MixId,
+  type Weights,
+} from "./compute";
 import { TrafficTable } from "./traffic-table";
 
 const MIXES: { value: MixId; label: string }[] = [
@@ -20,6 +32,11 @@ const clamp = (n: number) => Math.min(100, Math.max(0, n));
 
 const WORDS = ["No", "One", "Two", "Three", "Four", "Five"];
 const runsPer = (n: number) => `${WORDS[n] ?? n} ${n === 1 ? "run" : "runs"}`;
+const LOWER = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+const word = (n: number) => LOWER[n] ?? String(n);
+
+const FIRST_RUN = firstRun(TRAFFIC);
+const RERUN = rerunCases(TRAFFIC);
 
 function plural(n: number, one: string, many: string) {
   return `${n} ${n === 1 ? one : many}`;
@@ -32,6 +49,10 @@ export function TrafficMix({ runDate }: { runDate: string | null }) {
   const ran = hasRuns(TRAFFIC);
   const summary = useMemo(() => summarize(TRAFFIC, weights), [weights]);
   const rows = useMemo(() => caseRows(TRAFFIC, weights), [weights]);
+  const before = useMemo(() => (FIRST_RUN ? summarize(FIRST_RUN, weights) : null), [weights]);
+  // The headline is the first run: all 28 situations under one version of the assistant.
+  // Reruns after a product change are reported beside it, never folded into it.
+  const head = before ?? summary;
   const total = Object.values(weights).reduce((s, v) => s + v, 0);
 
   const choose = (m: MixId | "custom") => {
@@ -58,25 +79,26 @@ export function TrafficMix({ runDate }: { runDate: string | null }) {
           <div aria-live="polite" className="prose-col">
             <p className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <span className="num text-[40px] font-medium leading-none">
-                {summary.weightedRate === null ? "–" : `${(summary.weightedRate * 100).toFixed(1)}%`}
+                {head.weightedRate === null ? "–" : `${(head.weightedRate * 100).toFixed(1)}%`}
               </span>
               <span className="text-[14.5px] text-ink-2">right outcome, weighted by the mix</span>
             </p>
             <p className="mt-4 text-[14.5px]">
-              <span className="tabular-nums">{plural(summary.trials, "conversation", "conversations")}</span> run.{" "}
+              <span className="tabular-nums">{plural(head.trials, "conversation", "conversations")}</span> run.{" "}
               <span className="tabular-nums">
-                {summary.right} of {summary.trials}
+                {head.right} of {head.trials}
               </span>{" "}
               right, unweighted.{" "}
-              <span className={"tabular-nums " + (summary.wrongCollects > 0 ? "text-wrong" : "")}>
-                {plural(summary.wrongCollects, "wrong collect", "wrong collects")}
+              <span className={"tabular-nums " + (head.wrongCollects > 0 ? "text-wrong" : "")}>
+                {plural(head.wrongCollects, "wrong collect", "wrong collects")}
               </span>
               .{" "}
               <span className="tabular-nums">
-                {plural(summary.blocked, "payment step", "payment steps")}
+                {plural(head.blocked, "payment step", "payment steps")}
               </span>{" "}
               blocked by the gate.
             </p>
+            {before && <RerunNote before={before} />}
             {summary.casesMissing > 0 && (
               <p className="mt-2 text-[14px] text-ink-2">
                 {summary.casesMissing} of {TRAFFIC_CASES.length} situations have no runs yet. Their weights are left
@@ -141,5 +163,28 @@ export function TrafficMix({ runDate }: { runDate: string | null }) {
         </div>
       </section>
     </>
+  );
+}
+
+// The first run against the rerun, under the same mix as the headline.
+function RerunNote({ before }: { before: ReturnType<typeof summarize> }) {
+  const misses = before.trials - before.right;
+  const missedCases = RERUN.filter((r) => r.before.some((t) => !isRight(t)));
+  const allOrdinary = missedCases.length > 0 && missedCases.every((r) => !isHard(r.kase));
+  const after = RERUN.flatMap((r) => r.after);
+  const notRerun = TRAFFIC_CASES.length - RERUN.length;
+  return (
+    <p className="mt-3 text-[14.5px]">
+      These figures are the first run, with every situation under the same version of the assistant.{" "}
+      {allOrdinary && <>The {word(misses)} {misses === 1 ? "miss was" : "misses were"} all on ordinary cases. </>}
+      Since then, receipts send themselves when a payment posts, the assistant can take an email address, and it
+      states the policy without predicting what third parties will do or offering plan terms the policy does not
+      allow. The {word(RERUN.length)} situations were run again and came out{" "}
+      <span className="tabular-nums">
+        {after.filter(isRight).length} of {after.length}
+      </span>
+      . That is a fix checked on the cases it was written for, so it is not added to the headline. The other{" "}
+      {notRerun} situations were not rerun after the change. The table below shows the latest runs.
+    </p>
   );
 }

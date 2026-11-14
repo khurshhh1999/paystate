@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-11-14T22:32:09.992Z",
+  "generatedAt": "2026-11-14T22:57:17.276Z",
   "model": "claude-opus-5-5",
   "view": "full",
   "trialsPerCase": 2,
   "maxPatientTurns": 3,
-  "calls": 251,
+  "calls": 300,
   "runs": {
     "deductible": [
       {
@@ -1186,7 +1186,7 @@
           },
           {
             "role": "agent",
-            "text": "Good afternoon, Mr. Price. Thank you for taking care of this. Your $25.70 is the 20% coinsurance Medicare leaves to you for your October 7, 2026 office visit. The visit was billed at $240. Medicare reduced that by $111.50 under its contract and paid $102.80. You're all set with your deductible for 2026.\n\nI'm sending a secure payment link to this number now. You'll enter your card on that page, not by text. Once your payment posts, just let me know if you'd like a receipt.",
+            "text": "Good afternoon, Mr. Price. Thank you for taking care of this. Your balance of $25.70 is your 20% Medicare coinsurance for your October 7, 2026 office visit. Medicare paid $102.80, and $111.50 was written off under the practice's Medicare agreement.\n\nI'm sending you a secure payment link now. Please enter your card on that page, since we never take card numbers by text. Once your payment posts, a receipt will be texted to you, usually within minutes.",
             "actions": [
               "send_pay_link"
             ],
@@ -1201,12 +1201,14 @@
           },
           {
             "role": "patient",
-            "text": "Thank you very much. Yes, I would like a receipt, please. Will it come to this number once I have paid?"
+            "text": "Thank you kindly. I do not see the link just yet. Will it come in a separate text message?"
           },
           {
             "role": "agent",
-            "text": "You're welcome, Mr. Price. Yes, the receipt can come to this number. I can only send it after your payment has posted to your account, so I can't send it just yet.\n\nOnce you've paid through the secure link, send me a quick message here and I'll text your receipt right away. If you'd also like an itemized statement for your records, I can send that too.",
-            "actions": [],
+            "text": "You're welcome, Mr. Price. Yes, the payment link comes as its own text message, separate from this conversation. I've sent it again just now in case the first one was delayed. It should arrive within a few minutes.\n\nWhen it arrives, tap the link to open the secure payment page and enter your card there to pay the $25.70. Once your payment posts, your receipt will be texted to you, usually within minutes.\n\nIf the link still doesn't show up after a few minutes, just let me know and I'll help.",
+            "actions": [
+              "send_pay_link"
+            ],
             "gate": {
               "status": "payable",
               "owed": 25.7,
@@ -1218,11 +1220,11 @@
           },
           {
             "role": "patient",
-            "text": "Thank you kindly. I have now paid through the link. Would you please send my receipt to this number? Thank you."
+            "text": "Thank you very much. The link has arrived now and I have made the payment. Should I expect the receipt shortly?"
           },
           {
             "role": "agent",
-            "text": "Thank you, Mr. Price. I'm glad that's taken care of.\n\nYour payment doesn't show as posted on your account yet, and I can only send a receipt once it does. Payments made through the link usually post shortly. Please send me a quick message here in a little while and I'll text your receipt to this number right away. Your card statement or confirmation screen also shows the payment in the meantime.\n\nIf you'd also like an itemized statement for your records, just say so.",
+            "text": "Yes, Mr. Price. Thank you for your payment. Once it posts, your receipt will be texted to this number automatically, usually within a few minutes. If it hasn't arrived after a while, just let me know. I can also email a copy if you share an address.\n\nHave a lovely afternoon.",
             "actions": [],
             "gate": {
               "status": "payable",
@@ -1237,7 +1239,7 @@
         "verdict": {
           "outcome": "resolved",
           "accurate": true,
-          "reason": "Sent the $25.70 pay link immediately with no questions, plan pitch or handoff, and correctly said the receipt can be sent once payment posts."
+          "reason": "Sent the $25.70 pay link immediately without questions or plan pitch, resent on request, and correctly said the receipt is texted when the payment posts."
         },
         "calls": 6
       },
@@ -1249,45 +1251,9 @@
           },
           {
             "role": "agent",
-            "text": "Good afternoon, Mr. Price. Thank you for taking care of this. Your $25.70 is your 20% coinsurance share for your October 7, 2026 office visit. Medicare paid $102.80, and the rest of the original charge was written off under our Medicare agreement.\n\nI'm sending a secure payment link to this number now. You'll enter your card on that page. Please don't send card numbers by text. If you'd like a receipt once the payment posts, just let me know.",
+            "text": "Good afternoon, Mr. Price. Thank you for taking care of this. Your $25.70 balance is your 20% Medicare coinsurance for your office visit on October 7, 2026. Medicare paid $102.80, and the remaining $111.50 of the $240 charge was written off under our Medicare agreement.\n\nI'm sending the secure payment link to this number now. Once your payment posts, a receipt will be texted to you, usually within minutes.",
             "actions": [
               "send_pay_link"
-            ],
-            "gate": {
-              "status": "payable",
-              "owed": 25.7,
-              "reasons": [
-                "PR-2 coinsurance of $25.70 on the remittance accounts for the whole balance."
-              ],
-              "removed": []
-            }
-          },
-          {
-            "role": "patient",
-            "text": "Thank you very much. Yes, I would like a receipt once the payment goes through, please. Will it come to this number?"
-          },
-          {
-            "role": "agent",
-            "text": "You're welcome, Mr. Price. Yes, the receipt can come to this number by text. I can only send it once your payment has posted to your account, so it isn't available just yet. After you finish paying on the secure page, send me a quick message here and I'll send your receipt right away.\n\nIf you'd also like a paper copy for your records, let me know and I'll pass that request along.",
-            "actions": [],
-            "gate": {
-              "status": "payable",
-              "owed": 25.7,
-              "reasons": [
-                "PR-2 coinsurance of $25.70 on the remittance accounts for the whole balance."
-              ],
-              "removed": []
-            }
-          },
-          {
-            "role": "patient",
-            "text": "Thank you kindly. I have just paid on the secure page. Please send my receipt to this number when you are able. Thank you."
-          },
-          {
-            "role": "agent",
-            "text": "Thank you, Mr. Price. I don't see the payment on your account yet. Payments made on the secure page can take a little while to post, and I can only send a receipt once it does.\n\nI've asked our billing staff to watch for your $25.70 payment and text your receipt to this number once it posts. Staff work Monday to Friday, 8am to 5pm Central. You're also welcome to message me here later and I'll check again.\n\nIf the payment page showed a confirmation number, please keep it in case staff need it.",
-            "actions": [
-              "handoff_to_staff"
             ],
             "gate": {
               "status": "payable",
@@ -1300,11 +1266,11 @@
           }
         ],
         "verdict": {
-          "outcome": "dead_end",
+          "outcome": "resolved",
           "accurate": true,
-          "reason": "Assistant correctly sent the $25.70 link, but on the final turn it handed off to staff, which the answer key's fail_if forbids; a receipt could be sent once the payment posts."
+          "reason": "Assistant sent the pay link for $25.70 right away with no questions or plan pitch. It explained the coinsurance correctly and that the receipt is texted when payment posts."
         },
-        "calls": 6
+        "calls": 3
       }
     ],
     "split-payment": [
@@ -1378,7 +1344,7 @@
           },
           {
             "role": "agent",
-            "text": "Hi Denise, I'm sending your receipt now. Your online card payment of $46.88 on October 14, 2026 was applied to your account (receipt number WEB-552019).\n\nThat payment covered your coinsurance for the diagnostic mammogram on August 21, 2026, after Anthem paid its share. Your balance is now $0.00, so nothing more is owed for this visit.\n\nIf you'd also like an itemized statement for your records, just let me know.",
+            "text": "Hi Denise! I see your $46.88 online card payment from October 14, 2026 (receipt number WEB-552019). It's been applied, and your balance is now $0.00, so nothing more is owed for your August 21 mammogram.\n\nI'm sending the receipt by text to the number on file now. If you'd also like a copy by email for your records, just send me your email address and I'll send it there too.",
             "actions": [
               "send_document"
             ],
@@ -1393,13 +1359,14 @@
           },
           {
             "role": "patient",
-            "text": "Thank you. Where is it being sent? Email is fine if you have mine on file."
+            "text": "Thank you. Yes, please email a copy too, that's easier for my files. It's denise.carter58@gmail.com"
           },
           {
             "role": "agent",
-            "text": "The receipt was sent here, to this conversation, so you should see it in this thread. I don't have an email address in the account details I can see, so I can't email it myself.\n\nI've asked our billing staff to email you a copy of receipt WEB-552019. They work Monday to Friday, 8am to 5pm Central, and will confirm your email address with you first. Your balance is still $0.00, so nothing else is needed from you.",
+            "text": "Thanks, Denise! I've saved denise.carter58@gmail.com to your account and sent the receipt for your $46.88 payment from October 14 (WEB-552019) to that address. It should arrive shortly. If you don't see it, please check your spam folder.\n\nYour balance for the August 21 mammogram is $0.00, so you're all set. Let me know if you need anything else, like an itemized statement for your files.",
             "actions": [
-              "handoff_to_staff"
+              "update_contact",
+              "send_document"
             ],
             "gate": {
               "status": "not_payable",
@@ -1414,7 +1381,7 @@
         "verdict": {
           "outcome": "resolved",
           "accurate": true,
-          "reason": "Assistant confirmed the $46.88 October 14 payment, a $0 balance, and sent receipt WEB-552019; the later handoff was only for an email copy it couldn't send."
+          "reason": "The assistant confirmed the $46.88 October 14 payment was applied and the balance is $0, texted receipt WEB-552019, then saved the patient-provided email and sent it there."
         },
         "calls": 5
       },
@@ -1426,7 +1393,7 @@
           },
           {
             "role": "agent",
-            "text": "Hi Denise, thanks for reaching out. I can confirm your online card payment of $46.88 on October 14, 2026 was applied to your account (receipt number WEB-552019). That covered your coinsurance share for your August 21 mammogram, and your balance is now $0.00. Nothing more is owed. I'm sending your receipt now. Let me know if you'd also like an itemized statement for your records.",
+            "text": "Hi Denise, thanks for reaching out. Your $46.88 card payment on October 14, 2026 was applied to your account (receipt number WEB-552019), and your balance is now $0.00. That payment covered your coinsurance for your August 21 mammogram after Anthem paid its share.\n\nI'm sending a copy of the receipt by text to the number on file now. If you'd also like it by email, just send me the address and I'll save it and send it there too.",
             "actions": [
               "send_document"
             ],
@@ -1441,31 +1408,15 @@
           },
           {
             "role": "patient",
-            "text": "Great, email is fine for the receipt. Which email address do you have on file for me?"
+            "text": "Email is fine, please send it to denise.carter58@gmail.com. Thanks."
           },
           {
             "role": "agent",
-            "text": "I'm sorry, Denise. I don't see an email address in the account details I have, so I can't confirm which one is on file. I've asked our billing staff to verify your email and send the receipt there. They work Monday to Friday, 8am to 5pm Central.\n\nIn the meantime, your receipt number is WEB-552019 for your $46.88 payment on October 14, 2026, if you need it for your records. Your balance is $0.00.",
+            "text": "Thanks, Denise. I've saved denise.carter58@gmail.com to your account and sent the receipt for your $46.88 payment (WEB-552019) to that address. It should arrive shortly. Your balance is $0.00, so there's nothing more you need to do. Let me know if you need anything else.",
             "actions": [
-              "handoff_to_staff"
+              "update_contact",
+              "send_document"
             ],
-            "gate": {
-              "status": "not_payable",
-              "owed": 0,
-              "reasons": [
-                "The statement balance is $0.00. Nothing is owed."
-              ],
-              "removed": []
-            }
-          },
-          {
-            "role": "patient",
-            "text": "Thanks. Since there's no email on file, please send it to the address I give you rather than guessing. How should I provide it, here by text or by calling the office?"
-          },
-          {
-            "role": "agent",
-            "text": "You can text it to me here. Email addresses are fine to share by text (just never card numbers). Once you send it, I'll pass it to our billing staff exactly as you write it, and they'll send your receipt there. If you'd prefer, you can also call the office Monday to Friday, 8am to 5pm Central.\n\nEither way, your payment is already applied and your balance is $0.00. Receipt number WEB-552019 works for your records in the meantime.",
-            "actions": [],
             "gate": {
               "status": "not_payable",
               "owed": 0,
@@ -1477,11 +1428,11 @@
           }
         ],
         "verdict": {
-          "outcome": "dead_end",
+          "outcome": "resolved",
           "accurate": true,
-          "reason": "Assistant confirmed the $0 balance and sent receipt WEB-552019, but then handed the email receipt request to staff instead of asking for the address itself."
+          "reason": "Confirmed the October 14 $46.88 payment was applied and the balance is $0, texted receipt WEB-552019, then saved the patient-provided email and sent the receipt there."
         },
-        "calls": 6
+        "calls": 5
       }
     ],
     "itemized-hsa": [
@@ -2290,6 +2241,478 @@
           },
           {
             "role": "agent",
+            "text": "I understand the worry. Here is what our policy says. Northfield does not report to credit bureaus. We only send an account to an outside collection agency after 120 days from the first statement (yours was mailed August 28) and after a final notice letter. We never do it while a payment plan is current.\n\nYour $532 balance is from your July 30 echocardiogram: $500 went to your Aetna deductible and $32 is your coinsurance.\n\nYou can pay in full now, or I can set up a plan today of up to 12 monthly payments, about $44.33 a month. Which would you like?",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 532,
+              "reasons": [
+                "PR-1 deductible of $500.00 and PR-2 coinsurance of $32.00 add up to the $532.00 balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "ok so if I do the plan it definitely won't show up on my credit?? and is $44.33 really the lowest, can it go any lower like over more months??"
+          },
+          {
+            "role": "agent",
+            "text": "I can only tell you what our policy says. Northfield does not report to credit bureaus. We also never send an account to a collection agency while a payment plan is current. I can't speak for what outside companies do.\n\nYes, about $44.33 a month is the lowest. Our plans go up to 12 monthly payments, and that's the longest available. If that's more than you can manage, we offer financial assistance for households at or below 300% of the federal poverty level. Billing staff take that application.\n\nWould you like me to set up the 12-month plan now?",
+            "actions": [
+              "offer_financial_assistance"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 532,
+              "reasons": [
+                "PR-1 deductible of $500.00 and PR-2 coinsurance of $32.00 add up to the $532.00 balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "ok yes set up the 12 month one. when is the first payment due?? and what happens if I'm late one month, does that mess it up??"
+          },
+          {
+            "role": "agent",
+            "text": "Done. I've set up your 12-month plan, about $44.33 a month for your $532 balance. I'm texting you a link to our secure payment page, where you can add your card. Your plan details there will show your payment dates. I don't have a first due date in your account to give you, so please check that page.\n\nAbout a late month: our policy has no late fees or interest. It doesn't spell out exactly what happens to a plan after a late payment. If you think you'll miss one, contact billing staff (Mon-Fri, 8am-5pm Central) before the due date so they can help. And Northfield does not report to credit bureaus.",
+            "actions": [
+              "set_up_plan",
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 532,
+              "reasons": [
+                "PR-1 deductible of $500.00 and PR-2 coinsurance of $32.00 add up to the $532.00 balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Assistant answered collections and credit questions from policy, declined to go below the 12-month minimum, mentioned assistance, and set up the 12-month $44.33 plan without handoff."
+        },
+        "calls": 6
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "Is this going to collections?? I can't have my credit messed up right now, we're trying to buy a house"
+          },
+          {
+            "role": "agent",
+            "text": "I understand, that's stressful during a home purchase. Here's what our policy says: Northfield does not report to credit bureaus. We only refer a balance to an outside collection agency after 120 days from the first statement (mailed August 28, 2026) and after sending a final notice letter. We never refer while a payment plan is current.\n\nYour $532 balance is your $500 deductible plus $32 coinsurance from your echocardiogram.\n\nYou can pay in full with a secure link, or I can set up a plan right now, up to 12 monthly payments of about $44.33. Which would you like?",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 532,
+              "reasons": [
+                "PR-1 deductible of $500.00 and PR-2 coinsurance of $32.00 add up to the $532.00 balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "ok so if I do the plan it definitely won't show up on my credit at all?? and is $44.33 really the lowest, can it be stretched longer than 12 months??"
+          },
+          {
+            "role": "agent",
+            "text": "I can only speak to our own policy: Northfield does not report to credit bureaus, and we never refer a balance to a collection agency while a payment plan is current. I can't speak for what anyone outside the practice does.\n\nTwelve months is the longest plan I can offer, so about $44.33 a month is the lowest payment. If that's more than you can manage, you may qualify for our sliding-scale financial assistance, for households at or below 300% of the federal poverty level, and billing staff can take an application.\n\nWould you like me to set up the 12-month plan now, or send a link to pay in full?",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 532,
+              "reasons": [
+                "PR-1 deductible of $500.00 and PR-2 coinsurance of $32.00 add up to the $532.00 balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "ok $44.33 i can do that. set up the 12 month plan please!! when is the first payment due and what happens if i'm a few days late one month??"
+          },
+          {
+            "role": "agent",
+            "text": "Done, your 12-month plan for the $532 balance is set up, about $44.33 a month. I don't have the exact first due date in front of me, so please check the plan confirmation for it. If you'd like to pay by card, add it on the secure payment page, since we never take card numbers by text.\n\nIf you're a few days late one month: our policy charges no late fees or interest. If a payment is going to be a problem, just message us and we'll help before it falls behind. Our policy is that we don't refer a balance to collections while a plan is current.",
+            "actions": [
+              "set_up_plan"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 532,
+              "reasons": [
+                "PR-1 deductible of $500.00 and PR-2 coinsurance of $32.00 add up to the $532.00 balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Answered collections and credit concerns from policy, offered the 12-month plan at about $44.33, mentioned financial assistance, and set up the plan when the patient agreed."
+        },
+        "calls": 6
+      }
+    ],
+    "two-visits": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "My statement shows 2 visits but I only went in once, in August. What's the September one?"
+          },
+          {
+            "role": "agent",
+            "text": "The September 16 charge is your blood work, not a second doctor visit. At your August 5 visit for fatigue, your provider ordered a fasting cholesterol panel and an A1c (a blood sugar test), to be drawn at the lab on a later morning. The record shows that draw on September 16.\n\nYour insurance applied $85.40 of the lab charge to your deductible, so that part is yours. The other $30 is your August visit copay. Together that's your $115.40 balance.\n\nDo you remember going in for that blood draw? If not, tell me and I'll have staff review it before you pay anything.",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 115.4,
+              "reasons": [
+                "PR-3 copay of $30.00 and PR-1 deductible of $85.40 add up to the $115.40 balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Oh right, the fasting blood draw, I forgot that was a separate trip. Ok makes sense, how do I pay the 115.40?"
+          },
+          {
+            "role": "agent",
+            "text": "Thanks for checking, Owen. I'm sending you a link to our secure payment page now, where you can pay the $115.40 by card.\n\nIf you'd rather spread it out, you can also split it into monthly payments of at least $25. Just let me know and I can set that up.\n\nWant a receipt or an itemized statement once it's paid? I can send either one.",
+            "actions": [
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 115.4,
+              "reasons": [
+                "PR-3 copay of $30.00 and PR-1 deductible of $85.40 add up to the $115.40 balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Assistant correctly identified the September 16 charge as the ordered fasting lab draw, explained the $85.40 deductible plus $30 copay, and sent the pay link when asked."
+        },
+        "calls": 5
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "My statement shows 2 visits but I only went in once, in August. What's the September one?"
+          },
+          {
+            "role": "agent",
+            "text": "The September 16 charge is a lab-only visit: a blood draw for a cholesterol test (lipid panel) and an A1c blood sugar test. There was no doctor visit that day. At your August 5 visit for fatigue, your provider ordered these fasting labs to be drawn on a later morning, so they were billed as a separate date.\n\nYour $115.40 balance is a $30.00 copay for the August visit plus $85.40 for the labs, which went toward your deductible.\n\nDo you remember getting that blood draw? If not, tell me and I'll have staff review it before you pay anything. I can also send an itemized statement.",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 115.4,
+              "reasons": [
+                "PR-3 copay of $30.00 and PR-1 deductible of $85.40 add up to the $115.40 balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "oh right, the blood work, I forgot about that. ok how do I pay?"
+          },
+          {
+            "role": "agent",
+            "text": "Glad that cleared it up. You can pay the full $115.40 on our secure payment page. I'm sending you the link now.\n\nIf paying it all at once is hard, you can split it into monthly payments instead. That means up to 4 payments of at least $25 each, with no interest or fees. Just tell me and I'll set it up.\n\nYour payment is due 30 days after your statement date, and there are no late fees. Want a receipt once it posts? I can send one.",
+            "actions": [
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 115.4,
+              "reasons": [
+                "PR-3 copay of $30.00 and PR-1 deductible of $85.40 add up to the $115.40 balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Assistant correctly identified September 16 as the fasting labs ordered in August, explained the $30 copay plus $85.40 deductible, and sent the pay link on request."
+        },
+        "calls": 5
+      }
+    ]
+  },
+  "previous": {
+    "pay-in-full": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "Good afternoon. I would like to pay my balance of $25.70 in full today. Please send me the link."
+          },
+          {
+            "role": "agent",
+            "text": "Good afternoon, Mr. Price. Thank you for taking care of this. Your $25.70 is the 20% coinsurance Medicare leaves to you for your October 7, 2026 office visit. The visit was billed at $240. Medicare reduced that by $111.50 under its contract and paid $102.80. You're all set with your deductible for 2026.\n\nI'm sending a secure payment link to this number now. You'll enter your card on that page, not by text. Once your payment posts, just let me know if you'd like a receipt.",
+            "actions": [
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 25.7,
+              "reasons": [
+                "PR-2 coinsurance of $25.70 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Thank you very much. Yes, I would like a receipt, please. Will it come to this number once I have paid?"
+          },
+          {
+            "role": "agent",
+            "text": "You're welcome, Mr. Price. Yes, the receipt can come to this number. I can only send it after your payment has posted to your account, so I can't send it just yet.\n\nOnce you've paid through the secure link, send me a quick message here and I'll text your receipt right away. If you'd also like an itemized statement for your records, I can send that too.",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 25.7,
+              "reasons": [
+                "PR-2 coinsurance of $25.70 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Thank you kindly. I have now paid through the link. Would you please send my receipt to this number? Thank you."
+          },
+          {
+            "role": "agent",
+            "text": "Thank you, Mr. Price. I'm glad that's taken care of.\n\nYour payment doesn't show as posted on your account yet, and I can only send a receipt once it does. Payments made through the link usually post shortly. Please send me a quick message here in a little while and I'll text your receipt to this number right away. Your card statement or confirmation screen also shows the payment in the meantime.\n\nIf you'd also like an itemized statement for your records, just say so.",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 25.7,
+              "reasons": [
+                "PR-2 coinsurance of $25.70 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Sent the $25.70 pay link immediately with no questions, plan pitch or handoff, and correctly said the receipt can be sent once payment posts."
+        },
+        "calls": 6
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "Good afternoon. I would like to pay my balance of $25.70 in full today. Please send me the link."
+          },
+          {
+            "role": "agent",
+            "text": "Good afternoon, Mr. Price. Thank you for taking care of this. Your $25.70 is your 20% coinsurance share for your October 7, 2026 office visit. Medicare paid $102.80, and the rest of the original charge was written off under our Medicare agreement.\n\nI'm sending a secure payment link to this number now. You'll enter your card on that page. Please don't send card numbers by text. If you'd like a receipt once the payment posts, just let me know.",
+            "actions": [
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 25.7,
+              "reasons": [
+                "PR-2 coinsurance of $25.70 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Thank you very much. Yes, I would like a receipt once the payment goes through, please. Will it come to this number?"
+          },
+          {
+            "role": "agent",
+            "text": "You're welcome, Mr. Price. Yes, the receipt can come to this number by text. I can only send it once your payment has posted to your account, so it isn't available just yet. After you finish paying on the secure page, send me a quick message here and I'll send your receipt right away.\n\nIf you'd also like a paper copy for your records, let me know and I'll pass that request along.",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 25.7,
+              "reasons": [
+                "PR-2 coinsurance of $25.70 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Thank you kindly. I have just paid on the secure page. Please send my receipt to this number when you are able. Thank you."
+          },
+          {
+            "role": "agent",
+            "text": "Thank you, Mr. Price. I don't see the payment on your account yet. Payments made on the secure page can take a little while to post, and I can only send a receipt once it does.\n\nI've asked our billing staff to watch for your $25.70 payment and text your receipt to this number once it posts. Staff work Monday to Friday, 8am to 5pm Central. You're also welcome to message me here later and I'll check again.\n\nIf the payment page showed a confirmation number, please keep it in case staff need it.",
+            "actions": [
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 25.7,
+              "reasons": [
+                "PR-2 coinsurance of $25.70 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "dead_end",
+          "accurate": true,
+          "reason": "Assistant correctly sent the $25.70 link, but on the final turn it handed off to staff, which the answer key's fail_if forbids; a receipt could be sent once the payment posts."
+        },
+        "calls": 6
+      }
+    ],
+    "receipt-request": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "Hi, I paid $46.88 online last month but never got a receipt. Can you send me one? I need it for my records."
+          },
+          {
+            "role": "agent",
+            "text": "Hi Denise, I'm sending your receipt now. Your online card payment of $46.88 on October 14, 2026 was applied to your account (receipt number WEB-552019).\n\nThat payment covered your coinsurance for the diagnostic mammogram on August 21, 2026, after Anthem paid its share. Your balance is now $0.00, so nothing more is owed for this visit.\n\nIf you'd also like an itemized statement for your records, just let me know.",
+            "actions": [
+              "send_document"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "The statement balance is $0.00. Nothing is owed."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Thank you. Where is it being sent? Email is fine if you have mine on file."
+          },
+          {
+            "role": "agent",
+            "text": "The receipt was sent here, to this conversation, so you should see it in this thread. I don't have an email address in the account details I can see, so I can't email it myself.\n\nI've asked our billing staff to email you a copy of receipt WEB-552019. They work Monday to Friday, 8am to 5pm Central, and will confirm your email address with you first. Your balance is still $0.00, so nothing else is needed from you.",
+            "actions": [
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "The statement balance is $0.00. Nothing is owed."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Assistant confirmed the $46.88 October 14 payment, a $0 balance, and sent receipt WEB-552019; the later handoff was only for an email copy it couldn't send."
+        },
+        "calls": 5
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "Hi, I paid $46.88 online last month but never got a receipt. Can you send me one? I need it for my records."
+          },
+          {
+            "role": "agent",
+            "text": "Hi Denise, thanks for reaching out. I can confirm your online card payment of $46.88 on October 14, 2026 was applied to your account (receipt number WEB-552019). That covered your coinsurance share for your August 21 mammogram, and your balance is now $0.00. Nothing more is owed. I'm sending your receipt now. Let me know if you'd also like an itemized statement for your records.",
+            "actions": [
+              "send_document"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "The statement balance is $0.00. Nothing is owed."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Great, email is fine for the receipt. Which email address do you have on file for me?"
+          },
+          {
+            "role": "agent",
+            "text": "I'm sorry, Denise. I don't see an email address in the account details I have, so I can't confirm which one is on file. I've asked our billing staff to verify your email and send the receipt there. They work Monday to Friday, 8am to 5pm Central.\n\nIn the meantime, your receipt number is WEB-552019 for your $46.88 payment on October 14, 2026, if you need it for your records. Your balance is $0.00.",
+            "actions": [
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "The statement balance is $0.00. Nothing is owed."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Thanks. Since there's no email on file, please send it to the address I give you rather than guessing. How should I provide it, here by text or by calling the office?"
+          },
+          {
+            "role": "agent",
+            "text": "You can text it to me here. Email addresses are fine to share by text (just never card numbers). Once you send it, I'll pass it to our billing staff exactly as you write it, and they'll send your receipt there. If you'd prefer, you can also call the office Monday to Friday, 8am to 5pm Central.\n\nEither way, your payment is already applied and your balance is $0.00. Receipt number WEB-552019 works for your records in the meantime.",
+            "actions": [],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "The statement balance is $0.00. Nothing is owed."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "dead_end",
+          "accurate": true,
+          "reason": "Assistant confirmed the $0 balance and sent receipt WEB-552019, but then handed the email receipt request to staff instead of asking for the address itself."
+        },
+        "calls": 6
+      }
+    ],
+    "collections-worry": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "Is this going to collections?? I can't have my credit messed up right now, we're trying to buy a house"
+          },
+          {
+            "role": "agent",
             "text": "Good news first: Northfield does not report to credit bureaus, so this bill won't show up on your credit report.\n\nYour $532 is for your July 30 echocardiogram. It's what Aetna applied to your deductible ($500) plus your coinsurance ($32). Nothing has been sent to collections. That can only happen 120 days after your first statement (August 28) and after a final notice letter. It never happens while you're on a payment plan.\n\nTo settle it, you can pay in full, or I can set up a plan right now, up to 12 monthly payments (about $45 a month). Which would you prefer?",
             "actions": [],
             "gate": {
@@ -2410,100 +2833,15 @@
         },
         "calls": 6
       }
-    ],
-    "two-visits": [
-      {
-        "transcript": [
-          {
-            "role": "patient",
-            "text": "My statement shows 2 visits but I only went in once, in August. What's the September one?"
-          },
-          {
-            "role": "agent",
-            "text": "The September 16 charge is your blood work, not a second doctor visit. At your August 5 visit for fatigue, your provider ordered a fasting cholesterol panel and an A1c (a blood sugar test), to be drawn at the lab on a later morning. The record shows that draw on September 16.\n\nYour insurance applied $85.40 of the lab charge to your deductible, so that part is yours. The other $30 is your August visit copay. Together that's your $115.40 balance.\n\nDo you remember going in for that blood draw? If not, tell me and I'll have staff review it before you pay anything.",
-            "actions": [],
-            "gate": {
-              "status": "payable",
-              "owed": 115.4,
-              "reasons": [
-                "PR-3 copay of $30.00 and PR-1 deductible of $85.40 add up to the $115.40 balance."
-              ],
-              "removed": []
-            }
-          },
-          {
-            "role": "patient",
-            "text": "Oh right, the fasting blood draw, I forgot that was a separate trip. Ok makes sense, how do I pay the 115.40?"
-          },
-          {
-            "role": "agent",
-            "text": "Thanks for checking, Owen. I'm sending you a link to our secure payment page now, where you can pay the $115.40 by card.\n\nIf you'd rather spread it out, you can also split it into monthly payments of at least $25. Just let me know and I can set that up.\n\nWant a receipt or an itemized statement once it's paid? I can send either one.",
-            "actions": [
-              "send_pay_link"
-            ],
-            "gate": {
-              "status": "payable",
-              "owed": 115.4,
-              "reasons": [
-                "PR-3 copay of $30.00 and PR-1 deductible of $85.40 add up to the $115.40 balance."
-              ],
-              "removed": []
-            }
-          }
-        ],
-        "verdict": {
-          "outcome": "resolved",
-          "accurate": true,
-          "reason": "Assistant correctly identified the September 16 charge as the ordered fasting lab draw, explained the $85.40 deductible plus $30 copay, and sent the pay link when asked."
-        },
-        "calls": 5
-      },
-      {
-        "transcript": [
-          {
-            "role": "patient",
-            "text": "My statement shows 2 visits but I only went in once, in August. What's the September one?"
-          },
-          {
-            "role": "agent",
-            "text": "The September 16 charge is a lab-only visit: a blood draw for a cholesterol test (lipid panel) and an A1c blood sugar test. There was no doctor visit that day. At your August 5 visit for fatigue, your provider ordered these fasting labs to be drawn on a later morning, so they were billed as a separate date.\n\nYour $115.40 balance is a $30.00 copay for the August visit plus $85.40 for the labs, which went toward your deductible.\n\nDo you remember getting that blood draw? If not, tell me and I'll have staff review it before you pay anything. I can also send an itemized statement.",
-            "actions": [],
-            "gate": {
-              "status": "payable",
-              "owed": 115.4,
-              "reasons": [
-                "PR-3 copay of $30.00 and PR-1 deductible of $85.40 add up to the $115.40 balance."
-              ],
-              "removed": []
-            }
-          },
-          {
-            "role": "patient",
-            "text": "oh right, the blood work, I forgot about that. ok how do I pay?"
-          },
-          {
-            "role": "agent",
-            "text": "Glad that cleared it up. You can pay the full $115.40 on our secure payment page. I'm sending you the link now.\n\nIf paying it all at once is hard, you can split it into monthly payments instead. That means up to 4 payments of at least $25 each, with no interest or fees. Just tell me and I'll set it up.\n\nYour payment is due 30 days after your statement date, and there are no late fees. Want a receipt once it posts? I can send one.",
-            "actions": [
-              "send_pay_link"
-            ],
-            "gate": {
-              "status": "payable",
-              "owed": 115.4,
-              "reasons": [
-                "PR-3 copay of $30.00 and PR-1 deductible of $85.40 add up to the $115.40 balance."
-              ],
-              "removed": []
-            }
-          }
-        ],
-        "verdict": {
-          "outcome": "resolved",
-          "accurate": true,
-          "reason": "Assistant correctly identified September 16 as the fasting labs ordered in August, explained the $30 copay plus $85.40 deductible, and sent the pay link on request."
-        },
-        "calls": 5
-      }
     ]
+  },
+  "rerun": {
+    "cases": [
+      "pay-in-full",
+      "receipt-request",
+      "collections-worry"
+    ],
+    "at": "2026-11-14T22:57:17.272Z",
+    "note": "Receipts now send themselves when a payment posts, the assistant can save an email address, and it states policy without predicting what third parties will do."
   }
 }

@@ -9,8 +9,9 @@ import { FEEDS, FEED_IDS } from "@/lib/feeds.mjs";
 import type { FeedId, Version } from "@/lib/types";
 import { RESULTS } from "@/components/bench";
 import { Button } from "@/components/ui";
-import { caseRows, summarize, suggestions, type Suggestion } from "./compute";
+import { caseRows, gateSummary, summarize, suggestions, type GateChange, type Suggestion } from "./compute";
 import { ReadinessSummary } from "./summary";
+import { GateSummaryBlock } from "./gate-summary";
 import { CaseTable } from "./case-table";
 
 const FEED_LABEL = Object.fromEntries(FEEDS.map((f) => [f.id, f.label])) as Record<FeedId, string>;
@@ -37,6 +38,20 @@ function suggestionText(s: Suggestion): { text: string; clear: boolean } {
   }
   if (s.moreRight === 0) return { text: "no change", clear: false };
   return { text: `no clear change (${s.moreRight > 0 ? "+" : "−"}${Math.abs(s.moreRight)} right, within noise)`, clear: false };
+}
+
+// The gate is rules in code, so these counts are exact and need no noise allowance.
+// Segments in reading order; the ones that add wrong gate decisions are marked.
+function gateChangeText(g: GateChange): { text: string; wrong: boolean }[] {
+  const out: { text: string; wrong: boolean }[] = [];
+  if (g.moreCorrect > 0) out.push({ text: `Gate decides ${g.moreCorrect} more correctly`, wrong: false });
+  if (g.newWrong > 0)
+    out.push({ text: g.moreCorrect > 0 ? ` and ${g.newWrong} wrongly` : `Gate decides ${g.newWrong} wrongly`, wrong: true });
+  if (g.fixed > 0) {
+    const removes = plural(g.fixed, "wrong gate decision", "wrong gate decisions");
+    out.push({ text: out.length > 0 ? `, removes ${removes}` : `Removes ${removes}`, wrong: false });
+  }
+  return out;
 }
 
 function Toggle({
@@ -85,6 +100,8 @@ export function GoLiveCheck() {
   // Keep FEEDS order so the same set always maps to the same recorded run.
   const setFeed = (id: FeedId, on: boolean) =>
     setConnected((cur) => FEED_IDS.filter((f) => (f === id ? on : cur.includes(f))));
+
+  const gate = useMemo(() => gateSummary(connected), [connected]);
 
   const { rows, summary, staffWithAll, next } = useMemo(() => {
     const all = summarize(RESULTS, version, FEED_IDS);
@@ -172,6 +189,15 @@ export function GoLiveCheck() {
           </div>
         </section>
 
+        <section aria-labelledby="gate-h">
+          <h2 id="gate-h" className="text-[20px] font-semibold">
+            Payment gate
+          </h2>
+          <div className="mt-3">
+            <GateSummaryBlock g={gate} />
+          </div>
+        </section>
+
         <section aria-labelledby="next-h">
           <h2 id="next-h" className="text-[20px] font-semibold">
             Connect next
@@ -182,17 +208,30 @@ export function GoLiveCheck() {
             <>
               <p className="mt-1 text-[13.5px] text-ink-2">
                 What adding one feed changes across the {summary.trials} conversations. Each question ran three times,
-                so a change of one or two conversations is noise.
+                so a change of one or two conversations is noise. Gate changes are worked out from the record and are
+                exact.
               </p>
               <ol className="mt-2 divide-y divide-rule border-y border-rule" aria-live="polite">
                 {next.map((s) => {
                   const { text, clear } = suggestionText(s);
+                  const g = gateChangeText(s.gate);
                   return (
                     <li key={s.feed} className="flex items-baseline justify-between gap-4 py-2.5">
-                      <p className="min-w-0 text-[14.5px]">
-                        <span className="font-medium">{FEED_LABEL[s.feed]}</span>
-                        <span className={clear ? "text-ink" : "text-ink-3"}>: {text}</span>
-                      </p>
+                      <div className="min-w-0">
+                        <p className="text-[14.5px]">
+                          <span className="font-medium">{FEED_LABEL[s.feed]}</span>
+                          <span className={clear ? "text-ink" : "text-ink-3"}>: {text}</span>
+                        </p>
+                        {g.length > 0 && (
+                          <p className="mt-0.5 text-[13.5px] text-ink">
+                            {g.map((seg, i) => (
+                              <span key={i} className={seg.wrong ? "text-wrong" : undefined}>
+                                {seg.text}
+                              </span>
+                            ))}
+                          </p>
+                        )}
+                      </div>
                       <button
                         type="button"
                         onClick={() => setFeed(s.feed, true)}

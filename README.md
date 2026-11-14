@@ -44,6 +44,10 @@ The bench above is twelve hard cases with a scripted patient. Three changes move
 
 First run, 56 conversations on `claude-opus-5-5` at low effort: 53 right, 89.3% weighted by the assumed mix, no wrong collects. The gate never had to remove an action, because the assistant did not attempt one it disallowed. All three misses were on ordinary cases and all three were about the edge of what the assistant can do, not about judgment: it handed a receipt to staff because it could not see a payment that had just been made, handed an email receipt to staff because it had no email on file, and reassured a patient about her credit more broadly than policy supports. Two runs per situation is a first reading.
 
+Each miss became a product change: receipts are texted automatically when a payment posts, the assistant can save an email address the patient gives, and it states policy without predicting what lenders or credit bureaus will do. The three situations were run again and came out 6 of 6, after one more fix (the assistant had been offering to ask staff for plan terms the policy does not allow). That is a fix checked on the cases it was written for, so the headline stays at the first run; the other 25 situations were not rerun.
+
+The go-live check also runs the gate for whatever feeds are ticked. With remittance as the only feed it decides ten of the twelve hard accounts correctly and would allow payment on two that are not owed, because the deciding facts are in the eligibility and ledger feeds.
+
 ## The cases
 
 | Case | Should the patient pay as stated? |

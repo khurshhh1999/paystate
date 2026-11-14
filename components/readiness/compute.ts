@@ -1,10 +1,11 @@
-// Pure functions behind the go-live check. Everything is derived from recorded trials for a
-// set of connected feeds; nothing here calls the API. A combination that has not been run
+// Pure functions behind the go-live check. Conversation figures are derived from recorded trials
+// for a set of connected feeds; gate figures are computed live from the record. Nothing here calls the API. A combination that has not been run
 // yet comes back as empty trials, and every function treats that as "unknown", not as zero.
 
 import { CASES } from "@/lib/cases.mjs";
-import { FEED_IDS, relevantFeeds, trialsForFeeds } from "@/lib/feeds.mjs";
-import type { Case, FeedId, Outcome, Results, Trial, Version } from "@/lib/types";
+import { FEED_IDS, recordForFeeds, relevantFeeds, trialsForFeeds } from "@/lib/feeds.mjs";
+import { paymentGate } from "@/lib/gate.mjs";
+import type { Case, FeedId, Gate, Outcome, Results, Trial, Version } from "@/lib/types";
 
 export type Standing = "wrong" | "never" | "mixed" | "all" | "unrun";
 
@@ -16,6 +17,7 @@ export interface CaseRow {
   happens: string;
   missing: FeedId[]; // feeds the case's record draws on that are not connected
   sample: Trial | null; // the conversation to show when the row is opened
+  gate: GateRow; // the code gate under this setting, computed live
 }
 
 export interface Summary {
@@ -36,6 +38,7 @@ export interface Suggestion {
   ran: boolean; // false when any case lacks trials for the current or the extended set
   moreRight: number;
   fewerWrong: number;
+  gate: GateChange;
 }
 
 export function isRight(o: Outcome): boolean {
@@ -94,6 +97,7 @@ export function caseRows(results: Results, version: Version, connected: FeedId[]
       happens: happensFor(trials),
       missing: relevantFeeds(kase).filter((id) => !connected.includes(id)),
       sample: sampleOf(trials),
+      gate: gateRow(kase, connected),
     };
   }).sort((a, b) => STANDING_RANK[a.standing] - STANDING_RANK[b.standing] || a.order - b.order);
 }
@@ -148,10 +152,102 @@ export function suggestions(results: Results, version: Version, connected: FeedI
       ran,
       moreRight: ran ? next.right - now.right : 0,
       fewerWrong: ran ? now.wrongCollects - next.wrongCollects : 0,
+      gate: gateChange(connected, feed),
     };
   });
+  // A feed that removes a wrong gate decision comes first: that is money the gate would allow
+  // that is not owed. The recorded conversation counts break ties.
   return out.sort((a, b) => {
+    if (b.gate.fixed !== a.gate.fixed) return b.gate.fixed - a.gate.fixed;
     if (a.ran !== b.ran) return a.ran ? -1 : 1;
     return b.moreRight - a.moreRight || b.fewerWrong - a.fewerWrong;
   });
+}
+
+// The payment gate under a feed setting. Rules in code, so this is computed live for any
+// setting rather than read from recorded runs. The full record is the reference answer.
+
+export type GateResult = Omit<Gate, "removed">;
+export type GateStanding = "correct" | "unverified" | "wrong";
+
+export interface GateRow {
+  kase: Case;
+  now: GateResult;
+  full: GateResult;
+  standing: GateStanding;
+  allowsUnowed: boolean; // the gate would let through money the full record says is not owed
+  decidingFeeds: FeedId[]; // unconnected feeds holding the fact that fixes a wrong decision
+}
+
+export interface GateSummary {
+  correct: number;
+  unverified: number;
+  wrong: number;
+  rows: GateRow[]; // in CASES order
+}
+
+const sameOwed = (a: number | null, b: number | null) =>
+  a === null || b === null ? a === b : Math.abs(a - b) < 0.005;
+
+function standingOfGate(now: GateResult, full: GateResult): GateStanding {
+  if (now.status === full.status && sameOwed(now.owed, full.owed)) return "correct";
+  if (now.status === "unverified") return "unverified";
+  return "wrong";
+}
+
+const collects = (g: GateResult) => g.status === "payable" || g.status === "partial";
+
+function allowsUnowedOf(now: GateResult, full: GateResult): boolean {
+  if (!collects(now)) return false;
+  if (!collects(full)) return true;
+  return (now.owed ?? 0) > (full.owed ?? 0) + 0.005;
+}
+
+// Which missing feed holds the deciding fact: the single feeds that, added on their own, make
+// the gate agree with the full record. If no single feed does, every missing feed the case draws on.
+function decidingFeedsOf(kase: Case, connected: FeedId[], full: GateResult): FeedId[] {
+  const missing = relevantFeeds(kase).filter((id) => !connected.includes(id));
+  const fixers = missing.filter(
+    (id) => standingOfGate(paymentGate(recordForFeeds(kase, [...connected, id])), full) === "correct",
+  );
+  return fixers.length > 0 ? fixers : missing;
+}
+
+export function gateRow(kase: Case, connected: FeedId[]): GateRow {
+  const now = paymentGate(recordForFeeds(kase, connected));
+  const full = paymentGate(kase.record);
+  const standing = standingOfGate(now, full);
+  return {
+    kase,
+    now,
+    full,
+    standing,
+    allowsUnowed: standing === "wrong" && allowsUnowedOf(now, full),
+    decidingFeeds: standing === "wrong" ? decidingFeedsOf(kase, connected, full) : [],
+  };
+}
+
+export function gateSummary(connected: FeedId[]): GateSummary {
+  const rows = CASES.map((kase) => gateRow(kase, connected));
+  const count = (s: GateStanding) => rows.filter((r) => r.standing === s).length;
+  return { correct: count("correct"), unverified: count("unverified"), wrong: count("wrong"), rows };
+}
+
+export interface GateChange {
+  moreCorrect: number; // cannot verify now, decides correctly with the feed
+  fixed: number; // wrong now, decides correctly with the feed
+  newWrong: number; // not wrong now, wrong with the feed
+}
+
+export function gateChange(connected: FeedId[], feed: FeedId): GateChange {
+  const now = gateSummary(connected).rows;
+  const next = gateSummary([...connected, feed]).rows;
+  const c: GateChange = { moreCorrect: 0, fixed: 0, newWrong: 0 };
+  now.forEach((a, i) => {
+    const b = next[i];
+    if (b.standing === "correct" && a.standing === "unverified") c.moreCorrect += 1;
+    if (b.standing === "correct" && a.standing === "wrong") c.fixed += 1;
+    if (b.standing === "wrong" && a.standing !== "wrong") c.newWrong += 1;
+  });
+  return c;
 }

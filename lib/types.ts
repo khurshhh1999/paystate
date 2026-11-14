@@ -16,7 +16,8 @@ export type Action =
   | "handoff_to_staff"
   // Product actions only (PRODUCT_ACTIONS). v1/v2 never produce these.
   | "send_document"
-  | "stop_messages";
+  | "stop_messages"
+  | "update_contact";
 
 // The payment gate's decision for one record (lib/gate.mjs). `owed` is null when unverified.
 // `removed` lists collect actions the assistant chose and the gate took out.
