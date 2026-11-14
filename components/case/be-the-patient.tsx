@@ -80,7 +80,7 @@ export function BeThePatient({ caseId, opener, defaultView }: { caseId: string; 
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-[14px] text-ink-2">Talk to</span>
           <Segmented
-            label="Agent version"
+            label="Instructions"
             value={version}
             onChange={setVersion}
             disabled={started}
@@ -89,7 +89,7 @@ export function BeThePatient({ caseId, opener, defaultView }: { caseId: string; 
               { value: "v2", label: "v2" },
             ]}
           />
-          <Segmented label="What the agent sees" value={view} onChange={setView} disabled={started} options={VIEW_OPTIONS} />
+          <Segmented label="What the assistant sees" value={view} onChange={setView} disabled={started} options={VIEW_OPTIONS} />
           {started && <span className="text-[13px] text-ink-3">Start over to switch.</span>}
         </div>
         <span className="num text-[13px] text-ink-2">
@@ -99,7 +99,7 @@ export function BeThePatient({ caseId, opener, defaultView }: { caseId: string; 
 
       <div className="flex flex-col gap-4 p-4">
         {started ? (
-          <Transcript turns={turns} agentLabel={`Agent ${version}`} />
+          <Transcript turns={turns} agentLabel={`Assistant ${version}`} />
         ) : (
           <p className="text-[14px] text-ink-2">
             The first message is the scripted patient&apos;s opener. Edit it or send it as is, then reply however you
@@ -108,7 +108,7 @@ export function BeThePatient({ caseId, opener, defaultView }: { caseId: string; 
         )}
         {sending && (
           <p className="text-right text-[13.5px] text-ink-3" aria-live="polite">
-            Agent is replying…
+            The assistant is replying…
           </p>
         )}
 

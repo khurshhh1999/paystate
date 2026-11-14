@@ -1,8 +1,8 @@
-# Payable as Stated
+# Paystate
 
 A patient billing assistant that checks a bill is owed before it asks for money, with the two things around it that decide whether that works at a real practice: the queue its handoffs land in, and a check of what the practice has connected.
 
-Live: https://payable-as-stated.vercel.app
+Live: https://paystate.vercel.app
 
 ## The product
 

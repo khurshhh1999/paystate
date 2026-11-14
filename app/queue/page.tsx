@@ -4,7 +4,7 @@ import ticketsJson from "@/data/tickets.json";
 import { Queue } from "@/components/queue/queue";
 
 export const metadata: Metadata = {
-  title: "Staff queue · Payable as Stated",
+  title: "Staff queue · Paystate",
 };
 
 const RECORDED = (ticketsJson as unknown as { tickets: Ticket[] }).tickets;

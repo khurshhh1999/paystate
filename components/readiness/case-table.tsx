@@ -30,11 +30,11 @@ export function CaseTable({ rows, trialsPerCase }: { rows: CaseRow[]; trialsPerC
         <table className="ledger min-w-[760px]">
           <thead>
             <tr>
-              <th>Patient asks</th>
-              <th>Recorded runs</th>
-              <th>What happens</th>
-              <th>Still missing</th>
-              <th>
+              <th scope="col">Patient asks</th>
+              <th scope="col">Recorded runs</th>
+              <th scope="col">What happens</th>
+              <th scope="col">Still missing</th>
+              <th scope="col">
                 <span className="sr-only">Conversation</span>
               </th>
             </tr>
@@ -52,7 +52,10 @@ export function CaseTable({ rows, trialsPerCase }: { rows: CaseRow[]; trialsPerC
                       <p className="mt-1 text-[13px] text-ink-3">{r.kase.title}</p>
                     </td>
                     <td>
-                      <span className="inline-flex gap-1 pt-1">
+                      <span className="sr-only">
+                        {r.trials.length === 0 ? "Not run yet" : r.trials.map((t) => OUTCOME_LABEL[t.verdict.outcome]).join(", ")}
+                      </span>
+                      <span aria-hidden className="inline-flex gap-1 pt-1">
                         {Array.from({ length: slots }, (_, i) =>
                           r.trials[i] ? <OutcomeDot key={i} outcome={r.trials[i].verdict.outcome} /> : <EmptyDot key={i} />,
                         )}
@@ -74,6 +77,7 @@ export function CaseTable({ rows, trialsPerCase }: { rows: CaseRow[]; trialsPerC
                           type="button"
                           aria-expanded={isOpen}
                           aria-controls={`conv-${id}`}
+                          aria-label={`${isOpen ? "Hide the" : "Show a"} conversation: ${r.kase.title}`}
                           onClick={() => setOpen(isOpen ? null : id)}
                           className="whitespace-nowrap text-[13.5px] text-accent underline-offset-2 hover:underline"
                         >

@@ -30,13 +30,13 @@ export function FeedTable() {
   const rows = ROWS.map((r) => ({ ...r, off: tally("v1", r.feeds), on: tally("v2", r.feeds) }));
   if (rows.some((r) => r.on.total === 0 || r.off.total === 0)) return null;
   const cell = (n: number, total: number) => (
-    <>
+    <span>
       {n} <span className="text-ink-3">/ {total}</span>
-    </>
+    </span>
   );
   return (
     <div className="table-scroll">
-      <table className="ledger">
+      <table className="ledger stack">
         <thead>
           <tr>
             <th scope="col">The assistant can read</th>
@@ -49,11 +49,13 @@ export function FeedTable() {
         <tbody>
           {rows.map((r) => (
             <tr key={r.label}>
-              <td>{r.label}</td>
-              <td className="num r">{cell(r.on.right, r.on.total)}</td>
-              <td className="num r">{cell(r.off.right, r.off.total)}</td>
-              <td className={"num r " + (r.off.wrong > 0 ? "font-medium text-wrong" : "")}>{r.off.wrong}</td>
-              <td className="num r">{cell(r.on.handoffs, r.on.total)}</td>
+              <td className="font-medium md:font-normal">{r.label}</td>
+              <td className="num r" data-label="Right, check on">{cell(r.on.right, r.on.total)}</td>
+              <td className="num r" data-label="Right, check off">{cell(r.off.right, r.off.total)}</td>
+              <td className={"num r " + (r.off.wrong > 0 ? "font-medium text-wrong" : "")} data-label="Wrong collects, check off">
+                <span>{r.off.wrong}</span>
+              </td>
+              <td className="num r" data-label="Ends with staff, check on">{cell(r.on.handoffs, r.on.total)}</td>
             </tr>
           ))}
         </tbody>

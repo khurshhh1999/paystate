@@ -7,20 +7,26 @@ import { Money, Panel } from "@/components/ui";
 
 export function TicketCard({ ticket }: { ticket: Ticket }) {
   return (
-    <Panel className="flex flex-col gap-3 p-4 text-[14px]">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span className="font-medium">{TICKET_KINDS[ticket.kind]}</span>
-        <Money value={ticket.amount} className="text-[13.5px]" />
-        {ticket.hold && (
-          <span className="rounded bg-handoff-soft px-1.5 py-0.5 text-[12.5px] font-medium text-handoff">On hold</span>
+    <Panel className="flex flex-col text-[14px]">
+      {/* What it is and how much, then why, then what staff do next. */}
+      <div className="flex flex-col gap-2 p-4">
+        <div className="flex items-baseline gap-3">
+          <span className="font-semibold">{TICKET_KINDS[ticket.kind]}</span>
+          {ticket.hold && (
+            <span className="rounded bg-handoff-soft px-1.5 py-0.5 text-[12.5px] font-medium text-handoff">On hold</span>
+          )}
+          <Money value={ticket.amount} className="ml-auto text-[14px]" />
+        </div>
+        <p>{ticket.reason}</p>
+        {ticket.told_patient && (
+          <p className="text-ink-2">
+            <span className="text-ink-3">Patient was told: </span>
+            {ticket.told_patient}
+          </p>
         )}
       </div>
-      <p>{ticket.reason}</p>
-      {ticket.told_patient && (
-        <p className="text-ink-2">Patient was told: {ticket.told_patient}</p>
-      )}
       {ticket.captured.length > 0 && (
-        <dl className="grid grid-cols-[minmax(0,auto)_minmax(0,1fr)] gap-x-4 gap-y-1 text-[13px]">
+        <dl className="grid grid-cols-[minmax(0,auto)_minmax(0,1fr)] gap-x-4 gap-y-1 border-t border-rule px-4 py-3 text-[13px]">
           {ticket.captured.map((c, i) => (
             <div key={i} className="contents">
               <dt className="text-ink-2">{c.label}</dt>
@@ -29,13 +35,15 @@ export function TicketCard({ ticket }: { ticket: Ticket }) {
           ))}
         </dl>
       )}
-      <p>
-        <span className="text-ink-2">Next step: </span>
-        {ticket.next_step}
-      </p>
-      <Link href={`/queue#${ticket.id}`} className="text-[13.5px] text-accent underline underline-offset-2">
-        Open in the staff queue
-      </Link>
+      <div className="flex flex-col gap-2 border-t border-rule px-4 py-3">
+        <p>
+          <span className="font-medium">Next step: </span>
+          {ticket.next_step}
+        </p>
+        <Link href={`/queue#${ticket.id}`} className="self-start text-[13.5px] text-accent underline underline-offset-2">
+          Open in the staff queue
+        </Link>
+      </div>
     </Panel>
   );
 }

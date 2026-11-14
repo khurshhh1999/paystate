@@ -5,7 +5,8 @@ import { editablePrompt, FORMAT, orderedCases, RESULTS } from "@/components/benc
 import { LabRunner } from "@/components/lab/lab-runner";
 
 export const metadata: Metadata = {
-  title: "Prompt lab · Payable as Stated",
+  title: "Prompt lab · Paystate",
+  description: "Edit the assistant's instructions and run all twelve test cases against them.",
 };
 
 export default function LabPage() {
@@ -23,7 +24,7 @@ export default function LabPage() {
       <header className="prose-col">
         <h1 className="text-[28px] font-semibold leading-tight sm:text-[32px]">Prompt lab</h1>
         <p className="mt-3 text-[16px] text-ink-2">
-          Edit the agent&apos;s instructions and run all {CASES.length} cases against them. Each case runs once with
+          Edit the assistant&apos;s instructions and run all {CASES.length} cases against them. Each case runs once with
           the same scripted patient and the same judge as the recorded bench. It starts on the statement-only record,
           because that is where the recorded runs show instructions making a difference; with the full record both
           recorded versions are close to the ceiling.

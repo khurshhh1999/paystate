@@ -1,8 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { CASES } from "@/lib/cases.mjs";
 import type { Version, View } from "@/lib/types";
 import { EmptyDot, Money, OutcomeBadge, OutcomeDot, type Outcome } from "@/components/ui";
 import {
+  feedRunCount,
   formatDate,
   GROUP_HEADING,
   GROUP_ORDER,
@@ -18,6 +20,12 @@ import { Scorecard, summarizeAll } from "@/components/scorecard";
 import { Findings } from "@/components/findings";
 import { DiscoverButton } from "@/components/obsidian/discover-button";
 
+export const metadata: Metadata = {
+  title: "Evidence · Paystate",
+  description:
+    "The test bench behind the product pages: twelve billing cases, 324 graded conversations, and every transcript.",
+};
+
 const OUTCOMES: { outcome: Outcome; text: string }[] = [
   {
     outcome: "resolved",
@@ -25,15 +33,15 @@ const OUTCOMES: { outcome: Outcome; text: string }[] = [
   },
   {
     outcome: "correct_handoff",
-    text: "Staff were needed, and before handing off the agent told the patient the right thing and placed a hold or captured what staff will need.",
+    text: "Staff were needed, and before handing off the assistant told the patient the right thing and placed a hold or captured what staff will need.",
   },
   {
     outcome: "dead_end",
-    text: "Wrong or generic information, a handoff of something the agent was allowed to do itself, or a patient left without a next step.",
+    text: "Wrong or generic information, a handoff of something the assistant was allowed to do itself, or a patient left without a next step.",
   },
   {
     outcome: "wrong_collect",
-    text: "The agent asked for, accepted or scheduled money the patient should not pay as stated, or asked a bereaved relative for payment. This overrides everything else in the conversation.",
+    text: "The assistant asked for, accepted or scheduled money the patient should not pay as stated, or asked a bereaved relative for payment. This overrides everything else in the conversation.",
   },
 ];
 
@@ -63,7 +71,8 @@ export default function BenchPage() {
   });
   const full = row("full");
   const statement = row("statement");
-  const graded = full.total + statement.total;
+  const feeds = feedRunCount();
+  const graded = full.total + statement.total + feeds;
   const ranFull = hasRuns("full");
   const ranStatement = hasRuns("statement");
   const runDate = formatDate(RESULTS.generatedAt);
@@ -72,16 +81,24 @@ export default function BenchPage() {
   return (
     <div>
       <header className="prose-col">
-        <h1 className="text-[28px] font-semibold leading-[1.2] sm:text-[32px]">
-          A billing agent is only as right as the record it can see.
-        </h1>
+        <h1 className="text-[28px] font-semibold leading-[1.2] sm:text-[32px]">Evidence</h1>
         <p className="mt-4 text-[16px] text-ink-2">
+          The test bench behind the patient thread, the staff queue and the go-live check.{" "}
           {capital(spell(CASES.length))} patient situations
-          {graded > 0 ? <>, {graded} graded conversations.</> : "."}{" "}
+          {graded > 0 ? (
+            <>
+              , <span className="fig">{graded}</span> graded conversations: {full.total} with the full account record,{" "}
+              {statement.total} with only what the statement prints and {feeds} with some feeds removed.
+            </>
+          ) : (
+            "."
+          )}
+        </p>
+        <p className="mt-3 text-[16px] text-ink-2">
           {ranFull && (
             <>
-              With the full account record, the agent reached the right outcome in{" "}
-              <span className="num text-ink">
+              With the full record, the assistant reached the right outcome in{" "}
+              <span className="fig text-ink">
                 {full.right} of {full.total}
               </span>
               .{" "}
@@ -89,14 +106,14 @@ export default function BenchPage() {
           )}
           {ranStatement && (
             <>
-              Shown only what is printed on the statement, it reached{" "}
-              <span className="num text-ink">
+              Shown only the statement, it reached{" "}
+              <span className="fig text-ink">
                 {statement.right} of {statement.total}
               </span>
               {statement.wrong > 0 ? (
                 <>
                   , and offered to take payment for a bill the patient did not owe in{" "}
-                  <span className="num text-wrong">{statement.wrong}</span>{" "}
+                  <span className="fig text-wrong">{statement.wrong}</span>{" "}
                   {statement.wrong === 1 ? "conversation" : "conversations"}.
                 </>
               ) : (
@@ -107,13 +124,13 @@ export default function BenchPage() {
           {!ranFull && !ranStatement && "Not run yet."}
         </p>
         <p className="mt-3 text-[16px] text-ink-2">
-          A scripted patient sends two messages, the agent replies and declares its actions, and a judge model grades
+          A scripted patient sends two messages, the assistant replies and declares its actions, and a judge model grades
           the conversation against a senior biller&apos;s answer key. Each case runs {trials} times for each
           combination of record and instructions.
         </p>
       </header>
 
-      <section className="mt-12" aria-labelledby="scorecard">
+      <section className="mt-12 border-t border-rule pt-8" aria-labelledby="scorecard">
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
           <h2 id="scorecard" className="text-[20px] font-semibold">
             Scorecard
@@ -133,7 +150,7 @@ export default function BenchPage() {
           <Scorecard results={RESULTS} />
         </div>
         <p className="prose-col mt-4 text-[14px] text-ink-2">
-          Statement only means the agent sees the service, the amounts and the payer&apos;s name: no remittance codes,
+          Statement only means the assistant sees the service, the amounts and the payer&apos;s name: no remittance codes,
           eligibility, ledger or intake. v2 adds one rule to v1: check whether the balance is payable as stated before
           asking for, accepting or scheduling any payment.
         </p>
@@ -143,7 +160,7 @@ export default function BenchPage() {
         </div>
       </section>
 
-      <section className="mt-14" aria-labelledby="cases">
+      <section className="mt-12 border-t border-rule pt-8" aria-labelledby="cases">
         <h2 id="cases" className="text-[20px] font-semibold">
           Cases
         </h2>
@@ -228,7 +245,7 @@ export default function BenchPage() {
         </div>
       </section>
 
-      <section className="mt-14" aria-labelledby="outcomes">
+      <section className="mt-12 border-t border-rule pt-8" aria-labelledby="outcomes">
         <h2 id="outcomes" className="text-[20px] font-semibold">
           The four outcomes
         </h2>

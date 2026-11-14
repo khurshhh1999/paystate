@@ -14,7 +14,7 @@ const LINKS = [
 export function EvidenceNav() {
   const pathname = usePathname();
   return (
-    <nav aria-label="Evidence" className="mb-8 flex gap-5 overflow-x-auto border-b border-rule text-[14px]">
+    <nav aria-label="Evidence" className="mb-8 flex gap-4 overflow-x-auto [scrollbar-width:none] sm:gap-5 border-b border-rule text-[14px]">
       {LINKS.map((l) => {
         const active = l.href === "/evidence" ? pathname === "/evidence" : pathname.startsWith(l.href);
         return (

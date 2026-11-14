@@ -57,6 +57,19 @@ export function trialsFor(version: Version, caseId: string, view: View = "full",
   return runsFor(view, results)?.[version]?.[caseId] ?? [];
 }
 
+/** Conversations in the feed-by-feed runs: each case with each partial set of the feeds it uses. */
+export function feedRunCount(results: Results = RESULTS): number {
+  return VERSIONS.reduce(
+    (n, v) =>
+      n +
+      Object.values(results.feedRuns?.[v] ?? {}).reduce(
+        (m, sets) => m + Object.values(sets).reduce((k, trials) => k + trials.length, 0),
+        0,
+      ),
+    0,
+  );
+}
+
 export function hasRuns(view: View = "full", results: Results = RESULTS): boolean {
   return VERSIONS.some((v) => Object.values(runsFor(view, results)?.[v] ?? {}).some((t) => t.length > 0));
 }

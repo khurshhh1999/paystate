@@ -54,7 +54,7 @@ export function Findings() {
     return { c, full, stmt, drop: full.filter(right).length - stmt.filter(right).length };
   })
     // The Spanish plan request needs nothing beyond the statement, so its drop is run-to-run
-    // variation in whether the agent set the plan up or asked to confirm first. Left out here.
+    // variation in whether the assistant set the plan up or asked to confirm first. Left out here.
     .filter((r) => r.stmt.length > 0 && r.drop > 0 && NEEDS[r.c.id]?.feed !== "None")
     .sort((a, b) => b.drop - a.drop);
 
@@ -64,30 +64,30 @@ export function Findings() {
   });
 
   return (
-    <section className="mt-16 border-t border-rule pt-8">
+    <section className="mt-12 border-t border-rule pt-8">
       <h2 className="text-[20px] font-semibold">What the runs say</h2>
 
       <div className="prose-col mt-3 flex flex-col gap-3">
         <p>
-          I expected the instructions to be the lever. I wrote a second version of the agent with an explicit rule to
+          I expected the instructions to be the lever. I wrote a second version of the instructions with an explicit rule to
           check the bill before asking for money, and assumed it would beat the baseline. On the full record it did
           not: both versions were right almost every time, and neither took money it should not have.
         </p>
         <p>
-          The difference appeared when I took the record away. An agent that sees only the statement cannot tell a
+          The difference appeared when I took the record away. An assistant that sees only the statement cannot tell a
           deductible from a denial, so it either explains nothing or, when the patient offers to pay, agrees to take it.
         </p>
       </div>
 
       {hasStatement && lost.length > 0 && (
         <>
-          <h3 className="mt-8 text-[16px] font-semibold">Where the statement-only agent lost the patient</h3>
+          <h3 className="mt-8 text-[16px] font-semibold">Where the statement-only assistant lost the patient</h3>
           <div className="table-scroll mt-3">
             <table className="ledger">
               <thead>
                 <tr>
                   <th>Case</th>
-                  <th>What the agent needed</th>
+                  <th>What the assistant needed</th>
                   <th>Where it lives</th>
                   <th>Full record</th>
                   <th>Statement only</th>
@@ -129,7 +129,7 @@ export function Findings() {
         </>
       )}
 
-      <h2 className="mt-12 text-[20px] font-semibold">Feed by feed</h2>
+      <h2 className="mt-12 border-t border-rule pt-8 text-[20px] font-semibold">Feed by feed</h2>
       <p className="prose-col mt-3">
         Two views is coarse, so I ran every case again with each partial set of feeds: 180 more conversations. The
         remittance is what stops the wrong collects when the check is off. Eligibility rescues the most answers. The
@@ -144,12 +144,12 @@ export function Findings() {
         <FeedTable />
       </div>
 
-      <h2 className="mt-12 text-[20px] font-semibold">What I would build next</h2>
+      <h2 className="mt-12 border-t border-rule pt-8 text-[20px] font-semibold">What it changed in the product</h2>
       <ol className="prose-col mt-4 flex list-decimal flex-col gap-4 pl-5">
         <li>
-          <span className="font-medium">Score each practice by what its agent can read, before go-live.</span> The{" "}
+          <span className="font-medium">Score each practice by what its assistant can read, before go-live.</span> The{" "}
           <Link href="/readiness" className="underline decoration-rule-strong underline-offset-2 hover:decoration-ink">go-live check</Link>{" "}
-          is a first version. Remittance
+          does this. It looks for remittance
           lines with group codes, eligibility with termination dates and aid category, the payment ledger including
           unapplied money, intake flags. A practice missing a feed will dead-end on a known set of questions, and that
           is knowable during implementation instead of in week three. It also turns integration depth from a
@@ -158,7 +158,7 @@ export function Findings() {
         <li>
           <span className="font-medium">Put the payable-as-stated check in front of every payment, and watch its cost.</span>{" "}
           The rule removed every wrong collect here. Without the record it also refused valid payment plans, because
-          the agent could no longer tell a good bill from a bad one. It belongs as a guard where a feed is missing, with
+          the assistant could no longer tell a good bill from a bad one. It belongs as a guard where a feed is missing, with
           its handoff volume tracked as the price.
         </li>
         <li>

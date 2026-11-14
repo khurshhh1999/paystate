@@ -40,7 +40,8 @@ export function resolutionsFor(ticket: Ticket): Resolution[] {
   const name = firstName(ticket.patient);
   const amount = usd(ticket.amount);
   const balance = usd(ticket.balance);
-  const remaining = usd(Math.max(0, ticket.balance - ticket.amount));
+  const owed = Math.max(0, ticket.balance - ticket.amount);
+  const remaining = usd(owed);
   const hi = `${PREFIX} Hi ${name},`;
 
   switch (ticket.kind) {
@@ -49,114 +50,136 @@ export function resolutionsFor(ticket: Ticket): Resolution[] {
         {
           id: "refiled",
           label: "Claim refiled to the new insurer",
-          message: `${hi} we sent the claim for your visit to your new insurance. You do not owe the ${amount} on your statement now. If they leave a balance after processing, we will send you a new statement. Nothing to do for now.`,
+          message: `${hi} we sent the claim for your visit to your new insurance. Please do not pay the ${amount} on your statement. If anything is left for you to pay after they process it, we will send you a new statement.`,
         },
         {
           id: "not-active",
           label: "New coverage not active on the visit date",
-          message: `${hi} we could not confirm your new insurance was active on the date of your visit, so the ${amount} is still open. Please call us at the number on your statement so we can check the coverage with you. Your account stays on hold until we talk.`,
+          message: `${hi} we checked with your new insurance, and it was not active on the date of your visit, so we could not bill it. Please call us at the number on your statement so we can go over your coverage with you. Your account stays on hold until we talk.`,
         },
       ];
 
     case "add_secondary": {
-      const coverage = mentions(ticket, "medicaid") ? "your Medicaid coverage" : "your secondary insurance";
+      const medicaid = mentions(ticket, "medicaid");
+      const coverage = medicaid ? "your Medicaid coverage" : "your secondary insurance";
       return [
         {
           id: "added",
           label: "Secondary added and billed, balance cleared",
-          message: `${hi} we added ${coverage} to your account and billed it for the ${amount}. You do not owe this. Your balance is now ${remaining}, and you can ignore the statement.`,
+          message: `${hi} we added ${coverage} to your account and billed it for the ${amount}. You do not owe this amount, and it will not go to collections. Your balance is now ${remaining}, so you can ignore the statement.`,
         },
         {
           id: "need-member-id",
-          label: "Coverage not found, member number needed",
-          message: `${hi} we could not find ${coverage} with the details we have. Please reply with your member number or a photo of your card. Your account stays on hold, so you do not need to pay the ${amount} while we sort this out.`,
+          label: "Member number needed from the patient",
+          message: `${hi} we need ${medicaid ? "your Medicaid member number" : "the member number for your secondary insurance"} to add it to your account. Please reply with the number or a photo of your card. Your account stays on hold, so please do not pay the ${amount} while we sort this out.`,
         },
       ];
     }
 
-    case "apply_payment":
+    case "apply_payment": {
+      const applied: Resolution = {
+        id: "applied",
+        label: "Payment applied",
+        message: `${hi} we found your ${amount} payment and applied it to your visit. Your balance is now ${remaining}, so you can ignore the statement. Sorry for the mix-up.`,
+      };
+      // When the ticket already cites the receipt, the payment is on file: asking the
+      // patient for proof would be wrong.
+      if (mentions(ticket, "receipt")) return [applied];
       return [
-        {
-          id: "applied",
-          label: "Payment applied, balance $0",
-          message: `${hi} we found your ${amount} payment and applied it to your visit. Your balance is now ${remaining}. You can ignore the statement.`,
-        },
+        applied,
         {
           id: "not-found",
-          label: "Payment not found",
-          message: `${hi} we could not find your ${amount} payment in our records yet. Please reply with a photo of your receipt or the card statement showing the charge. Your account stays on hold, so no statements or reminders go out while we look.`,
+          label: "Payment not found yet",
+          message: `${hi} we have not found your ${amount} payment in our records yet. Please reply with a photo of your receipt or the card statement showing the charge. Your account stays on hold while we look, so no statements or reminders will go out.`,
         },
       ];
+    }
 
-    case "rebill_liability":
+    case "rebill_liability": {
+      const workersComp = mentions(ticket, "workers");
       return [
         {
           id: "billed-carrier",
-          label: "Billed to the liable carrier",
-          message: `${hi} we billed your employer's workers' compensation carrier for your visit. You do not owe the ${amount}. Your account stays on hold until they respond, so you will not get statements in the meantime. Nothing to do for now.`,
+          label: workersComp ? "Billed to the workers' comp carrier" : "Billed to the liable carrier",
+          message: `${hi} we sent the bill for your visit to ${workersComp ? "your employer's workers' compensation carrier" : "the insurer responsible for your injury"}. Please do not pay the ${amount}. Your account stays on hold while they process it, so no statements will go out. We will text you if we need anything from you.`,
         },
       ];
+    }
 
-    case "write_off":
+    case "write_off": {
+      const lateFiling = mentions(ticket, "CO-29") || mentions(ticket, "timely") || mentions(ticket, "late filing");
+      const why = lateFiling
+        ? "your insurance denied the claim for your visit because we sent it to them too late. That was our mistake, so we removed"
+        : "the charge on your statement came from a billing error on our side, so we removed";
       return [
         {
           id: "written-off",
-          label: "Written off, balance $0",
-          message: `${hi} the ${amount} on your statement came from a billing error on our side, so we removed it. You do not owe it. Your balance is now ${remaining}. Nothing to do.`,
+          label: "Written off",
+          message: `${hi} ${why} the ${amount}. You do not owe it, and your balance is now ${remaining}.`,
         },
         {
           id: "appealed",
           label: "Appealed to the payer",
-          message: `${hi} we have appealed the ${amount} with your insurance. Your account stays on hold while they review it, and you do not owe anything during the review. We will text you when we hear back.`,
+          message: `${hi} we have asked your insurance to reconsider the claim for your visit. Whatever they decide, you do not owe the ${amount}. Your account stays on hold while they review it, so no statements will go out.`,
         },
       ];
+    }
 
-    case "correct_balance": {
-      const owed = Math.max(0, ticket.balance - ticket.amount);
+    case "correct_balance":
       return [
         {
           id: "corrected",
           label: "Balance corrected",
           message:
             owed > 0
-              ? `${hi} we corrected your balance. We removed ${amount}, and the amount you owe is now ${usd(owed)}. A new statement with that amount will follow.${planOffer(owed)}`
-              : `${hi} we corrected your balance. We removed ${amount}, and you now owe nothing. You can ignore the statement.`,
+              ? `${hi} we corrected your balance. Of the ${balance} on your statement, you owe ${remaining}, the share your insurance set for you. We removed the other ${amount}, and a new statement for ${remaining} will follow.${planOffer(owed)}`
+              : `${hi} we corrected your balance and removed the ${amount}. You owe nothing for this visit, so you can ignore the statement.`,
         },
         {
-          id: "reprocess",
-          label: "Sent to the payer to reprocess",
-          message: `${hi} we asked your insurance to reprocess the claim for the ${amount} that should not be billed to you. Your account stays on hold while they do, and you do not need to pay anything until we text you the result.`,
+          id: "settling",
+          label: "Being settled with the insurer",
+          message: `${hi} ${owed > 0 ? `${amount} of the ${balance}` : `the ${amount}`} on your statement is being settled between us and your insurance and will not be billed to you.${owed > 0 ? ` The most you will owe is ${remaining}.` : ""} Your account stays on hold until this is done, so please do not pay yet. We will text you the final amount.`,
         },
       ];
-    }
 
     case "financial_assistance":
       return [
         {
+          id: "application-taken",
+          label: "Application taken, decision to follow",
+          message: `${hi} thank you for going through the financial assistance application with us. We will text you when there is a decision. Your account stays on hold until then, so you do not need to pay the ${amount} now.`,
+        },
+        {
           id: "application-sent",
-          label: "Application sent to the patient",
-          message: `${hi} we sent you our financial assistance application. Please send it back with your household size and proof of income, such as recent pay stubs, an unemployment letter or last year's tax return. Your account stays on hold while you apply, so you do not need to pay the ${amount} now.`,
+          label: "Could not reach, application sent",
+          message: `${hi} we tried to reach you about financial assistance and have sent you the application. Please send it back with your household size and proof of income, such as recent pay stubs, an unemployment letter or last year's tax return. Your account stays on hold while you apply, so you do not need to pay the ${amount} now.`,
         },
         {
           id: "approved",
           label: "Approved, balance adjusted",
-          message: `${hi} your financial assistance application was approved. Your balance of ${balance} is now ${BLANK_AMOUNT}. A new statement with the new amount will follow.`,
+          message: `${hi} your financial assistance application was approved. Your balance of ${balance} is now ${BLANK_AMOUNT}, and we will send you a new statement for that amount.`,
         },
       ];
 
-    case "charge_review":
+    case "charge_review": {
+      // A problem visit billed alongside a preventive one (modifier 25) is the usual dispute.
+      const sameDayVisit = mentions(ticket, "-25") || mentions(ticket, "preventive");
+      const why = sameDayVisit
+        ? `Your checkup itself was covered in full. At the same visit a separate problem was also examined and treated, and your plan bills that as an office visit with its own copay, so the ${amount} is correct. We are sorry no one explained this at the time.`
+        : `It was billed correctly, so it stays on your account.`;
       return [
         {
           id: "upheld",
           label: "Charge upheld after review",
-          message: `${hi} we reviewed the ${amount} charge. Your visit note shows a separate problem was examined and treated at the same visit as your checkup, and your plan bills that as its own visit with a copay, so the ${amount} stands. We are sorry this was not explained at the time.${planOffer(ticket.amount)}`,
+          message: `${hi} we reviewed the ${amount} charge. ${why}${planOffer(ticket.amount)}`,
         },
         {
           id: "courtesy",
           label: "Charge removed as a courtesy",
-          message: `${hi} we removed the ${amount} charge as a courtesy. Your balance is now ${remaining}. Nothing to do.`,
+          message: `${hi} we reviewed the ${amount} charge and removed it as a courtesy. Your balance is now ${remaining}.`,
         },
       ];
+    }
 
     case "bereavement":
       return [
@@ -164,7 +187,7 @@ export function resolutionsFor(ticket: Ticket): Resolution[] {
           id: "called-family",
           label: "Called the family, account marked deceased",
           message: null,
-          note: "No text is sent for this ticket. This one is a phone call.",
+          note: "No text goes out for this ticket. Staff speak with the family by phone.",
         },
       ];
 
@@ -174,7 +197,7 @@ export function resolutionsFor(ticket: Ticket): Resolution[] {
         {
           id: "resolved",
           label: "Resolved, patient informed",
-          message: `${hi} we have finished looking into your account. Your balance is ${balance}. Call us at the number on your statement if you have questions.`,
+          message: `${hi} we have finished looking into your account. Your balance is ${balance}. If you have questions, call us at the number on your statement.`,
         },
       ];
   }

@@ -1,10 +1,10 @@
-// The Bench scorecard: a 2×2 of what the agent sees (rows) against which instructions it runs (columns).
+// The Bench scorecard: a 2×2 of what the assistant sees (rows) against which instructions it runs (columns).
 // Rows are the comparison that matters, so each row carries its combined total next to its name.
 
 import { summarizeVersion } from "@/lib/score.mjs";
 import { CASES } from "@/lib/cases.mjs";
 import type { Results, Version, VersionSummary, View } from "@/lib/types";
-import { Money, OUTCOME_LABEL, type Outcome } from "@/components/ui";
+import { money, OUTCOME_LABEL, type Outcome } from "@/components/ui";
 import { StatusBars, type StripCell } from "@/components/obsidian/status-bars";
 import { orderedCases, trialsFor, VERSION_SHORT, VERSIONS, VIEW_LABEL, VIEW_ORDER } from "@/components/bench";
 
@@ -70,12 +70,13 @@ function Cell({ s, version, view, results }: { s: VersionSummary; version: Versi
       {ran && (
         <dl className="mt-3 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-0.5 text-[14px]">
           <dt className="text-ink-2">Wrong collects</dt>
-          <dd className={"num " + (s.wrong_collect > 0 ? "font-medium text-wrong" : "")}>
-            {s.wrong_collect}
+          <dd>
+            <span className={"num " + (s.wrong_collect > 0 ? "font-medium text-wrong" : "")}>{s.wrong_collect}</span>
             {s.wrong_collect > 0 && (
-              <span className="font-normal text-ink-2">
+              <span className="text-ink-2">
                 {" "}
-                · <Money value={s.wrongCollectDollars} /> per pass
+                · <span className="fig">{money(s.wrongCollectDollars)}</span> not owed, each time the twelve cases are
+                run
               </span>
             )}
           </dd>
@@ -93,7 +94,7 @@ export function Scorecard({ results }: { results: Results }) {
   return (
     <div>
       <div className="hidden gap-x-8 border-b border-rule-strong pb-2 text-[14px] sm:grid sm:grid-cols-[180px_minmax(0,1fr)_minmax(0,1fr)]">
-        <span className="text-ink-2">What the agent sees</span>
+        <span className="text-ink-2">What the assistant sees</span>
         {VERSIONS.map((v) => (
           <span key={v} className="font-medium">
             {VERSION_SHORT[v]}
@@ -115,7 +116,7 @@ export function Scorecard({ results }: { results: Results }) {
               <p className="text-[13px] text-ink-2">{VIEW_NOTE[view]}</p>
               {total > 0 && (
                 <p className="mt-2 text-[14px]">
-                  <span className="num font-medium">
+                  <span className="fig font-medium">
                     {right} of {total}
                   </span>{" "}
                   <span className="text-ink-2">right across both</span>

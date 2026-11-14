@@ -12,9 +12,9 @@
   --sunken: #eef0ec;
   --ink: #15201c;
   --ink-2: #4a5852;
-  --ink-3: #7b8882;
-  --rule: #dde1dc;
-  --rule-strong: #b9c0ba;
+  --ink-3: #68756f;
+  --rule: #d5dad4;
+  --rule-strong: #b3bab4;
   --accent: #0b5d4e;
   --accent-ink: #ffffff;
   --accent-soft: #e2efeb;
@@ -24,7 +24,7 @@
   --ok-soft: #e3f2e9;
   --handoff: #2b5fa8;
   --handoff-soft: #e4ecf7;
-  --stuck: #9a6a00;
+  --stuck: #8a5f00;
   --stuck-soft: #f7efd9;
   --wrong: #b3261e;
   --wrong-soft: #fae6e4;
@@ -103,6 +103,11 @@ h1, h2, h3 {
   font-variant-numeric: tabular-nums;
 }
 
+/* Figures inside a sentence: same face as the text, digits still the same width. */
+.fig {
+  font-variant-numeric: tabular-nums;
+}
+
 /* Running prose: keep the measure readable. */
 .prose-col {
   max-width: 64ch;
@@ -135,6 +140,61 @@ h1, h2, h3 {
 }
 .ledger tbody tr:hover {
   background: var(--sunken);
+}
+
+/*
+  .ledger.stack: below 768px each row becomes a block, each cell labelled from its
+  data-label. The first cell, without a label, reads as the row's heading.
+*/
+@media (max-width: 767px) {
+  .ledger.stack thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .ledger.stack,
+  .ledger.stack tbody,
+  .ledger.stack tr,
+  .ledger.stack td {
+    display: block;
+    width: 100%;
+  }
+  .ledger.stack tr {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .ledger.stack tr:first-child {
+    border-top: 1px solid var(--rule-strong);
+  }
+  .ledger.stack tbody tr:hover {
+    background: transparent;
+  }
+  .ledger.stack td {
+    min-width: 0 !important;
+    padding: 2px 0;
+    border: 0;
+    text-align: left;
+  }
+  .ledger.stack td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    margin-top: 8px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-2);
+  }
+  /* Figures sit on the same line as their label. */
+  .ledger.stack td.r {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .ledger.stack td.r::before {
+    margin-top: 0;
+  }
 }
 
 :focus-visible {

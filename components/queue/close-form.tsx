@@ -35,45 +35,53 @@ export function CloseForm({ ticket }: { ticket: Ticket }) {
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-4">
+      {/* One bordered list: the picked outcome opens to show the text the patient will get. */}
       <fieldset>
         <legend className="mb-2 text-[14px] text-ink-2">Outcome</legend>
-        <div className="flex flex-col gap-1.5">
-          {options.map((o) => (
-            <label key={o.id} className="flex cursor-pointer items-start gap-2.5 text-[14.5px]">
-              <input
-                type="radio"
-                name={`${uid}-resolution`}
-                value={o.id}
-                checked={picked === o.id}
-                onChange={() => pick(o.id)}
-                className="mt-1 accent-accent"
-              />
-              <span>{o.label}</span>
-            </label>
-          ))}
+        <div className="divide-y divide-rule rounded-md border border-rule-strong">
+          {options.map((o) => {
+            const isPicked = picked === o.id;
+            return (
+              <div key={o.id} className={isPicked ? "bg-accent-soft" : ""}>
+                <label className="flex cursor-pointer items-start gap-2.5 px-3 py-2.5 text-[14.5px]">
+                  <input
+                    type="radio"
+                    name={`${uid}-resolution`}
+                    value={o.id}
+                    checked={isPicked}
+                    onChange={() => pick(o.id)}
+                    className="mt-1 accent-accent"
+                  />
+                  <span className={isPicked ? "font-medium" : ""}>{o.label}</span>
+                </label>
+                {isPicked && sendsText && (
+                  <div className="flex flex-col gap-1.5 px-3 pb-3 sm:pl-[2.125rem]">
+                    <label htmlFor={`${uid}-message`} className="text-[13.5px] text-ink-2">
+                      Text the patient will get
+                    </label>
+                    <textarea
+                      id={`${uid}-message`}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      rows={5}
+                      className="w-full rounded-md border border-rule-strong bg-surface px-3 py-2 text-[14.5px] leading-[1.5] text-ink"
+                    />
+                    {blankLeft && (
+                      <p className="text-[13.5px] text-stuck">
+                        Fill in the new amount where it says {BLANK_AMOUNT} before sending.
+                      </p>
+                    )}
+                    <p className="text-[13px] text-ink-3">Nothing is sent in this demo.</p>
+                  </div>
+                )}
+                {isPicked && !sendsText && o.note && (
+                  <p className="px-3 pb-3 text-[14px] text-ink-2 sm:pl-[2.125rem]">{o.note}</p>
+                )}
+              </div>
+            );
+          })}
         </div>
       </fieldset>
-
-      {resolution && sendsText && (
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor={`${uid}-message`} className="text-[14px] text-ink-2">
-            Text the patient will get
-          </label>
-          <textarea
-            id={`${uid}-message`}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            rows={6}
-            className="w-full rounded-md border border-rule-strong bg-surface px-3 py-2 text-[14.5px] leading-[1.5] text-ink"
-          />
-          {blankLeft && (
-            <p className="text-[13.5px] text-stuck">Fill in the new amount where it says {BLANK_AMOUNT} before sending.</p>
-          )}
-          <p className="text-[13px] text-ink-3">Nothing is sent in this demo.</p>
-        </div>
-      )}
-
-      {resolution && !sendsText && resolution.note && <p className="text-[14px] text-ink-2">{resolution.note}</p>}
 
       <div>
         <Button type="submit" disabled={!canClose}>

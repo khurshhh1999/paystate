@@ -2,20 +2,23 @@ import type { Metadata } from "next";
 import { PatientDesk } from "@/components/patient/patient-desk";
 
 export const metadata: Metadata = {
-  title: "Payable as Stated",
+  title: "Paystate",
 };
 
 export default function Home() {
   return (
-    <div className="flex flex-col gap-8">
-      <header className="flex flex-col gap-3">
+    <div className="flex flex-col gap-6">
+      <header className="flex flex-col gap-2">
         <h1 className="text-[28px] font-semibold leading-tight sm:text-[32px]">
-          What a patient gets when they text back about a bill
+          Angela wants to pay $318 she does not owe.
         </h1>
+        <p className="prose-col">
+          Her doctor&apos;s office filed the claim 78 days late. The insurer denied it and the statement went out
+          anyway. She would rather pay than argue. Text back as her and see what the assistant does with the offer.
+        </p>
         <p className="prose-col text-ink-2">
-          Pick a patient. Their statement text has just arrived. Reply as them, or tap a suggested reply. The billing
-          assistant answers from the practice&apos;s account record, and anything it cannot finish itself goes to the
-          staff queue with the details attached.
+          Paystate is a billing assistant that reads the practice&apos;s account before it asks a patient for money.
+          Eleven more patients are in the list. Some of them owe every cent.
         </p>
       </header>
       <PatientDesk />

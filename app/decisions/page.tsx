@@ -4,7 +4,7 @@ import { FeedTable, tally } from "@/components/feed-table";
 import { FEED_IDS } from "@/lib/feeds.mjs";
 
 export const metadata: Metadata = {
-  title: "Decisions · Payable as Stated",
+  title: "Decisions · Paystate",
   description: "Who the product is for, what I decided and turned down, and how I would measure it.",
 };
 
@@ -46,7 +46,7 @@ const DECISIONS = [
     title: "The assistant turns down money that is not owed",
     chose: "If the record says the balance is not payable as stated, the assistant declines payment even when the patient offers.",
     declined: "Taking the payment and refunding later if staff find a problem.",
-    why: "A refund is staff work, a credit balance and a patient who learns the practice took money it should not have. For a dual-eligible patient, billing her at all is prohibited.",
+    why: "A refund is staff work, a credit balance and a patient who learns the practice took money it should not have. Billing a Qualified Medicare Beneficiary for Medicare cost-sharing is prohibited outright.",
     cost: "Resolution and collection numbers look worse in the week it ships. That is why the metric has to change with it.",
   },
   {
@@ -136,7 +136,7 @@ const LEFT_OUT = [
 
 const FIRST_30 = [
   "Read 200 real handoffs and sort them into the nine ticket kinds. Anything that does not fit is a kind I missed.",
-  "Join past conversations that ended in a payment to their remittance lines and count the ones carrying a CO code. That is the real wrong-collect rate.",
+  "Join past conversations that ended in a payment to the remittance for that balance, and count the payments on amounts the payer assigned to the practice (group code CO). That is a first estimate of the real wrong-collect rate.",
   "Run the go-live check on two live practices with different integrations and compare its list with their actual complaints.",
   "Ship hold-before-handoff to half the handoffs at one practice and compare repeat contact.",
 ];
@@ -150,7 +150,7 @@ const OPEN = [
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="mt-14">
+    <section className="mt-12 border-t border-rule pt-8">
       <h2 className="text-[20px] font-semibold">{title}</h2>
       <div className="mt-4">{children}</div>
     </section>
@@ -172,7 +172,7 @@ export default function DecisionsPage() {
         </p>
       </header>
 
-      <Section title="The problem in one paragraph">
+      <Section title="The problem">
         <div className="prose-col flex flex-col gap-3">
           <p>
             A patient who texts back about a bill is usually asking one of two things: why do I owe this, or how do I
@@ -190,7 +190,7 @@ export default function DecisionsPage() {
 
       <Section title="Three people, three jobs">
         <div className="table-scroll">
-          <table className="ledger">
+          <table className="ledger stack">
             <thead>
               <tr>
                 <th scope="col">Who</th>
@@ -208,9 +208,9 @@ export default function DecisionsPage() {
                       {p.where.label}
                     </Link>
                   </td>
-                  <td className="min-w-[180px]">{p.wants}</td>
-                  <td className="min-w-[200px] text-ink-2">{p.today}</td>
-                  <td className="min-w-[220px]">{p.here}</td>
+                  <td className="min-w-[180px]" data-label="What they want">{p.wants}</td>
+                  <td className="min-w-[200px] text-ink-2" data-label="What they usually get">{p.today}</td>
+                  <td className="min-w-[220px]" data-label="What they get here">{p.here}</td>
                 </tr>
               ))}
             </tbody>
@@ -254,18 +254,19 @@ export default function DecisionsPage() {
               <>
                 {" "}
                 With only the statement balance and the check on, the assistant was right in{" "}
-                <span className="num">
+                <span className="fig">
                   {none.on.right} of {none.on.total}
                 </span>{" "}
                 conversations and{" "}
-                <span className="num">
+                <span className="fig">
                   {none.on.handoffs}
                 </span>{" "}
-                ended with staff. With everything connected it was{" "}
-                <span className="num">
+                ended with staff. With everything connected it was right in{" "}
+                <span className="fig">
                   {all.on.right} of {all.on.total}
-                </span>{" "}
-                and <span className="num">{all.on.handoffs}</span>. With the check off and no remittance, it offered to
+                </span>
+                , and <span className="fig">{all.on.handoffs}</span> still ended with staff, because most of these cases
+                need someone to correct the account. With the check off and no remittance, it offered to
                 take payment on a claim the practice had filed late.
               </>
             )}
@@ -291,7 +292,7 @@ export default function DecisionsPage() {
 
       <Section title="How I would measure it">
         <div className="table-scroll">
-          <table className="ledger">
+          <table className="ledger stack">
             <thead>
               <tr>
                 <th scope="col">Metric</th>
@@ -303,15 +304,15 @@ export default function DecisionsPage() {
               {METRICS.map((m) => (
                 <tr key={m.name}>
                   <td className="min-w-[190px] font-medium">{m.name}</td>
-                  <td className="min-w-[240px]">{m.what}</td>
-                  <td className="min-w-[220px] text-ink-2">{m.why}</td>
+                  <td className="min-w-[240px]" data-label="What it counts">{m.what}</td>
+                  <td className="min-w-[220px] text-ink-2" data-label="Why it is here">{m.why}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
         <p className="prose-col mt-4">
-          Resolution rate and dollars collected are missing from the top of that list on purpose. On most dashboards the
+          Resolution rate and dollars collected are left off this list on purpose. On most dashboards the
           patient who pays a late-filed claim counts as resolved and collected. Graded against the record, it is the
           worst outcome on this site.
         </p>

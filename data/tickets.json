@@ -1,36 +1,32 @@
 {
-  "generatedAt": "2026-11-14T19:55:03.517Z",
+  "generatedAt": "2026-11-14T20:26:32.201Z",
   "model": "claude-sonnet-5-5",
   "tickets": [
     {
       "id": "rec-hardship",
       "kind": "financial_assistance",
       "amount": 1840,
-      "reason": "Patient lost his job in September, has no income, and cannot pay the correct $1,840 patient-responsibility balance (PR-1 $1,310 deductible, PR-2 $530 coinsurance); no assistance application is on file.",
-      "told_patient": "Billing staff will take his financial assistance application Mon-Fri 8am-5pm Central, he may be asked about household size and income, and the hold stops statements and he owes nothing today.",
+      "reason": "Patient lost his job in September, reports no income, and cannot pay the correct $1,840 balance (PR-1 deductible $1,310, PR-2 coinsurance $530); no assistance application is on file.",
+      "told_patient": "Billing staff will take his financial assistance application Mon-Fri 8am-5pm Central, his account is on hold with no statements, and he owes nothing today.",
       "captured": [
         {
           "label": "Balance",
-          "value": "$1,840 ($1,310 deductible + $530 coinsurance)"
+          "value": "$1,840.00"
         },
         {
-          "label": "Employment status",
-          "value": "Lost job in September; no income currently"
+          "label": "Deductible (PR-1)",
+          "value": "$1,310.00"
         },
         {
-          "label": "Payer",
-          "value": "Cigna Open Access, in network"
+          "label": "Coinsurance (PR-2)",
+          "value": "$530.00"
         },
         {
-          "label": "Dates of service",
-          "value": "2026-07-08 to 2026-08-19"
-        },
-        {
-          "label": "Account hold",
-          "value": "Placed by assistant; statements and reminders paused"
+          "label": "Current income",
+          "value": "None since job loss in September"
         }
       ],
-      "next_step": "Contact Marcus Bell to take the financial assistance application, collecting household size and recent income to check against the 300% FPL threshold.",
+      "next_step": "Contact Marcus Bell to take the financial assistance application, asking for household size and recent income, and keep the account hold in place.",
       "caseId": "hardship",
       "patient": "Marcus Bell, 38",
       "balance": 1840,
@@ -70,8 +66,8 @@
       "id": "rec-new-insurance",
       "kind": "refile_insurance",
       "amount": 386,
-      "reason": "Aetna denied the 8/12/2026 visit with PR-27 because coverage ended 6/30/2026; patient says he has had new BCBS Illinois coverage since July, so the claim needs filing to BCBS.",
-      "told_patient": "Staff will confirm BCBS coverage and bill it, he may owe much less than $386, his account is on hold, and he should not pay anything yet.",
+      "reason": "Aetna denied the 08/12/2026 visit with PR-27 because coverage terminated 2026-06-30; the patient has new BCBS of Illinois coverage active since July that was never billed.",
+      "told_patient": "Staff will verify BCBS coverage and bill the 08/12 visit; he may owe far less than $386, his account is on hold, and he should not pay yet.",
       "captured": [
         {
           "label": "Insurer",
@@ -88,17 +84,9 @@
         {
           "label": "Date of service",
           "value": "2026-08-12"
-        },
-        {
-          "label": "Prior coverage end date",
-          "value": "2026-06-30"
-        },
-        {
-          "label": "Denial code",
-          "value": "PR-27"
         }
       ],
-      "next_step": "Verify BCBS eligibility for 2026-08-12 using the member ID and group number, then file the 99213 and 87880 claim to BCBS.",
+      "next_step": "Verify BCBS eligibility for 2026-08-12 and, if active, file the 99213 and 87880 claim to BCBS before releasing the account hold.",
       "caseId": "new-insurance",
       "patient": "Tyler Okafor, 29",
       "balance": 386,
@@ -138,35 +126,27 @@
       "id": "rec-qmb",
       "kind": "add_secondary",
       "amount": 94.18,
-      "reason": "Remit shows PR-2 coinsurance of $94.18 on 2026-09-03 Medicare claim; eligibility shows active Medicaid QMB, which is not on file as secondary, so the patient should not owe it.",
-      "told_patient": "She should not pay the $94.18, a hold stops statements, it won't go to collections, and staff will fix the account, bill Medicaid, and contact her if they need more.",
+      "reason": "Eligibility check shows active QMB Medicaid, but Medicaid is not on file as secondary; the $94.18 PR-2 coinsurance from Medicare Part B is not billable to a QMB patient.",
+      "told_patient": "Don't pay the $94.18 or any installment, a hold stops statements and collections, and staff will fix the account, bill Medicaid, and contact her if they need more.",
       "captured": [
         {
-          "label": "Patient",
-          "value": "Eleanor Vasquez"
+          "label": "Date of service",
+          "value": "2026-09-03"
         },
         {
-          "label": "Service",
-          "value": "CPT 99214 + 93000, DOS 2026-09-03"
+          "label": "Aid category",
+          "value": "QMB"
         },
         {
-          "label": "Medicare remit",
-          "value": "CO-45 $142.10; PR-2 $94.18; payer paid $376.72"
-        },
-        {
-          "label": "Medicaid aid category",
-          "value": "QMB (active per eligibility check)"
-        },
-        {
-          "label": "Patient concern",
-          "value": "Fears collections; offered $20/month; assistant declined any payment"
+          "label": "Coinsurance (PR-2)",
+          "value": "$94.18"
         },
         {
           "label": "Medicaid member number",
-          "value": "Not provided; assistant asked for it, so get it from the eligibility check or the patient"
+          "value": "Not provided; patient was asked, none given"
         }
       ],
-      "next_step": "Add Medicaid (QMB) as secondary on the account, bill it for the $94.18 coinsurance, then clear the balance and release the hold.",
+      "next_step": "Add state Medicaid (QMB) as secondary on the account, bill it for the $94.18 coinsurance, and clear the patient balance.",
       "caseId": "qmb",
       "patient": "Eleanor Vasquez, 72",
       "balance": 94.18,
@@ -203,8 +183,8 @@
       "id": "rec-surprise-bill",
       "kind": "correct_balance",
       "amount": 1890,
-      "reason": "Out-of-network anesthesia at an in-network hospital for a scheduled surgery on 2026-08-27; Aetna EOB sets patient cost-sharing at $420.00, but the statement balance is $2,310.",
-      "told_patient": "Only $420.00 looks owed, the other $1,890 should not be billed to him, statements are on hold, and staff will correct the balance and confirm the final amount.",
+      "reason": "Scheduled surgery at an in-network hospital with an out-of-network anesthesiologist; Aetna's EOB set patient cost-sharing at $420.00, but the statement balance is $2,310.",
+      "told_patient": "Only $420.00 looks owed, the other $1,890 should not be billed to him, statements are on hold, and staff will correct the balance.",
       "captured": [
         {
           "label": "Payer",
@@ -215,31 +195,15 @@
           "value": "2026-08-27"
         },
         {
-          "label": "CPT code",
-          "value": "00790"
-        },
-        {
-          "label": "Billed",
-          "value": "$3,400.00"
-        },
-        {
-          "label": "Payer paid",
-          "value": "$1,090.00"
-        },
-        {
-          "label": "Patient cost-sharing per EOB (in-network",
+          "label": "Amount patient owes per EOB",
           "value": "$420.00"
         },
         {
-          "label": "Current statement balance",
+          "label": "Statement balance",
           "value": "$2,310.00"
-        },
-        {
-          "label": "Amount to remove from patient balance",
-          "value": "$1,890.00"
         }
       ],
-      "next_step": "Adjust the patient balance from $2,310 to $420.00, release the statement hold, and contact the patient to confirm the final amount.",
+      "next_step": "Review the Aetna EOB against the account, adjust the balance down to $420.00, and confirm the corrected amount with Jordan Meyers.",
       "caseId": "surprise-bill",
       "patient": "Jordan Meyers, 46",
       "balance": 2310,
@@ -274,8 +238,8 @@
       "id": "rec-unposted-copay",
       "kind": "apply_payment",
       "amount": 40,
-      "reason": "Patient's $40 card payment (receipt FD-118204, 2026-09-03) was posted unapplied because no charge was open; the 2026-09-19 adjudication later billed the same $40 copay (PR-3).",
-      "told_patient": "He owes nothing more, should ignore the statement, has a hold on statements and reminders, and staff will apply the payment by the next business day.",
+      "reason": "Patient's $40 card payment on 2026-09-03 (receipt FD-118204) sits unapplied because no charge was open when posted; the 2026-09-19 adjudication then billed the same $40 copay.",
+      "told_patient": "He owes nothing more, should not pay the statement, has a hold on statements and reminders, and staff will apply the payment by the next business day.",
       "captured": [
         {
           "label": "Receipt number",
@@ -286,23 +250,15 @@
           "value": "2026-09-03"
         },
         {
-          "label": "Payment type",
-          "value": "card payment, front desk"
+          "label": "Payment amount",
+          "value": "$40.00"
         },
         {
-          "label": "Date of service",
+          "label": "Service date",
           "value": "2026-09-03"
-        },
-        {
-          "label": "Adjudication posted",
-          "value": "2026-09-19"
-        },
-        {
-          "label": "Remit code",
-          "value": "PR-3 (copay) $40"
         }
       ],
-      "next_step": "Apply the unapplied $40 payment (FD-118204) to the 9/3 99213 copay charge, confirm the statement balance is $0, then release the statement hold.",
+      "next_step": "Apply the unapplied $40.00 payment FD-118204 to the 2026-09-03 charge so the balance reads $0.00, then release the statement hold.",
       "caseId": "unposted-copay",
       "patient": "Sam Castellano, 52",
       "balance": 40,
@@ -337,35 +293,27 @@
       "id": "rec-deceased",
       "kind": "bereavement",
       "amount": 1126,
-      "reason": "Robert Hensley died 2026-10-02, but the EHR still shows him active and four SMS reminders went out 10/09 through 10/30 on a $1,126 Medicare PR-2 coinsurance balance.",
-      "told_patient": "Reminders are stopped, no payment is requested now, staff will call her to discuss the account and her question about responsibility, next business day if closed.",
+      "reason": "Patient Robert Hensley died October 2, 2026, but the EHR still shows him active and four SMS reminders (10/09-10/30) went out after his death on a $1,126.00 PR-2 coinsurance balance.",
+      "told_patient": "Reminders are stopped, no payment is expected now, and billing staff will call her to explain who is responsible for the account.",
       "captured": [
         {
-          "label": "Contact",
+          "label": "Date of death",
+          "value": "October 2"
+        },
+        {
+          "label": "Caller",
           "value": "Carol Hensley, spouse"
         },
         {
-          "label": "Date of death",
-          "value": "2026-10-02"
-        },
-        {
-          "label": "Patient",
-          "value": "Robert Hensley"
-        },
-        {
-          "label": "Balance",
-          "value": "$1,126 (Medicare Part B coinsurance, PR-2)"
+          "label": "Balance (Medicare Part B PR-2)",
+          "value": "$1,126.00"
         },
         {
           "label": "Reminders sent after death",
           "value": "10/09, 10/16, 10/23, 10/30"
-        },
-        {
-          "label": "Hold",
-          "value": "Placed by assistant"
         }
       ],
-      "next_step": "Call Mrs. Hensley to offer condolences and answer her question about responsibility for the balance, and update Robert's EHR status to deceased.",
+      "next_step": "Call Mrs. Hensley with condolences, update Robert's status to deceased, and review the account for estate handling and any secondary coverage before discussing the balance.",
       "caseId": "deceased",
       "patient": "Carol Hensley, spouse of patient Robert Hensley",
       "balance": 1126,
@@ -403,16 +351,12 @@
       "id": "rec-preventive",
       "kind": "charge_review",
       "amount": 35,
-      "reason": "Patient disputes the correct $35 PR-3 copay on 99213-25, billed same day as her covered preventive visit after a knee exam, x-ray order and prescription; she says she wasn't told.",
-      "told_patient": "A hold is on her account so no statements or reminders go out, she shouldn't pay the $35 yet, and billing staff will follow up after review.",
+      "reason": "Patient disputes the $35 PR-3 copay on same-day 99213-25; the charge is correct as billed (knee exam, x-ray ordered, NSAID prescribed) but she says no one told her it would be billed separately.",
+      "told_patient": "Account is on hold with no statements or reminders, she should not pay the $35 for now, and billing staff will follow up after reviewing the visit.",
       "captured": [
         {
-          "label": "Date of service",
-          "value": "2026-09-10"
-        },
-        {
-          "label": "Disputed CPT",
-          "value": "99213-25"
+          "label": "Disputed service",
+          "value": "99213-25 problem-oriented visit, DOS 2026-09-10"
         },
         {
           "label": "Denial/adjustment code",
@@ -423,11 +367,11 @@
           "value": "Blue Shield PPO"
         },
         {
-          "label": "Patient's stated reason",
-          "value": "Not told that mentioning her knee would be billed as a separate visit"
+          "label": "Preventive visit 99396",
+          "value": "Paid 100%, patient owes $0.00"
         }
       ],
-      "next_step": "Review the 99213-25 charge and visit note against her complaint, decide whether to uphold or adjust the $35, and call her with the outcome.",
+      "next_step": "Review the visit documentation and decide whether to uphold or adjust the $35.00 copay, then call Renee Thompson with the outcome and release the hold.",
       "caseId": "preventive",
       "patient": "Renee Thompson, 55",
       "balance": 35,
@@ -462,15 +406,15 @@
       "id": "rec-work-injury",
       "kind": "rebill_liability",
       "amount": 742,
-      "reason": "Cigna denied the 2026-09-25 visit with CARC CO-19 as work-related and workers' compensation liability; the intake form lists Dalton Freight and the patient supplied the carrier and claim number.",
-      "told_patient": "He owes nothing now, should not pay, the account is on hold so statements stop, and staff will bill Liberty Mutual directly next business day.",
+      "reason": "Cigna denied the 2026-09-25 visit with CARC CO-19 as a work-related injury that is the workers' compensation carrier's liability; the account still shows the full balance.",
+      "told_patient": "The assistant told him not to pay anything, that statements and reminders are on hold, and that staff will bill Liberty Mutual directly.",
       "captured": [
         {
           "label": "Workers' comp carrier",
           "value": "Liberty Mutual"
         },
         {
-          "label": "Workers' comp claim number",
+          "label": "Claim number",
           "value": "WC-2291-447"
         },
         {
@@ -480,13 +424,9 @@
         {
           "label": "Date of service",
           "value": "2026-09-25"
-        },
-        {
-          "label": "Denial",
-          "value": "Cigna PPO, CARC CO-19, $742"
         }
       ],
-      "next_step": "Bill Liberty Mutual under claim WC-2291-447 for the 2026-09-25 visit, then release the account hold once the claim is accepted.",
+      "next_step": "Bill Liberty Mutual under claim WC-2291-447 for the $742.00 visit and keep the patient hold until they pay or deny.",
       "caseId": "work-injury",
       "patient": "Luis Herrera, 44",
       "balance": 742,
@@ -525,35 +465,27 @@
       "id": "rec-timely-filing",
       "kind": "write_off",
       "amount": 318,
-      "reason": "Aetna denied the claim CO-29 because it was first filed 2026-07-21, 168 days after the 2026-02-03 service against a 90-day limit; the practice's late filing makes the $318 non-billable to the patient.",
-      "told_patient": "She does not owe the $318, no payment was taken, a hold stops statements and reminders, and staff will correct the balance and write it off.",
+      "reason": "Aetna denied the claim CO-29 (filing limit expired); it was first submitted 2026-07-21, 168 days after the 2026-02-03 service against a 90-day limit, so the balance is the practice's error.",
+      "told_patient": "She does not owe the $318, no payment will be taken, statements and reminders are held, and staff will correct the balance and write it off.",
       "captured": [
         {
           "label": "Date of service",
           "value": "2026-02-03"
         },
         {
-          "label": "First submission date",
+          "label": "First submitted",
           "value": "2026-07-21"
         },
         {
-          "label": "Days to file",
-          "value": "168 (payer limit 90)"
-        },
-        {
-          "label": "Denial code",
-          "value": "CO-29"
+          "label": "Denial",
+          "value": "CO-29, $318.00"
         },
         {
           "label": "Payer",
           "value": "Aetna Open Access"
-        },
-        {
-          "label": "Statement balance",
-          "value": "$318"
         }
       ],
-      "next_step": "Write off the $318 as a timely-filing adjustment, zero the patient balance, then release the account hold.",
+      "next_step": "Write off the $318.00 as a timely-filing adjustment, zero her patient balance, and release the statement hold.",
       "caseId": "timely-filing",
       "patient": "Angela Brooks, 60",
       "balance": 318,

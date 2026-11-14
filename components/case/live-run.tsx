@@ -35,7 +35,7 @@ export function LiveRun({ caseId, defaultView }: { caseId: string; defaultView: 
   return (
     <div>
       <div className="flex flex-wrap items-center gap-3">
-        <Segmented label="What the agent sees" value={view} onChange={setView} options={VIEW_OPTIONS} disabled={busy} />
+        <Segmented label="What the assistant sees" value={view} onChange={setView} options={VIEW_OPTIONS} disabled={busy} />
         <span className="text-[13.5px] text-ink-2">Applies to the next run.</span>
       </div>
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
@@ -49,7 +49,7 @@ export function LiveRun({ caseId, defaultView }: { caseId: string; defaultView: 
                 </Button>
                 {s.status === "loading" && (
                   <span className="text-[13.5px] text-ink-2" aria-live="polite">
-                    Two agent replies and a grade. Usually 10 to 30 seconds.
+                    Two replies and a grade. Usually 10 to 30 seconds.
                   </span>
                 )}
               </div>
@@ -63,7 +63,7 @@ export function LiveRun({ caseId, defaultView }: { caseId: string; defaultView: 
                     <span className="text-[13px] text-ink-2">Run at {s.at}. Not saved.</span>
                   </div>
                   <div className="flex flex-col gap-4 p-4">
-                    <Transcript turns={s.trial.transcript} agentLabel={`Agent ${v}`} />
+                    <Transcript turns={s.trial.transcript} agentLabel={`Assistant ${v}`} />
                     <VerdictBlock verdict={s.trial.verdict} />
                   </div>
                 </Panel>

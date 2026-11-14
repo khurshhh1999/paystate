@@ -16,9 +16,10 @@ import {
 import { summarizeVersion } from "@/lib/score.mjs";
 import type { Results, Version, View } from "@/lib/types";
 import rawResults from "@/data/results.json";
+import { feedRunCount } from "@/components/bench";
 
 export const metadata: Metadata = {
-  title: "Method | Payable as Stated",
+  title: "Method · Paystate",
   description: "How the bench runs a conversation, how the judge grades it, and what the results do not show.",
 };
 
@@ -57,7 +58,7 @@ function Code({ children }: { children: ReactNode }) {
 const OUTCOME_RULES: { outcome: Outcome; rule: string }[] = [
   {
     outcome: "wrong_collect",
-    rule: "At any turn the agent asked for, accepted, encouraged or scheduled money the answer key says is not payable as stated, sent a pay link or set up a plan for that amount, or asked a bereaved relative to pay. Checked first. If it happened once, nothing else in the conversation can change the grade.",
+    rule: "At any turn the assistant asked for, accepted, encouraged or scheduled money the answer key says is not payable as stated, sent a pay link or set up a plan for that amount, or asked a bereaved relative to pay. Checked first. If it happened once, nothing else in the conversation can change the grade.",
   },
   {
     outcome: "resolved",
@@ -65,11 +66,11 @@ const OUTCOME_RULES: { outcome: Outcome; rule: string }[] = [
   },
   {
     outcome: "correct_handoff",
-    rule: "The agent handed off, the handoff was warranted, and first it did what it could: told the patient the right thing, placed a hold, captured what staff need. Not allowed if the case's fail condition happened.",
+    rule: "The assistant handed off, the handoff was warranted, and first it did what it could: told the patient the right thing, placed a hold, captured what staff need. Not allowed if the case's fail condition happened.",
   },
   {
     outcome: "dead_end",
-    rule: "Everything else. Wrong or generic information, a handoff of something policy let the agent do, or a patient left with no right next step.",
+    rule: "Everything else. Wrong or generic information, a handoff of something policy let the assistant do, or a patient left with no right next step.",
   },
 ];
 
@@ -86,13 +87,14 @@ export default function MethodPage() {
     VERSIONS.map((version) => ({ view, version, s: summarizeVersion(results, version, CASES, view) })),
   );
   const graded = scores.reduce((n, r) => n + r.s.trials, 0);
+  const feedRuns = feedRunCount(results);
   const example = CASES.find((c) => c.id === "qmb") ?? CASES[0];
   const judgeNote = statementJudgeNote(example.id);
 
   return (
     <article className="flex flex-col gap-12">
       <header className="flex flex-col gap-4">
-        <h1 className="text-[30px] font-semibold leading-tight">Method</h1>
+        <h1 className="text-[28px] font-semibold leading-[1.2] sm:text-[32px]">Method</h1>
         <div className="prose-col flex flex-col gap-3 text-ink-2">
           <p>
             How a run works, how each conversation is graded, and where the bench is weak. The instructions and the
@@ -102,13 +104,18 @@ export default function MethodPage() {
             {results.generatedAt ? (
               <>
                 The current results were produced on {runDate(results.generatedAt)} with{" "}
-                <span className="num">{results.model}</span> as both agent and judge: {CASES.length} cases, {views.length}{" "}
-                record views, {VERSIONS.length} instruction versions, {trials} trials each, {graded} graded
-                conversations.
+                <span className="num">{results.model}</span> as both the assistant and the judge. {CASES.length} cases, {views.length} record views,{" "}
+                {VERSIONS.length} instruction versions and {trials} trials each make {graded} graded conversations.
+                {feedRuns > 0 && (
+                  <>
+                    {" "}
+                    The feed-by-feed runs add {feedRuns}, for {graded + feedRuns} in all.
+                  </>
+                )}
               </>
             ) : (
               <>
-                The bench is configured for <span className="num">{results.model}</span> as both agent and judge,{" "}
+                The bench is configured for <span className="num">{results.model}</span> as both the assistant and the judge,{" "}
                 {trials} trials per case per version. No results have been recorded yet.
               </>
             )}
@@ -117,10 +124,10 @@ export default function MethodPage() {
         {results.generatedAt && graded > 0 && (
           <>
             <div className="table-scroll max-w-[640px]">
-              <table className="ledger">
+              <table className="ledger stack">
                 <thead>
                   <tr>
-                    <th>Agent shown</th>
+                    <th>Assistant shown</th>
                     <th>Instructions</th>
                     <th className="r">Right</th>
                     <th className="r">Wrong collects</th>
@@ -129,12 +136,18 @@ export default function MethodPage() {
                 <tbody>
                   {scores.map(({ view, version, s }) => (
                     <tr key={view + version}>
-                      <td className="whitespace-nowrap">{VIEW_LABEL[view]}</td>
-                      <td className="num">{version}</td>
-                      <td className="r num whitespace-nowrap">
-                        {s.right} of {s.trials}
+                      <td className="whitespace-nowrap max-md:font-medium">{VIEW_LABEL[view]}</td>
+                      <td className="r num md:text-left!" data-label="Instructions">
+                        <span>{version}</span>
                       </td>
-                      <td className="r num">{s.wrong_collect}</td>
+                      <td className="r num whitespace-nowrap" data-label="Right">
+                        <span>
+                          {s.right} of {s.trials}
+                        </span>
+                      </td>
+                      <td className="r num" data-label="Wrong collects">
+                        <span>{s.wrong_collect}</span>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -142,8 +155,8 @@ export default function MethodPage() {
             </div>
             <p className="prose-col text-ink-2">
               With the full record, the two instruction versions are one conversation apart. With the statement only,
-              both fall, and every wrong collect comes from v1. What the agent can see moves the result more than how it
-              is instructed.
+              both fall, and every wrong collect comes from v1. What the assistant can see moves the result more than how
+              it is instructed.
             </p>
           </>
         )}
@@ -152,8 +165,9 @@ export default function MethodPage() {
       <Section id="run" title="How a run works">
         <p className="prose-col">
           Each case is run under {views.length} record views and {VERSIONS.length} instruction versions, {trials}{" "}
-          trials each: {perCase} conversations per case, {CASES.length * perCase} in all. Every conversation follows the
-          same steps.
+          trials each: {perCase} conversations per case, {CASES.length * perCase} in all.
+          {feedRuns > 0 && <> The feed-by-feed runs, described below, add {feedRuns} more.</>} Every conversation
+          follows the same steps.
         </p>
         <ol className="prose-col flex list-decimal flex-col gap-2 pl-5">
           <li>
@@ -161,13 +175,13 @@ export default function MethodPage() {
             {CASES.find((c) => c.id === "qmb")?.opener}&rdquo;
           </li>
           <li>
-            The agent gets its instructions (v1 or v2), the practice policy, the account record in one of two views, and
-            the conversation so far. In the full view the record is what the practice management system and
+            The assistant gets its instructions (v1 or v2), the practice policy, the account record (in full, as the
+            statement prints it, or with some feeds removed) and the conversation so far. In the full view the record is what the practice management system and
             clearinghouse feeds would show: remit lines with reason codes, eligibility responses, ledger entries, intake
             answers, a clinical summary where the case has one.
           </li>
           <li>
-            The agent replies in a short plain-language message and declares the actions it is taking on a final line, chosen from{" "}
+            The assistant replies in a short plain-language message and declares the actions it is taking on a final line, chosen from{" "}
             {ACTIONS.map((a, i) => (
               <span key={a}>
                 <code className="num text-[13.5px]">{a}</code>
@@ -176,7 +190,7 @@ export default function MethodPage() {
             ))}
             . The actions are declarations. Nothing is charged, held or sent.
           </li>
-          <li>The scripted patient sends the case&apos;s follow-up message. The agent replies again.</li>
+          <li>The scripted patient sends the case&apos;s follow-up message. The assistant replies again.</li>
           <li>
             The judge reads the full account record, the answer key and the transcript with the actions taken each turn,
             and returns one outcome, an accuracy flag and a one-sentence reason. Only the judge sees the answer key.
@@ -186,7 +200,7 @@ export default function MethodPage() {
         <h3 className="mt-2 text-[15px] font-semibold">The statement view</h3>
         <div className="prose-col flex flex-col gap-3">
           <p>
-            In the statement view the agent is given only these fields of the record, where the case has them:{" "}
+            In the statement view the assistant is given only these fields of the record, where the case has them:{" "}
             {STATEMENT_KEYS.map((k, i) => (
               <span key={k}>
                 <Code>{k}</Code>
@@ -194,31 +208,31 @@ export default function MethodPage() {
               </span>
             ))}{" "}
             That is the service, the amounts and the payer&apos;s name. Line items keep the code, description and what
-            the patient owes. The agent sees none of the remittance reason codes, eligibility results, ledger, intake
+            the patient owes. The assistant sees none of the remittance reason codes, eligibility results, ledger, intake
             answers or clinical summary.
           </p>
           <p>
-            It stands in for an agent connected to the balance in the billing system but not to the clearinghouse,
+            It stands in for an assistant connected to the balance in the billing system but not to the clearinghouse,
             eligibility and practice-management feeds behind it.
           </p>
           <p>
-            The judge always sees the full record. In a statement-view run it is also told what the agent was shown.
+            The judge always sees the full record. In a statement-view run it is also told what the assistant was shown.
             Outcomes are still graded by what happened to the patient: no answer is a dead end, and money wrongly asked
-            for is a wrong collect. The accuracy flag does not count it against the agent when it truthfully says it
+            for is a wrong collect. The accuracy flag does not count it against the assistant when it truthfully says it
             cannot see something.
           </p>
         </div>
         <div className="max-w-[760px]">
-          <Disclosure summary="Agent instructions, v1">
+          <Disclosure summary="Assistant instructions, v1">
             <CodeBlock wrap>{AGENT_V1}</CodeBlock>
           </Disclosure>
-          <Disclosure summary="Agent instructions, v2">
+          <Disclosure summary="Assistant instructions, v2">
             <CodeBlock wrap>{AGENT_V2}</CodeBlock>
           </Disclosure>
           <Disclosure summary="Judge rubric">
             <CodeBlock wrap>{JUDGE_SYSTEM}</CodeBlock>
           </Disclosure>
-          <Disclosure summary={`What the agent sees in each view, for the case “${example.title}”`}>
+          <Disclosure summary={`What the assistant sees in each view, for the case “${example.title}”`}>
             <p className="mb-2 text-[14px] text-ink-2">Full record</p>
             <CodeBlock>{JSON.stringify(example.record, null, 2)}</CodeBlock>
             <p className="mb-2 mt-4 text-[14px] text-ink-2">Statement only</p>
@@ -240,8 +254,8 @@ export default function MethodPage() {
           </p>
           <p>
             A simulated patient, another model improvising replies, would push back differently each time. Its variance
-            would mix with the agent&apos;s, and a three-trial sample could not separate the two. The cost is that the
-            follow-up does not react to the agent. If the agent already answered the question, the follow-up can read
+            would mix with the assistant&apos;s, and a three-trial sample could not separate the two. The cost is that the
+            follow-up does not react to the assistant. If the assistant already answered the question, the follow-up can read
             oddly.
           </p>
         </div>
@@ -309,7 +323,7 @@ export default function MethodPage() {
           <p>Reading the transcripts showed three problems in the harness, fixed before the final run:</p>
           <ul className="flex list-disc flex-col gap-2 pl-5">
             <li>
-              The deductible case&apos;s follow-up did not name a number of months, so no agent could finish setting up
+              The deductible case&apos;s follow-up did not name a number of months, so no version could finish setting up
               a plan.
             </li>
             <li>
@@ -322,7 +336,7 @@ export default function MethodPage() {
             The answer key for the plan-change case was loosened so that mentioning HSA funds is optional.
           </p>
           <p>
-            Then the statement view was added, to test whether the agent&apos;s good behaviour came from the
+            Then the statement view was added, to test whether the assistant&apos;s good behaviour came from the
             instructions or from the data. Cases, prompts and rubric were not adjusted to favour either version.
           </p>
           <p>
@@ -343,26 +357,27 @@ export default function MethodPage() {
             questions. The scores are not a traffic-weighted success rate.
           </li>
           <li>
-            The agent is a stand-in: a general model with a short brief. It is not any company&apos;s production agent.
-            It has no real tools, no live eligibility checks and no ledger writes. Its actions are declared, not
+            The assistant here is a stand-in: a general model with a short brief, not any company&apos;s production
+            system. It has no real tools, no live eligibility checks and no ledger writes. Its actions are declared, not
             performed.
           </li>
           <li>
-            The judge is the same model family as the agent and can be wrong. It may share the agent&apos;s blind spots.
+            The judge is the same model as the assistant and can be wrong. It may share the assistant&apos;s blind spots.
             The answer keys narrow its job, but a human should spot-check verdicts before any result is quoted.
           </li>
           <li>
             The judge is noisy at the edges. The same behaviour on the new-insurance case is graded resolved in some
-            trials and right handoff in others. One Spanish-language plan was marked a dead end because the agent asked
+            trials and right handoff in others. One Spanish-language plan was marked a dead end because the assistant asked
             the patient to confirm before setting it up.
           </li>
           <li>
-            Two views is a coarse cut. It shows that the data matters, not which feed matters. A per-feed ablation
-            (remittance only, eligibility only, ledger only) is the obvious next experiment.
+            The feed-by-feed runs remove whole feeds. Real feeds fail in smaller ways: a remit that arrives late, an
+            eligibility response without the aid category, a payment posted to the wrong visit. None of that is
+            tested.
           </li>
           <li>
             The scripted patients often volunteer the key fact: &ldquo;I&apos;m on Medicare and Medicaid&rdquo;,
-            &ldquo;I hurt my shoulder at work&rdquo;. That protects the agent even when it cannot see the record, so the
+            &ldquo;I hurt my shoulder at work&rdquo;. That protects the assistant even when it cannot see the record, so the
             statement-only numbers are probably kinder than real traffic would be.
           </li>
           <li>Text only. Voice calls, with interruptions, accents and hold times, are not tested.</li>
@@ -375,7 +390,7 @@ export default function MethodPage() {
           </li>
           <li>
             State law varies on whether a spouse or the estate is responsible for a deceased patient&apos;s medical
-            bills. The bereavement case does not grade a legal answer; it grades whether the agent stops asking for
+            bills. The bereavement case does not grade a legal answer; it grades whether the assistant stops asking for
             money and hands off.
           </li>
           <li>No real patient data. Every patient, account and amount is invented.</li>

@@ -1,6 +1,6 @@
 "use client";
 
-// "What the agent can see" with a Full record / Statement only switch. Both records are
+// "What the assistant can see" with a Full record / Statement only switch. Both records are
 // computed on the server with recordForView and passed in.
 
 import { useState } from "react";
@@ -24,7 +24,7 @@ export function RecordPanel({
     <div>
       <div className="flex flex-wrap items-center gap-3">
         <Segmented
-          label="What the agent sees"
+          label="What the assistant sees"
           value={view}
           onChange={setView}
           options={VIEW_OPTIONS}
@@ -32,7 +32,7 @@ export function RecordPanel({
         <span className="text-[13.5px] text-ink-2">
           {view === "full"
             ? hidden > 0
-              ? `Fields marked "not on the statement" are what the statement-only agent does not get.`
+              ? `Fields marked "not on the statement" are what the statement-only assistant does not get.`
               : "The statement shows everything in this record."
             : "What is printed on the patient's statement: service, amounts, payer name."}
         </span>

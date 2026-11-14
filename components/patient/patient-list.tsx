@@ -28,10 +28,12 @@ export function PatientList({
         >
           {cases.map((c) => (
             <option key={c.id} value={c.id}>
-              {patientName(c)}, {money(c.balance)}: {SITUATION[c.id]}
+              {patientName(c)}, {money(c.balance)}
             </option>
           ))}
         </select>
+        {/* The closed select is too narrow for the description, so it sits underneath. */}
+        <p className="text-[13.5px] leading-snug text-ink-2">{SITUATION[selected]}</p>
       </div>
 
       <nav aria-label="Patients" className="hidden lg:block">
@@ -51,7 +53,7 @@ export function PatientList({
                 >
                   <span className="flex items-baseline justify-between gap-2">
                     <span className="font-medium">{patientName(c)}</span>
-                    <span className="num text-[13px]">{money(c.balance)}</span>
+                    <span className={"num text-[13px] " + (on ? "" : "text-ink-2")}>{money(c.balance)}</span>
                   </span>
                   <span className="mt-0.5 block text-[13px] leading-snug text-ink-2">{SITUATION[c.id]}</span>
                 </button>

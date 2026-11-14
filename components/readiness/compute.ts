@@ -60,10 +60,14 @@ function happensFor(trials: Trial[]): string {
   if (trials.length === 0) return "Not run yet";
   const o = trials.map((t) => t.verdict.outcome);
   if (o.includes("wrong_collect")) return "Takes money that is not owed";
-  if (o.every((x) => x === "resolved")) return "Answered without staff";
-  if (o.every(isRight)) return "Handed to staff with the right answer";
-  if (o.every((x) => x === "dead_end")) return "Patient left without an answer";
-  return "Depends on the run";
+  // A resolved run can still pass a follow-up to staff (updating insurance on file, say).
+  if (o.every((x) => x === "resolved"))
+    return trials.some(endsWithStaff) ? "Answered, with a follow-up for staff" : "Answered without staff";
+  if (o.every((x) => x === "correct_handoff")) return "Handed to staff with the right answer";
+  if (o.every(isRight)) return "Right every time, some runs via staff";
+  // Most dead ends hand off too, so "left without an answer" would be wrong.
+  if (o.every((x) => x === "dead_end")) return "No usable answer in any run";
+  return "Right in some runs, not others";
 }
 
 // Show the worst thing that happened: a wrong collect, else a dead end, else the first run.

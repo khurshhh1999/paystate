@@ -9,7 +9,7 @@ import { outreach } from "@/lib/outreach/types";
 import type { TriggerId } from "@/lib/outreach/types";
 
 export const metadata: Metadata = {
-  title: "Statement gate | Payable as Stated",
+  title: "Statement gate · Paystate",
   description:
     "A pre-statement check that holds bills which should not go out as written and sends a correction, or nothing, instead.",
 };
@@ -47,10 +47,10 @@ export default function OutreachPage() {
   return (
     <article className="flex flex-col gap-12">
       <header className="flex flex-col gap-4">
-        <h1 className="text-[30px] font-semibold leading-tight">Statement gate</h1>
+        <h1 className="text-[28px] font-semibold leading-[1.2] sm:text-[32px]">Statement gate</h1>
         <div className="prose-col flex flex-col gap-3 text-ink-2">
           <p>
-            Every bench case where the agent should not have asked for money was visible in the data before the
+            Every bench case where the assistant should not have asked for money was visible in the data before the
             patient wrote in. The CO denial is on the remit. The QMB category is on the eligibility response. The
             unapplied payment is on the ledger.
           </p>
@@ -63,8 +63,8 @@ export default function OutreachPage() {
 
       <section className="flex flex-col gap-4">
         <p className="prose-col text-[17px] leading-[1.5]">
-          Of <span className="num">{n(panel.accounts)}</span> synthetic open balances,{" "}
-          <span className="num">{n(union.caught)}</span> tripped at least one rule. They carry{" "}
+          Of <span className="fig">{n(panel.accounts)}</span> synthetic open balances,{" "}
+          <span className="fig">{n(union.caught)}</span> tripped at least one rule. They carry{" "}
           <Money value={union.statementDollars} /> on statements that should not go out as written, of which{" "}
           <Money value={union.inQuestionDollars} /> is not owed as stated.
         </p>
@@ -72,7 +72,7 @@ export default function OutreachPage() {
           The panel is synthetic and the incidence rates are assumptions, not measured rates:{" "}
           {triggers.map((t, i) => (
             <span key={t.id}>
-              rule {t.number} <span className="num">{pct(t.assumedRate)}</span>
+              rule {t.number} <span className="fig">{pct(t.assumedRate)}</span>
               {i < triggers.length - 1 ? ", " : "."}
             </span>
           ))}{" "}
@@ -127,7 +127,7 @@ export default function OutreachPage() {
         </div>
 
         <p className="prose-col text-[14px] text-ink-2">
-          The panel also holds <span className="num">{n(nearMissTotal)}</span> near misses: accounts that look like
+          The panel also holds <span className="fig">{n(nearMissTotal)}</span> near misses: accounts that look like
           a trigger but are payable, such as a CO denial already written off or a Medicare patient whose Medicaid
           category is SLMB, which does not carry the QMB billing protection.{" "}
           {allChecksClean
@@ -183,7 +183,7 @@ export default function OutreachPage() {
         </p>
       </section>
 
-      <div className="flex flex-col gap-14">
+      <div className="flex flex-col gap-12">
         {triggers.map((t) => (
           <TriggerSection key={t.id} t={t} play={PLAYBOOK[t.id]} />
         ))}

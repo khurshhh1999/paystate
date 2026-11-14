@@ -19,15 +19,24 @@ function plural(n: number, one: string, many: string) {
   return `${n} ${n === 1 ? one : many}`;
 }
 
-function suggestionText(s: Suggestion): string {
-  if (!s.ran) return "not run yet";
-  if (s.moreRight === 0 && s.fewerWrong === 0) return "no change for these twelve questions";
+// Three runs per question: a swing of one or two conversations is run-to-run noise.
+// Any change in wrong collects is reported as is, since each one is money taken that is not owed.
+const NOISE = 2;
+
+function suggestionText(s: Suggestion): { text: string; clear: boolean } {
+  if (!s.ran) return { text: "not run yet", clear: false };
   const parts: string[] = [];
-  if (s.moreRight > 0) parts.push(`${plural(s.moreRight, "more conversation", "more conversations")} right`);
-  if (s.moreRight < 0) parts.push(`${plural(-s.moreRight, "fewer conversation", "fewer conversations")} right`);
+  const smallRight = Math.abs(s.moreRight) <= NOISE;
+  if (s.moreRight > NOISE) parts.push(`${plural(s.moreRight, "more conversation", "more conversations")} right`);
+  if (s.moreRight < -NOISE) parts.push(`${plural(-s.moreRight, "fewer conversation", "fewer conversations")} right`);
   if (s.fewerWrong > 0) parts.push(plural(s.fewerWrong, "fewer wrong collect", "fewer wrong collects"));
   if (s.fewerWrong < 0) parts.push(plural(-s.fewerWrong, "more wrong collect", "more wrong collects"));
-  return parts.join(", ");
+  if (parts.length > 0) {
+    if (smallRight && s.moreRight !== 0) parts.push(`${s.moreRight > 0 ? "+" : "−"}${Math.abs(s.moreRight)} right, within noise`);
+    return { text: parts.join(", "), clear: true };
+  }
+  if (s.moreRight === 0) return { text: "no change", clear: false };
+  return { text: `no clear change (${s.moreRight > 0 ? "+" : "−"}${Math.abs(s.moreRight)} right, within noise)`, clear: false };
 }
 
 function Toggle({
@@ -36,7 +45,6 @@ function Toggle({
   standard,
   description,
   checked,
-  disabled = false,
   onChange,
 }: {
   id: string;
@@ -44,7 +52,6 @@ function Toggle({
   standard?: string;
   description: string;
   checked: boolean;
-  disabled?: boolean;
   onChange?: (on: boolean) => void;
 }) {
   return (
@@ -53,13 +60,12 @@ function Toggle({
         id={id}
         type="checkbox"
         checked={checked}
-        disabled={disabled}
         onChange={(e) => onChange?.(e.target.checked)}
         aria-describedby={`${id}-desc`}
-        className="mt-1 size-4 shrink-0 accent-accent disabled:opacity-60"
+        className="mt-1 size-4 shrink-0 accent-accent"
       />
       <div className="min-w-0">
-        <label htmlFor={id} className={"font-medium " + (disabled ? "text-ink-2" : "text-ink")}>
+        <label htmlFor={id} className="font-medium text-ink">
           {label}
           {standard && <span className="num ml-2 text-[13px] font-normal text-ink-3">{standard}</span>}
         </label>
@@ -90,45 +96,62 @@ export function GoLiveCheck() {
     };
   }, [connected, version]);
 
+  const allConnected = connected.length === FEED_IDS.length;
+
   return (
     <div className="mt-8 flex flex-col gap-10">
+      {/* Controls on the left, their result on the right on desktop, so a tick visibly changes something. */}
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-12">
       <section aria-labelledby="feeds-h">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 id="feeds-h" className="text-[20px] font-semibold">
             Connected feeds
           </h2>
           <div className="flex gap-2">
-            <Button variant="quiet" type="button" onClick={() => setConnected([])} className="h-8 text-[13.5px]">
+            <Button
+              variant="quiet"
+              type="button"
+              onClick={() => setConnected([])}
+              disabled={connected.length === 0}
+              className="h-8 text-[13.5px]"
+            >
               Balance only
             </Button>
-            <Button variant="quiet" type="button" onClick={() => setConnected([...FEED_IDS])} className="h-8 text-[13.5px]">
+            <Button
+              variant="quiet"
+              type="button"
+              onClick={() => setConnected([...FEED_IDS])}
+              disabled={allConnected}
+              className="h-8 text-[13.5px]"
+            >
               Everything
             </Button>
           </div>
         </div>
-        <div className="mt-2 divide-y divide-rule border-y border-rule">
-          <Toggle
-            id="feed-statement"
-            label="Statement balance"
-            description="Always there: the service, the amounts and the payer's name."
-            checked
-            disabled
-          />
-          <div className="grid divide-y divide-rule sm:grid-cols-2 sm:gap-x-8 sm:divide-y-0">
-            {FEEDS.map((f) => (
-              <Toggle
-                key={f.id}
-                id={`feed-${f.id}`}
-                label={f.label}
-                standard={f.standard}
-                description={f.carries}
-                checked={connected.includes(f.id)}
-                onChange={(on) => setFeed(f.id, on)}
-              />
-            ))}
+        <div className="mt-2 divide-y divide-rule border-t border-rule">
+          {/* Not a control: every practice sends the statement, so it is shown as a fixed row. */}
+          <div className="flex items-baseline justify-between gap-4 py-3 pl-7">
+            <div className="min-w-0">
+              <p className="font-medium text-ink">Statement balance</p>
+              <p className="text-[13.5px] text-ink-2">
+                Every practice sends this: the service, the amounts billed and paid, and the payer&apos;s name.
+              </p>
+            </div>
+            <span className="shrink-0 text-[13px] text-ink-3">Always on</span>
           </div>
+          {FEEDS.map((f) => (
+            <Toggle
+              key={f.id}
+              id={`feed-${f.id}`}
+              label={f.label}
+              standard={f.standard}
+              description={f.carries}
+              checked={connected.includes(f.id)}
+              onChange={(on) => setFeed(f.id, on)}
+            />
+          ))}
         </div>
-        <div className="mt-6 border-t border-rule-strong pt-1">
+        <div className="border-y border-rule-strong">
           <Toggle
             id="payable-check"
             label="Check the balance is owed before taking money"
@@ -139,37 +162,54 @@ export function GoLiveCheck() {
         </div>
       </section>
 
-      <section aria-labelledby="result-h">
-        <h2 id="result-h" className="text-[20px] font-semibold">
-          With this setting
-        </h2>
-        <div className="mt-3">
-          <ReadinessSummary s={summary} staffWithAll={staffWithAll} />
-        </div>
-      </section>
+      <div className="flex flex-col gap-10">
+        <section aria-labelledby="result-h">
+          <h2 id="result-h" className="text-[20px] font-semibold">
+            With this setting
+          </h2>
+          <div className="mt-3">
+            <ReadinessSummary s={summary} staffWithAll={staffWithAll} allConnected={allConnected} />
+          </div>
+        </section>
 
-      <section aria-labelledby="next-h">
-        <h2 id="next-h" className="text-[20px] font-semibold">
-          Connect next
-        </h2>
-        {next.length === 0 ? (
-          <p className="mt-2 text-ink-2">Everything is connected.</p>
-        ) : (
-          <ol className="mt-2 divide-y divide-rule border-y border-rule" aria-live="polite">
-            {next.map((s) => (
-              <li key={s.feed} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-2.5">
-                <p className="min-w-0 text-[14.5px]">
-                  <span className="font-medium">{FEED_LABEL[s.feed]}</span>
-                  <span className={s.ran ? "text-ink" : "text-ink-3"}>: {suggestionText(s)}</span>
-                </p>
-                <Button variant="quiet" type="button" onClick={() => setFeed(s.feed, true)} className="h-8 text-[13.5px]">
-                  Connect
-                </Button>
-              </li>
-            ))}
-          </ol>
-        )}
-      </section>
+        <section aria-labelledby="next-h">
+          <h2 id="next-h" className="text-[20px] font-semibold">
+            Connect next
+          </h2>
+          {next.length === 0 ? (
+            <p className="mt-2 text-ink-2">Everything is connected.</p>
+          ) : (
+            <>
+              <p className="mt-1 text-[13.5px] text-ink-2">
+                What adding one feed changes across the {summary.trials} conversations. Each question ran three times,
+                so a change of one or two conversations is noise.
+              </p>
+              <ol className="mt-2 divide-y divide-rule border-y border-rule" aria-live="polite">
+                {next.map((s) => {
+                  const { text, clear } = suggestionText(s);
+                  return (
+                    <li key={s.feed} className="flex items-baseline justify-between gap-4 py-2.5">
+                      <p className="min-w-0 text-[14.5px]">
+                        <span className="font-medium">{FEED_LABEL[s.feed]}</span>
+                        <span className={clear ? "text-ink" : "text-ink-3"}>: {text}</span>
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setFeed(s.feed, true)}
+                        aria-label={`Connect ${FEED_LABEL[s.feed]}`}
+                        className="shrink-0 text-[13.5px] text-accent underline-offset-2 hover:underline"
+                      >
+                        Connect
+                      </button>
+                    </li>
+                  );
+                })}
+              </ol>
+            </>
+          )}
+        </section>
+      </div>
+      </div>
 
       <section aria-labelledby="table-h">
         <h2 id="table-h" className="text-[20px] font-semibold">
@@ -182,8 +222,8 @@ export function GoLiveCheck() {
       </section>
 
       <p className="prose-col text-[13.5px] text-ink-2">
-        These are twelve questions chosen because they are hard, three runs each. They are not weighted by how often
-        patients ask them, so read the table as a list of what breaks, not as a forecast of volume.{" "}
+        These twelve questions were chosen because they are hard, and each ran three times. They are not weighted by
+        how often patients ask them, so the table shows what breaks. It does not forecast volume.{" "}
         <Link href="/evidence/method" className="text-accent underline underline-offset-2">
           How the runs work
         </Link>

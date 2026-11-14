@@ -24,7 +24,11 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const kase = getCase(id);
-  return { title: kase ? `${kase.title} · Payable as Stated` : "Case not found · Payable as Stated" };
+  if (!kase) return { title: "Case not found · Paystate" };
+  return {
+    title: `${kase.title} · Paystate`,
+    description: "One test case: the account record, what a senior biller would do, and every recorded conversation.",
+  };
 }
 
 function Section({ title, intro, children }: { title: string; intro?: React.ReactNode; children: React.ReactNode }) {
@@ -64,7 +68,7 @@ export default async function CasePage({ params }: Props) {
   return (
     <div>
       <p className="text-[14px]">
-        <Link href="/evidence" className="text-ink-2 underline decoration-rule-strong underline-offset-4 hover:text-ink">
+        <Link href="/evidence#cases" className="text-ink-2 underline decoration-rule-strong underline-offset-4 hover:text-ink">
           All cases
         </Link>
       </p>
@@ -102,8 +106,8 @@ export default async function CasePage({ params }: Props) {
       </header>
 
       <Section
-        title="What the agent can see"
-        intro="The full record is what a practice management system and clearinghouse feed would supply. The statement-only agent gets what the patient's statement prints. Both also get the practice policy, shown under the record."
+        title="What the assistant can see"
+        intro="The full record is what a practice management system and clearinghouse feed would supply. The statement-only assistant gets what the patient's statement prints. Both also get the practice policy, shown under the record."
       >
         <RecordPanel records={records} notes={notes} />
         <details className="mt-3 text-[14px]">
@@ -133,7 +137,7 @@ export default async function CasePage({ params }: Props) {
 
       <Section
         title="Recorded runs"
-        intro={`Each version ran this case ${RESULTS.trials || 3} times with the full record and ${RESULTS.trials || 3} times with the statement only, with the same scripted patient. Pick what the agent saw and a trial to read it.`}
+        intro={`Each version ran this case ${RESULTS.trials || 3} times with the full record and ${RESULTS.trials || 3} times with the statement only, with the same scripted patient. Pick what the assistant saw and a trial to read it.`}
       >
         <RecordedRuns trials={trials} notes={VERSION_NOTE} defaultView={defaultView} />
       </Section>
@@ -147,7 +151,7 @@ export default async function CasePage({ params }: Props) {
 
       <Section
         title="Be the patient"
-        intro="Write the patient's side yourself and see how the agent handles it. Up to five messages, then ask the judge to grade it against the same answer key."
+        intro="Write the patient's side yourself and see how the assistant handles it. Up to five messages, then ask the judge to grade it against the same answer key."
       >
         <BeThePatient caseId={kase.id} opener={kase.opener} defaultView={defaultView} />
       </Section>
@@ -165,7 +169,7 @@ export default async function CasePage({ params }: Props) {
             Next: {next.title}
           </Link>
         ) : (
-          <Link href="/evidence" className="underline decoration-rule-strong underline-offset-4 hover:text-accent">
+          <Link href="/evidence#cases" className="underline decoration-rule-strong underline-offset-4 hover:text-accent">
             Back to all cases
           </Link>
         )}

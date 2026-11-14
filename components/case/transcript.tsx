@@ -4,7 +4,7 @@
 import type { Turn, Verdict } from "@/lib/types";
 import { ActionChip, OutcomeBadge } from "@/components/ui";
 
-export function Transcript({ turns, agentLabel = "Agent" }: { turns: Turn[]; agentLabel?: string }) {
+export function Transcript({ turns, agentLabel = "Assistant" }: { turns: Turn[]; agentLabel?: string }) {
   if (turns.length === 0) {
     return <p className="text-[14px] text-ink-3">No messages.</p>;
   }

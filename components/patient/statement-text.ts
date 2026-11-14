@@ -58,7 +58,7 @@ export const SITUATION: Record<string, string> = {
   "plan-change": "Used to pay $30 for this visit",
   "work-injury": "Hurt his shoulder at work",
   preventive: "Billed after an annual physical",
-  deceased: "Her husband died in October. His reminders come to her phone.",
+  deceased: "Her late husband's reminders still come to her phone",
 };
 
 /** "Angela Brooks, 60" -> "Angela Brooks". The deceased case reads "Carol Hensley". */

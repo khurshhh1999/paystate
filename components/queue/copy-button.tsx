@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export function CopyButton({ value, label }: { value: string; label: string }) {
+export function CopyButton({ value, label, className = "" }: { value: string; label: string; className?: string }) {
   const [state, setState] = useState<"idle" | "copied" | "failed">("idle");
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -26,7 +26,7 @@ export function CopyButton({ value, label }: { value: string; label: string }) {
       type="button"
       onClick={copy}
       aria-label={`Copy ${label}`}
-      className="h-6 shrink-0 rounded border border-rule px-1.5 text-[12px] text-ink-2 hover:bg-sunken hover:text-ink"
+      className={`h-6 shrink-0 rounded border border-rule px-1.5 text-[12px] text-ink-2 hover:bg-sunken hover:text-ink ${className}`}
     >
       <span aria-live="polite">{state === "copied" ? "Copied" : state === "failed" ? "Select and copy" : "Copy"}</span>
     </button>

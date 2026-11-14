@@ -39,7 +39,7 @@ function VersionColumn({ version, note, trials }: { version: Version; note: stri
               ))}
             </span>
           </div>
-          <Transcript turns={trial.transcript} agentLabel={`Agent ${version}`} />
+          <Transcript turns={trial.transcript} agentLabel={`Assistant ${version}`} />
           <VerdictBlock verdict={trial.verdict} />
         </div>
       ) : (
@@ -74,7 +74,7 @@ export function RecordedRuns({
   return (
     <div>
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-        <Segmented label="What the agent saw" value={view} onChange={setView} options={VIEW_OPTIONS} />
+        <Segmented label="What the assistant saw" value={view} onChange={setView} options={VIEW_OPTIONS} />
         <dl className="flex flex-wrap gap-x-5 gap-y-1 text-[13px] text-ink-2">
           {VIEW_OPTIONS.map((o) => (
             <div key={o.value} className="flex items-center gap-2">

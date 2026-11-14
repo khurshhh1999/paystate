@@ -148,7 +148,7 @@ export function PatientDesk() {
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[250px_380px_minmax(0,1fr)] lg:gap-6">
+    <div className="grid gap-8 lg:grid-cols-[236px_420px_minmax(0,1fr)] lg:gap-6">
       <PatientList cases={ORDERED_CASES} selected={kase.id} onSelect={selectCase} />
       <Thread
         key={`${kase.id}-${threadKey}`}

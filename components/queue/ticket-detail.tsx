@@ -23,52 +23,59 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
+function Meta({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex gap-1.5">
+      <dt className="text-ink-2">{label}</dt>
+      <dd className="whitespace-nowrap">{children}</dd>
+    </div>
+  );
+}
+
 export function TicketDetail({ ticket, closure }: { ticket: Ticket; closure: Closure | undefined }) {
   const [showThread, setShowThread] = useState(false);
 
   return (
     <article className="flex flex-col gap-5">
+      {/* Two lines: what it is and when it is due, then who, how much, hold and arrival. */}
       <header>
-        <h2 className="text-[20px] font-semibold">{TICKET_KINDS[ticket.kind]}</h2>
-        <dl className="mt-1.5 flex flex-wrap gap-x-5 gap-y-1 text-[14px]">
-          <div className="flex gap-1.5">
-            <dt className="text-ink-2">Patient</dt>
-            <dd>{patientName(ticket.patient)}</dd>
-          </div>
-          <div className="flex gap-1.5">
-            <dt className="text-ink-2">Statement balance</dt>
-            <dd>
-              <Money value={ticket.balance} />
-            </dd>
-          </div>
-          <div className="flex gap-1.5">
-            <dt className="text-ink-2">In question</dt>
-            <dd>
-              <Money value={ticket.amount} />
-            </dd>
-          </div>
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
+          <h2 className="text-[20px] font-semibold">{TICKET_KINDS[ticket.kind]}</h2>
+          <p className="text-[14px] text-ink-2">
+            Reply due <span className="whitespace-nowrap text-ink">{formatReplyDue(ticket.createdAt)}</span>
+          </p>
+        </div>
+        <dl className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-[14px]">
+          <Meta label="Patient">{patientName(ticket.patient)}</Meta>
+          <Meta label="Statement balance">
+            <Money value={ticket.balance} />
+          </Meta>
+          <Meta label="In question">
+            <Money value={ticket.amount} />
+          </Meta>
+          <Meta label="Hold">
+            <span className={ticket.hold ? "text-ok" : "text-stuck"}>
+              {ticket.hold ? "Statements paused" : "None placed"}
+            </span>
+          </Meta>
+          <Meta label="Arrived">{formatCentral(ticket.createdAt)}</Meta>
         </dl>
-        <p className={"mt-1 text-[14px] " + (ticket.hold ? "text-ok" : "text-stuck")}>
-          {ticket.hold ? "Statements and reminders paused" : "No hold placed"}
-        </p>
-        <p className="mt-2 text-[14px] text-ink-2">
-          Arrived <span className="text-ink">{formatCentral(ticket.createdAt)}</span>
-          <span aria-hidden="true"> · </span>
-          Reply due <span className="text-ink">{formatReplyDue(ticket.createdAt)}</span>
-        </p>
       </header>
 
       <Section title="Next step">
-        <p className="prose-col font-medium">{ticket.next_step}</p>
+        <p className="prose-col border-l-2 border-accent pl-3 text-[16px] font-medium leading-[1.5]">{ticket.next_step}</p>
       </Section>
 
-      <Section title="Why this needs a person">
-        <p className="prose-col">{ticket.reason}</p>
-      </Section>
+      {/* Side by side when the detail column is wide enough to keep each at a readable measure. */}
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2 xl:gap-8">
+        <Section title="Why this needs a person">
+          <p className="prose-col">{ticket.reason}</p>
+        </Section>
 
-      <Section title="Patient was told">
-        <p className="prose-col">{ticket.told_patient}</p>
-      </Section>
+        <Section title="Patient was told">
+          <p className="prose-col">{ticket.told_patient}</p>
+        </Section>
+      </div>
 
       <Section title="Details already collected">
         {ticket.captured.length === 0 ? (
@@ -76,11 +83,19 @@ export function TicketDetail({ ticket, closure }: { ticket: Ticket; closure: Clo
         ) : (
           <dl className="grid grid-cols-1 gap-x-4 text-[14px] sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)]">
             {ticket.captured.map((c, i) => (
-              <div key={i} className="contents">
+              <div key={i} className="group contents">
                 <dt className="pt-2 text-ink-2 sm:border-b sm:border-rule sm:pb-2">{c.label}</dt>
                 <dd className="flex items-start justify-between gap-3 border-b border-rule pb-2 sm:pt-2">
-                  <span className="num min-w-0 break-words text-[13.5px]">{c.value}</span>
-                  <CopyButton value={c.value} label={c.label} />
+                  {/* Figures, dates and codes in mono so they read like the record; words stay in text. */}
+                  <span className={"min-w-0 break-words " + (/[a-z]/.test(c.value) ? "" : "num text-[13.5px]")}>
+                    {c.value}
+                  </span>
+                  {/* Shown on row hover or keyboard focus where there is a mouse; always shown on touch. */}
+                  <CopyButton
+                    value={c.value}
+                    label={c.label}
+                    className="[@media(hover:hover)]:opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+                  />
                 </dd>
               </div>
             ))}

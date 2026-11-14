@@ -12,7 +12,8 @@ import { closedTickets, openTickets, patientName } from "./order";
 
 type Filter = "open" | "closed";
 
-// The URL hash names the selected ticket, so the home page can link to /queue#live-...
+// The URL hash is the one record of which ticket is selected, so the home page can link
+// to /queue#live-... and clicking a row only rewrites the hash.
 function subscribeHash(onChange: () => void) {
   window.addEventListener("hashchange", onChange);
   return () => window.removeEventListener("hashchange", onChange);
@@ -20,14 +21,29 @@ function subscribeHash(onChange: () => void) {
 const readHash = () => decodeURIComponent(window.location.hash.slice(1));
 const noHash = () => "";
 
+function setHash(id: string | null) {
+  window.history.replaceState(null, "", id ? `#${encodeURIComponent(id)}` : window.location.pathname);
+  window.dispatchEvent(new HashChangeEvent("hashchange"));
+}
+
+// False on the server and during hydration. Until then neither this browser's tickets nor
+// the hash are known, so nothing is selected rather than a row that is about to change.
+const noop = () => () => {};
+const useMounted = () =>
+  useSyncExternalStore(
+    noop,
+    () => true,
+    () => false,
+  );
+
 const isMobile = () => window.matchMedia("(max-width: 767px)").matches;
 
 export function Queue({ recorded }: { recorded: Ticket[] }) {
   const live = useLiveTickets();
   const closures = useClosures();
   const hash = useSyncExternalStore(subscribeHash, readHash, noHash);
+  const mounted = useMounted();
   const [filter, setFilter] = useState<Filter>("open");
-  const [picked, setPicked] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const detailRef = useRef<HTMLDivElement>(null);
 
@@ -37,25 +53,31 @@ export function Queue({ recorded }: { recorded: Ticket[] }) {
   const rows = filter === "open" ? open : closed;
   const liveIds = new Set(live.map((t) => t.id));
 
-  // An explicit pick wins, then the hash (which may name a live ticket that has not loaded yet),
-  // then the first open ticket.
-  const byId = (id: string | null) => (id ? all.find((t) => t.id === id) : undefined);
-  const selected = byId(picked) ?? byId(hash) ?? open[0] ?? closed[0];
+  // The ticket in the hash, else the first open one (or the newest closed when none are open).
+  const fromHash = hash ? all.find((t) => t.id === hash) : undefined;
+  const selected = mounted ? (fromHash ?? open[0] ?? closed[0]) : undefined;
+
+  // When the hash starts naming a ticket (a deep link, or back from another page), show the
+  // list that holds it so its row is highlighted. Only on a hash change: closing or reopening
+  // the ticket in view leaves the filter alone.
+  const [seenHash, setSeenHash] = useState<string | null>(null);
+  if (mounted && hash !== seenHash) {
+    setSeenHash(hash);
+    if (fromHash) setFilter(closures[fromHash.id] ? "closed" : "open");
+  }
 
   const onHold = open.filter((t) => t.hold).reduce((sum, t) => sum + t.amount, 0);
   const canReset = live.length > 0 || Object.keys(closures).length > 0;
 
   function select(id: string) {
-    setPicked(id);
-    window.history.replaceState(null, "", `#${encodeURIComponent(id)}`);
+    setHash(id);
     if (isMobile()) detailRef.current?.scrollIntoView({ block: "start" });
   }
 
   function reset() {
     resetQueue();
-    setPicked(null);
     setFilter("open");
-    window.history.replaceState(null, "", window.location.pathname);
+    setHash(null);
   }
 
   return (
@@ -97,9 +119,11 @@ export function Queue({ recorded }: { recorded: Ticket[] }) {
                     type="button"
                     onClick={() => select(t.id)}
                     aria-current={isSelected ? "true" : undefined}
+                    // No colour transition: a fade would leave the old row tinted next to the new one.
+                    // Only the selected row carries the accent bar, so a hovered row never reads as selected.
                     className={
-                      "flex w-full flex-col gap-0.5 px-3 py-2.5 text-left transition-colors " +
-                      (isSelected ? "bg-accent-soft" : "hover:bg-sunken")
+                      "flex w-full flex-col gap-0.5 border-l-2 px-3 py-2.5 text-left " +
+                      (isSelected ? "border-accent bg-accent-soft" : "border-transparent hover:bg-sunken")
                     }
                   >
                     <span className="flex items-baseline justify-between gap-3">
@@ -108,7 +132,8 @@ export function Queue({ recorded }: { recorded: Ticket[] }) {
                     </span>
                     <span className="flex flex-wrap items-baseline gap-x-3 text-[13.5px]">
                       <span>{patientName(t.patient)}</span>
-                      {t.hold && !closures[t.id] && <span className="text-ink-2">On hold</span>}
+                      {/* Holds are the norm, so only the exception is worth a word in the row. */}
+                      {!t.hold && !closures[t.id] && <span className="text-stuck">No hold</span>}
                       {liveIds.has(t.id) && <span className="text-accent">From your conversation</span>}
                     </span>
                   </button>
@@ -130,7 +155,11 @@ export function Queue({ recorded }: { recorded: Ticket[] }) {
             <>
               <button
                 type="button"
-                onClick={() => listRef.current?.scrollIntoView({ block: "start" })}
+                onClick={() => {
+                  // Back to the row just read, or the top of the list if it is filtered out.
+                  const row = listRef.current?.querySelector("[aria-current]");
+                  (row ?? listRef.current)?.scrollIntoView({ block: row ? "center" : "start" });
+                }}
                 className="mb-4 text-[14px] text-accent underline-offset-2 hover:underline md:hidden"
               >
                 Back to queue
@@ -138,7 +167,7 @@ export function Queue({ recorded }: { recorded: Ticket[] }) {
               <TicketDetail key={selected.id} ticket={selected} closure={closures[selected.id]} />
             </>
           ) : (
-            <p className="text-[14px] text-ink-2">No tickets.</p>
+            mounted && <p className="text-[14px] text-ink-2">No tickets.</p>
           )}
         </div>
       </div>

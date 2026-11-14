@@ -35,11 +35,7 @@ function Bubble({ from, children }: { from: "patient" | "practice"; children: Re
 
 function Receipt({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-2 text-[12.5px] text-ink-2">
-      <span aria-hidden className="h-px flex-1 bg-rule" />
-      <span className="max-w-[80%] text-center leading-snug">{children}</span>
-      <span aria-hidden className="h-px flex-1 bg-rule" />
-    </div>
+    <p className="mx-auto max-w-[85%] text-center text-[12.5px] leading-snug text-ink-2">{children}</p>
   );
 }
 
@@ -71,10 +67,14 @@ export function Thread({
   const [draft, setDraft] = useState("");
   const scroller = useRef<HTMLDivElement>(null);
 
-  // Keep the newest message in view.
+  // Keep the newest message in view. A reply taller than the thread is shown from its first
+  // line, so the patient does not land at the bottom of a long answer.
   useEffect(() => {
     const el = scroller.current;
-    if (el) el.scrollTop = el.scrollHeight;
+    if (!el) return;
+    const newest = el.lastElementChild as HTMLElement | null;
+    const tall = newest && newest.offsetHeight > el.clientHeight - 32;
+    el.scrollTop = tall ? newest.offsetTop - 16 : el.scrollHeight;
   }, [transcript.length, pending, error]);
 
   function submit(text: string) {
@@ -107,7 +107,7 @@ export function Thread({
 
         <div
           ref={scroller}
-          className="flex h-[440px] flex-col gap-2.5 overflow-y-auto px-3 py-4 lg:h-[520px]"
+          className="relative flex h-[360px] flex-col gap-2.5 overflow-y-auto px-3 py-4 lg:h-[360px]"
           aria-label={`Text thread with Northfield Medical Group, as ${patientName}`}
           role="region"
           tabIndex={0}
@@ -129,7 +129,26 @@ export function Thread({
           )}
           {pending && (
             <div className="flex justify-start">
-              <p className="rounded-2xl rounded-bl-md bg-sunken px-3.5 py-2 text-[14px] text-ink-3">Typing</p>
+              <p className="flex h-[36px] items-center gap-1 rounded-2xl rounded-bl-md bg-sunken px-3.5">
+                <span className="sr-only">Typing</span>
+                {[0, 150, 300].map((d) => (
+                  <span
+                    key={d}
+                    aria-hidden
+                    style={{ animationDelay: `${d}ms` }}
+                    className="h-1.5 w-1.5 rounded-full bg-ink-2 motion-safe:animate-pulse"
+                  />
+                ))}
+              </p>
+            </div>
+          )}
+          {/* A failed reply sits under the message that did not get an answer, as on a phone. */}
+          {error && (
+            <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-right">
+              <ErrorText>{error}</ErrorText>
+              <Button variant="quiet" className="h-7 px-2.5 text-[13px]" onClick={onRetry} disabled={pending}>
+                Retry
+              </Button>
             </div>
           )}
         </div>
@@ -145,12 +164,15 @@ export function Thread({
           ) : (
             <>
               {suggestion && (
-                <div className="flex">
+                <div className="flex flex-col items-end gap-1">
+                  <span aria-hidden className="text-[12.5px] text-ink-3">
+                    Suggested reply. Tap to send.
+                  </span>
                   <button
                     type="button"
                     onClick={() => submit(suggestion)}
                     disabled={!canSend}
-                    className="max-w-full rounded-2xl border border-rule-strong px-3 py-1.5 text-left text-[13.5px] leading-snug text-ink hover:bg-sunken disabled:cursor-not-allowed disabled:opacity-50"
+                    className="max-w-[85%] rounded-2xl rounded-br-md border border-accent bg-accent-soft px-3.5 py-2 text-left text-[14px] leading-snug text-accent transition-colors hover:bg-accent hover:text-accent-ink disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <span className="sr-only">Send suggested reply: </span>
                     {suggestion}
@@ -177,12 +199,12 @@ export function Thread({
                       submit(draft);
                     }
                   }}
-                  rows={2}
+                  rows={1}
                   maxLength={MAX_CHARS}
                   placeholder="Text message"
-                  className="min-h-10 flex-1 resize-none rounded-xl border border-rule-strong bg-surface px-3 py-2 text-[14.5px] text-ink placeholder:text-ink-3"
+                  className="field-sizing-content max-h-28 min-h-9 flex-1 resize-none rounded-xl border border-rule-strong bg-surface px-3 py-2 text-[14.5px] text-ink placeholder:text-ink-3"
                 />
-                <Button type="submit" disabled={!canSend || !draft.trim()}>
+                <Button type="submit" className="h-10" disabled={!canSend || !draft.trim()}>
                   Send
                 </Button>
               </form>
@@ -190,15 +212,6 @@ export function Thread({
           )}
         </div>
       </div>
-
-      {error && (
-        <div className="flex flex-wrap items-center gap-3">
-          <ErrorText>{error}</ErrorText>
-          <Button variant="quiet" className="h-8" onClick={onRetry} disabled={pending}>
-            Retry
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

@@ -41,6 +41,7 @@ export function OutcomeDot({ outcome }: { outcome: Outcome }) {
   };
   return (
     <span
+      role="img"
       title={OUTCOME_LABEL[outcome]}
       aria-label={OUTCOME_LABEL[outcome]}
       className={"inline-block h-3 w-3 rounded-[3px] " + bg[outcome]}
@@ -101,6 +102,7 @@ export function Panel({ children, className = "" }: { children: ReactNode; class
 export function EmptyDot() {
   return (
     <span
+      role="img"
       title="Not run yet"
       aria-label="Not run yet"
       className="inline-block h-3 w-3 rounded-[3px] border border-rule-strong"

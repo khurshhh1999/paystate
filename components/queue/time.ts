@@ -28,10 +28,10 @@ function parts(fmt: Intl.DateTimeFormat, date: Date) {
   return out;
 }
 
-/** "Thu Nov 12, 8:12 am" in Central time. */
+/** "Thu Nov 12, 8:12 am CT". Staff and visitors may be in other zones, so the zone is named. */
 export function formatCentral(iso: string): string {
   const p = parts(central, new Date(iso));
-  return `${p.weekday} ${p.month} ${p.day}, ${p.hour}:${p.minute} ${(p.dayPeriod ?? "").toLowerCase()}`;
+  return `${p.weekday} ${p.month} ${p.day}, ${p.hour}:${p.minute} ${(p.dayPeriod ?? "").toLowerCase()} CT`;
 }
 
 /**
@@ -49,8 +49,8 @@ export function replyDueDay(createdIso: string): Date {
   return day;
 }
 
-/** "Fri Nov 13, 5:00 pm" */
+/** "Fri Nov 13, 5:00 pm CT" */
 export function formatReplyDue(createdIso: string): string {
   const p = parts(calendarDay, replyDueDay(createdIso));
-  return `${p.weekday} ${p.month} ${p.day}, 5:00 pm`;
+  return `${p.weekday} ${p.month} ${p.day}, 5:00 pm CT`;
 }

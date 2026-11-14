@@ -160,7 +160,7 @@ export function LabRunner({
       <section aria-labelledby="instructions">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <h2 id="instructions" className="text-[20px] font-semibold">
-            Agent instructions
+            Assistant instructions
           </h2>
           <div className="flex flex-wrap gap-2">
             <Button variant="quiet" onClick={() => edit(prompts.v1)} disabled={running}>
@@ -172,7 +172,7 @@ export function LabRunner({
           </div>
         </div>
         <label htmlFor="lab-prompt" className="sr-only">
-          Agent instructions
+          Assistant instructions
         </label>
         <textarea
           id="lab-prompt"
@@ -185,7 +185,7 @@ export function LabRunner({
         />
         <div className="mt-2 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 text-[13px] text-ink-2">
           <span>
-            The output-format line is appended automatically, so the judge can read the agent&apos;s declared actions.
+            The output-format line is appended automatically, so the judge can read the assistant&apos;s declared actions.
             Your edits are kept in this browser.
           </span>
           <span className="num">{prompt.length.toLocaleString("en-US")} characters</span>
@@ -201,7 +201,7 @@ export function LabRunner({
           Run
         </h2>
         <div className="mt-3 flex flex-wrap items-center gap-3">
-          <Segmented label="What the agent sees" value={view} onChange={setView} options={VIEW_OPTIONS} disabled={running} />
+          <Segmented label="What the assistant sees" value={view} onChange={setView} options={VIEW_OPTIONS} disabled={running} />
           <span className="text-[13.5px] text-ink-2">
             {view === "statement"
               ? "Service, amounts and payer name only: no remittance codes, eligibility, ledger or intake."
@@ -291,7 +291,7 @@ function ResultRow({ kase, row }: { kase: LabCase; row: Row }) {
         </summary>
         <div className="pb-4">
           <Panel className="flex flex-col gap-4 p-4">
-            <Transcript turns={row.trial.transcript} agentLabel="Agent (your instructions)" />
+            <Transcript turns={row.trial.transcript} agentLabel="Assistant (your instructions)" />
             <VerdictBlock verdict={row.trial.verdict} />
           </Panel>
         </div>
