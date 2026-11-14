@@ -1,0 +1,479 @@
+{
+  "asOf": "2026-11-14",
+  "seed": 20261114,
+  "engine": "node:sqlite (SQLite 3.51.3), in-memory",
+  "panel": {
+    "accounts": 5000,
+    "practices": 12,
+    "dollars": 1858374.62,
+    "meanBalance": 371.67,
+    "medianBalance": 231.46
+  },
+  "assumptions": {
+    "balance": "Statement balances are lognormal with a median of $240 (sigma 0.9), clipped to $12-$9,000. Trigger accounts draw their own amounts in the same shape.",
+    "payerMix": "Commercial 62%, marketplace 12%, Medicare 24%, Medicaid 2%.",
+    "channels": "Preferred channel: SMS 55% (85% of those with documented text consent), email 30%, voice 8%, mail 7%.",
+    "t6Overlap": "40% of work/accident accounts were denied CO-19 by the health plan and the denial was moved to the patient, so they also trip rule 1.",
+    "triggerRates": {
+      "t1": 0.012,
+      "t2": 0.015,
+      "t3": 0.008,
+      "t4": 0.006,
+      "t5": 0.025,
+      "t6": 0.007,
+      "t7": 0.003
+    }
+  },
+  "nearMisses": [
+    {
+      "id": "n1",
+      "rule": "t1",
+      "label": "CO denial correctly written off, not in the patient balance",
+      "rate": 0.01,
+      "seeded": 46
+    },
+    {
+      "id": "n2",
+      "rule": "t2",
+      "label": "PR-27 denial with an eligibility re-check after it that found no other coverage",
+      "rate": 0.004,
+      "seeded": 15
+    },
+    {
+      "id": "n3",
+      "rule": "t3",
+      "label": "Medicare patient with a Medicaid savings category that is not QMB (SLMB, QI)",
+      "rate": 0.008,
+      "seeded": 39
+    },
+    {
+      "id": "n4a",
+      "rule": "t4",
+      "label": "Out-of-network provider at an out-of-network facility, not an emergency",
+      "rate": 0.004,
+      "seeded": 22
+    },
+    {
+      "id": "n4b",
+      "rule": "t4",
+      "label": "Out-of-network surgeon (not ancillary) at an in-network facility with signed notice and consent",
+      "rate": 0.002,
+      "seeded": 15
+    },
+    {
+      "id": "n4c",
+      "rule": "t4",
+      "label": "Out-of-network ancillary provider already billed at the in-network cost share",
+      "rate": 0.003,
+      "seeded": 15
+    },
+    {
+      "id": "n5",
+      "rule": "t5",
+      "label": "Unapplied payment that has already been refunded",
+      "rate": 0.003,
+      "seeded": 19
+    },
+    {
+      "id": "n6",
+      "rule": "t6",
+      "label": "Accident-related visit billed to the auto (PIP) carrier, patient owes the PIP deductible",
+      "rate": 0.004,
+      "seeded": 23
+    }
+  ],
+  "schema": "-- One row per open patient balance (one encounter per account in this panel).\nCREATE TABLE accounts (\n  account_id            TEXT PRIMARY KEY,\n  patient_id            TEXT NOT NULL,\n  practice_id           TEXT NOT NULL,\n  dos                   TEXT NOT NULL,   -- date of service\n  adjudicated_at        TEXT NOT NULL,   -- primary payer remit posted\n  primary_payer         TEXT NOT NULL,\n  primary_payer_type    TEXT NOT NULL,   -- commercial | marketplace | medicare | medicaid | auto_pip\n  statement_balance     REAL NOT NULL,   -- what the next statement would ask for\n  guarantor_status      TEXT NOT NULL,   -- self | parent | deceased\n  guarantor_status_at   TEXT,\n  preferred_channel     TEXT NOT NULL,   -- sms | email | voice | mail\n  sms_consent           INTEGER NOT NULL,-- 1 = documented consent to billing texts\n  has_email             INTEGER NOT NULL,\n  preferred_language    TEXT NOT NULL,   -- en | es | vi | zh\n  next_statement_date   TEXT NOT NULL\n);\n\n-- 835 remittance adjustment lines (CARC with group code).\nCREATE TABLE remit_lines (\n  account_id  TEXT NOT NULL REFERENCES accounts(account_id),\n  line_no     INTEGER NOT NULL,\n  posted_at   TEXT NOT NULL,\n  group_code  TEXT NOT NULL,   -- CO | PR | OA\n  carc        TEXT NOT NULL,   -- e.g. 45, 1, 2, 3, 27, 29\n  amount      REAL NOT NULL\n);\n\n-- 270/271 eligibility responses and coverage discovery results.\nCREATE TABLE eligibility_checks (\n  account_id             TEXT NOT NULL REFERENCES accounts(account_id),\n  checked_at             TEXT NOT NULL,\n  payer                  TEXT NOT NULL,\n  status                 TEXT NOT NULL,   -- active | terminated | no_coverage_found\n  effective_date         TEXT,\n  term_date              TEXT,\n  medicaid_aid_category  TEXT             -- QMB | QMB+ | SLMB | QI | NULL\n);\n\nCREATE TABLE ledger_payments (\n  account_id   TEXT NOT NULL REFERENCES accounts(account_id),\n  payment_id   TEXT NOT NULL,\n  posted_at    TEXT NOT NULL,\n  source       TEXT NOT NULL,     -- front_desk | portal | mailed_check\n  amount       REAL NOT NULL,\n  applied      INTEGER NOT NULL,  -- 1 = applied to a charge\n  refunded_at  TEXT\n);\n\n-- Answers from the registration / intake form.\nCREATE TABLE intake_flags (\n  account_id        TEXT NOT NULL REFERENCES accounts(account_id),\n  work_related      INTEGER NOT NULL,\n  accident_related  INTEGER NOT NULL\n);\n\nCREATE TABLE encounters (\n  account_id               TEXT NOT NULL REFERENCES accounts(account_id),\n  service_line             TEXT NOT NULL,\n  emergency                INTEGER NOT NULL,\n  facility_network_status  TEXT NOT NULL,   -- in | out\n  provider_network_status  TEXT NOT NULL,   -- in | out\n  notice_consent_signed    INTEGER NOT NULL,\n  in_network_cost_share    REAL NOT NULL    -- patient share at the in-network level, from the EOB\n);\n\n-- Inbound and outbound contacts other than statements.\nCREATE TABLE contact_events (\n  account_id   TEXT NOT NULL REFERENCES accounts(account_id),\n  received_at  TEXT NOT NULL,\n  direction    TEXT NOT NULL,   -- inbound | outbound\n  channel      TEXT NOT NULL,\n  topic        TEXT NOT NULL    -- billing_question | death_reported | address_change\n);\n\n-- Statements and reminders already sent.\nCREATE TABLE outreach_log (\n  account_id  TEXT NOT NULL REFERENCES accounts(account_id),\n  sent_at     TEXT NOT NULL,\n  channel     TEXT NOT NULL,   -- mail | sms | email\n  template    TEXT NOT NULL    -- statement | reminder\n);\n\n-- First-contact channel. Texts only go to patients with documented consent.\nCREATE VIEW contact_route AS\nSELECT\n  account_id,\n  CASE\n    WHEN preferred_channel = 'sms' AND sms_consent = 1 THEN 'sms'\n    WHEN preferred_channel IN ('sms', 'email') AND has_email = 1 THEN 'email'\n    WHEN preferred_channel = 'voice' THEN 'voice'\n    ELSE 'mail'\n  END AS first_contact_channel\nFROM accounts;",
+  "triggers": [
+    {
+      "id": "t1",
+      "number": 1,
+      "name": "Provider-liability denial in the patient balance",
+      "rule": "A remit line with group code CO (other than the routine CO-45 and CO-253 adjustments) and a statement balance larger than what the PR lines leave the patient owing.",
+      "assumedRate": 0.012,
+      "sql": "WITH pr AS (\n  SELECT account_id, SUM(amount) AS pr_total\n  FROM remit_lines\n  WHERE group_code = 'PR'\n  GROUP BY account_id\n),\nco_denials AS (\n  -- CO-45 (fee schedule) and CO-253 (sequestration) are routine write-offs.\n  SELECT account_id,\n         GROUP_CONCAT('CO-' || carc, ', ') AS co_codes,\n         SUM(amount) AS co_denied\n  FROM remit_lines\n  WHERE group_code = 'CO' AND carc NOT IN ('45', '253')\n  GROUP BY account_id\n),\napplied AS (\n  SELECT account_id, SUM(amount) AS applied_paid\n  FROM ledger_payments\n  WHERE applied = 1\n  GROUP BY account_id\n),\ngap AS (\n  SELECT a.account_id,\n         a.statement_balance\n           - (COALESCE(pr.pr_total, 0) - COALESCE(applied.applied_paid, 0)) AS over_pr\n  FROM accounts a\n  LEFT JOIN pr USING (account_id)\n  LEFT JOIN applied USING (account_id)\n)\nSELECT a.account_id,\n       a.practice_id,\n       a.primary_payer,\n       d.co_codes,\n       a.statement_balance,\n       ROUND(MIN(d.co_denied, g.over_pr), 2) AS amount_in_question\nFROM accounts a\nJOIN co_denials d USING (account_id)\nJOIN gap g USING (account_id)\nWHERE g.over_pr > 0.005\nORDER BY a.account_id;",
+      "caught": 82,
+      "statementDollars": 56944.29,
+      "inQuestionDollars": 32795.63,
+      "columns": [
+        "account_id",
+        "practice_id",
+        "primary_payer",
+        "co_codes",
+        "statement_balance",
+        "amount_in_question"
+      ],
+      "sample": [
+        {
+          "account_id": "A100033",
+          "practice_id": "PR11",
+          "primary_payer": "Commercial HDHP D",
+          "co_codes": "CO-29",
+          "statement_balance": 166.64,
+          "amount_in_question": 94.85
+        },
+        {
+          "account_id": "A100112",
+          "practice_id": "PR06",
+          "primary_payer": "Medicare Part B",
+          "co_codes": "CO-19",
+          "statement_balance": 317.8,
+          "amount_in_question": 317.8
+        },
+        {
+          "account_id": "A100126",
+          "practice_id": "PR10",
+          "primary_payer": "Commercial HMO C",
+          "co_codes": "CO-19",
+          "statement_balance": 1173.35,
+          "amount_in_question": 1173.35
+        }
+      ],
+      "check": {
+        "seeded": 82,
+        "missed": 0,
+        "extra": 0
+      }
+    },
+    {
+      "id": "t2",
+      "number": 2,
+      "name": "Coverage terminated, no re-check since",
+      "rule": "A PR-27 denial (expenses incurred after coverage terminated) and no eligibility check or coverage discovery run after the denial posted.",
+      "assumedRate": 0.015,
+      "sql": "WITH pr27 AS (\n  SELECT account_id,\n         MAX(posted_at) AS denied_at,\n         SUM(amount)    AS pr27_amount\n  FROM remit_lines\n  WHERE group_code = 'PR' AND carc = '27'\n  GROUP BY account_id\n),\nlast_check AS (\n  SELECT account_id, MAX(checked_at) AS last_checked_at\n  FROM eligibility_checks\n  GROUP BY account_id\n)\nSELECT a.account_id,\n       a.practice_id,\n       a.dos,\n       p.denied_at,\n       lc.last_checked_at,\n       r.first_contact_channel,\n       a.statement_balance,\n       ROUND(MIN(p.pr27_amount, a.statement_balance), 2) AS amount_in_question\nFROM accounts a\nJOIN pr27 p USING (account_id)\nJOIN contact_route r USING (account_id)\nLEFT JOIN last_check lc USING (account_id)\nWHERE lc.last_checked_at IS NULL\n   OR lc.last_checked_at < p.denied_at\nORDER BY a.account_id;",
+      "caught": 78,
+      "statementDollars": 43409.34,
+      "inQuestionDollars": 43409.34,
+      "columns": [
+        "account_id",
+        "practice_id",
+        "dos",
+        "denied_at",
+        "last_checked_at",
+        "first_contact_channel",
+        "statement_balance",
+        "amount_in_question"
+      ],
+      "sample": [
+        {
+          "account_id": "A100025",
+          "practice_id": "PR05",
+          "dos": "2026-05-02",
+          "denied_at": "2026-05-21",
+          "last_checked_at": "2025-12-03",
+          "first_contact_channel": "sms",
+          "statement_balance": 1321.02,
+          "amount_in_question": 1321.02
+        },
+        {
+          "account_id": "A100053",
+          "practice_id": "PR09",
+          "dos": "2026-04-10",
+          "denied_at": "2026-05-02",
+          "last_checked_at": "2025-11-25",
+          "first_contact_channel": "sms",
+          "statement_balance": 201.04,
+          "amount_in_question": 201.04
+        },
+        {
+          "account_id": "A100085",
+          "practice_id": "PR08",
+          "dos": "2026-03-27",
+          "denied_at": "2026-04-16",
+          "last_checked_at": "2025-11-08",
+          "first_contact_channel": "sms",
+          "statement_balance": 582.33,
+          "amount_in_question": 582.33
+        }
+      ],
+      "check": {
+        "seeded": 78,
+        "missed": 0,
+        "extra": 0
+      }
+    },
+    {
+      "id": "t3",
+      "number": 3,
+      "name": "QMB patient billed Medicare cost-sharing",
+      "rule": "Medicare is primary, the balance is Medicare deductible, coinsurance or copay (PR-1, PR-2, PR-3), and an eligibility response shows Medicaid QMB or QMB+ active on the date of service.",
+      "assumedRate": 0.008,
+      "sql": "WITH qmb AS (\n  SELECT DISTINCT e.account_id, e.medicaid_aid_category\n  FROM eligibility_checks e\n  JOIN accounts a USING (account_id)\n  WHERE e.medicaid_aid_category IN ('QMB', 'QMB+')\n    AND e.status = 'active'\n    AND e.effective_date <= a.dos\n    AND (e.term_date IS NULL OR e.term_date >= a.dos)\n),\ncost_share AS (\n  SELECT account_id,\n         GROUP_CONCAT('PR-' || carc, ', ') AS pr_codes,\n         SUM(amount) AS medicare_cost_share\n  FROM remit_lines\n  WHERE group_code = 'PR' AND carc IN ('1', '2', '3')\n  GROUP BY account_id\n)\nSELECT a.account_id,\n       a.practice_id,\n       q.medicaid_aid_category,\n       c.pr_codes,\n       r.first_contact_channel,\n       a.statement_balance,\n       ROUND(MIN(c.medicare_cost_share, a.statement_balance), 2) AS amount_in_question\nFROM accounts a\nJOIN qmb q USING (account_id)\nJOIN cost_share c USING (account_id)\nJOIN contact_route r USING (account_id)\nWHERE a.primary_payer_type = 'medicare'\nORDER BY a.account_id;",
+      "caught": 36,
+      "statementDollars": 12430.73,
+      "inQuestionDollars": 12430.73,
+      "columns": [
+        "account_id",
+        "practice_id",
+        "medicaid_aid_category",
+        "pr_codes",
+        "first_contact_channel",
+        "statement_balance",
+        "amount_in_question"
+      ],
+      "sample": [
+        {
+          "account_id": "A100064",
+          "practice_id": "PR03",
+          "medicaid_aid_category": "QMB",
+          "pr_codes": "PR-2",
+          "first_contact_channel": "email",
+          "statement_balance": 400.67,
+          "amount_in_question": 400.67
+        },
+        {
+          "account_id": "A100078",
+          "practice_id": "PR08",
+          "medicaid_aid_category": "QMB",
+          "pr_codes": "PR-2",
+          "first_contact_channel": "email",
+          "statement_balance": 264.1,
+          "amount_in_question": 264.1
+        },
+        {
+          "account_id": "A100150",
+          "practice_id": "PR12",
+          "medicaid_aid_category": "QMB+",
+          "pr_codes": "PR-2",
+          "first_contact_channel": "email",
+          "statement_balance": 106.01,
+          "amount_in_question": 106.01
+        }
+      ],
+      "check": {
+        "seeded": 36,
+        "missed": 0,
+        "extra": 0
+      }
+    },
+    {
+      "id": "t4",
+      "number": 4,
+      "name": "Surprise-billing protection, billed above in-network share",
+      "rule": "Commercial or marketplace plan, out-of-network clinician, and either an emergency or an in-network facility where the service is ancillary or no notice-and-consent was signed. The statement is above the in-network cost share on the EOB.",
+      "assumedRate": 0.006,
+      "sql": "SELECT a.account_id,\n       a.practice_id,\n       e.service_line,\n       e.facility_network_status AS facility,\n       e.emergency,\n       e.in_network_cost_share,\n       a.statement_balance,\n       ROUND(a.statement_balance - e.in_network_cost_share, 2) AS amount_in_question\nFROM accounts a\nJOIN encounters e USING (account_id)\nWHERE a.primary_payer_type IN ('commercial', 'marketplace')\n  AND e.provider_network_status = 'out'\n  AND (\n        e.emergency = 1\n     OR (e.facility_network_status = 'in'\n         AND (e.service_line IN ('anesthesia', 'radiology', 'pathology', 'laboratory', 'emergency medicine', 'assistant surgeon', 'neonatology', 'hospitalist')\n              OR e.notice_consent_signed = 0))\n      )\n  AND a.statement_balance > e.in_network_cost_share + 0.005\nORDER BY a.account_id;",
+      "caught": 37,
+      "statementDollars": 84135.73,
+      "inQuestionDollars": 71741.88,
+      "columns": [
+        "account_id",
+        "practice_id",
+        "service_line",
+        "facility",
+        "emergency",
+        "in_network_cost_share",
+        "statement_balance",
+        "amount_in_question"
+      ],
+      "sample": [
+        {
+          "account_id": "A100148",
+          "practice_id": "PR03",
+          "service_line": "anesthesia",
+          "facility": "in",
+          "emergency": 0,
+          "in_network_cost_share": 144.06,
+          "statement_balance": 1294.63,
+          "amount_in_question": 1150.57
+        },
+        {
+          "account_id": "A100211",
+          "practice_id": "PR08",
+          "service_line": "emergency medicine",
+          "facility": "in",
+          "emergency": 1,
+          "in_network_cost_share": 248.99,
+          "statement_balance": 1264.49,
+          "amount_in_question": 1015.5
+        },
+        {
+          "account_id": "A100469",
+          "practice_id": "PR07",
+          "service_line": "anesthesia",
+          "facility": "in",
+          "emergency": 0,
+          "in_network_cost_share": 64.68,
+          "statement_balance": 1422.2,
+          "amount_in_question": 1357.52
+        }
+      ],
+      "check": {
+        "seeded": 37,
+        "missed": 0,
+        "extra": 0
+      }
+    },
+    {
+      "id": "t5",
+      "number": 5,
+      "name": "Payment received but not applied",
+      "rule": "The ledger holds a payment that was never applied to a charge and has not been refunded.",
+      "assumedRate": 0.025,
+      "sql": "WITH unapplied AS (\n  SELECT account_id,\n         SUM(amount)    AS unapplied_total,\n         MIN(posted_at) AS first_posted_at,\n         GROUP_CONCAT(source, ', ') AS sources\n  FROM ledger_payments\n  WHERE applied = 0 AND refunded_at IS NULL\n  GROUP BY account_id\n)\nSELECT a.account_id,\n       a.practice_id,\n       u.first_posted_at,\n       u.sources,\n       u.unapplied_total,\n       a.statement_balance,\n       CASE WHEN u.unapplied_total >= a.statement_balance - 0.005\n            THEN 'full' ELSE 'partial' END AS covers,\n       ROUND(MIN(u.unapplied_total, a.statement_balance), 2) AS amount_in_question\nFROM accounts a\nJOIN unapplied u USING (account_id)\nORDER BY a.account_id;",
+      "caught": 98,
+      "statementDollars": 29856.4,
+      "inQuestionDollars": 23843.55,
+      "columns": [
+        "account_id",
+        "practice_id",
+        "first_posted_at",
+        "sources",
+        "unapplied_total",
+        "statement_balance",
+        "covers",
+        "amount_in_question"
+      ],
+      "sample": [
+        {
+          "account_id": "A100194",
+          "practice_id": "PR07",
+          "first_posted_at": "2026-07-15",
+          "sources": "front_desk",
+          "unapplied_total": 14.31,
+          "statement_balance": 38.62,
+          "covers": "partial",
+          "amount_in_question": 14.31
+        },
+        {
+          "account_id": "A100300",
+          "practice_id": "PR11",
+          "first_posted_at": "2026-03-21",
+          "sources": "front_desk",
+          "unapplied_total": 428.56,
+          "statement_balance": 428.56,
+          "covers": "full",
+          "amount_in_question": 428.56
+        },
+        {
+          "account_id": "A100326",
+          "practice_id": "PR12",
+          "first_posted_at": "2026-06-13",
+          "sources": "front_desk",
+          "unapplied_total": 173.49,
+          "statement_balance": 173.49,
+          "covers": "full",
+          "amount_in_question": 173.49
+        }
+      ],
+      "check": {
+        "seeded": 98,
+        "missed": 0,
+        "extra": 0
+      }
+    },
+    {
+      "id": "t6",
+      "number": 6,
+      "name": "Work or accident injury billed to the health plan",
+      "rule": "The intake form says the visit was work-related or accident-related, but the claim went to the patient's health plan instead of workers' compensation or an auto carrier.",
+      "assumedRate": 0.007,
+      "sql": "SELECT a.account_id,\n       a.practice_id,\n       CASE WHEN i.work_related = 1 THEN 'work' ELSE 'accident' END AS intake_says,\n       a.primary_payer,\n       r.first_contact_channel,\n       a.statement_balance,\n       a.statement_balance AS amount_in_question\nFROM accounts a\nJOIN intake_flags i USING (account_id)\nJOIN contact_route r USING (account_id)\nWHERE (i.work_related = 1 OR i.accident_related = 1)\n  AND a.primary_payer_type IN ('commercial', 'marketplace', 'medicare', 'medicaid')\nORDER BY a.account_id;",
+      "caught": 35,
+      "statementDollars": 17327.81,
+      "inQuestionDollars": 17327.81,
+      "columns": [
+        "account_id",
+        "practice_id",
+        "intake_says",
+        "primary_payer",
+        "first_contact_channel",
+        "statement_balance",
+        "amount_in_question"
+      ],
+      "sample": [
+        {
+          "account_id": "A100094",
+          "practice_id": "PR12",
+          "intake_says": "accident",
+          "primary_payer": "Marketplace Silver E",
+          "first_contact_channel": "email",
+          "statement_balance": 358.11,
+          "amount_in_question": 358.11
+        },
+        {
+          "account_id": "A100112",
+          "practice_id": "PR06",
+          "intake_says": "work",
+          "primary_payer": "Medicare Part B",
+          "first_contact_channel": "sms",
+          "statement_balance": 317.8,
+          "amount_in_question": 317.8
+        },
+        {
+          "account_id": "A100126",
+          "practice_id": "PR10",
+          "intake_says": "work",
+          "primary_payer": "Commercial HMO C",
+          "first_contact_channel": "email",
+          "statement_balance": 1173.35,
+          "amount_in_question": 1173.35
+        }
+      ],
+      "check": {
+        "seeded": 35,
+        "missed": 0,
+        "extra": 0
+      }
+    },
+    {
+      "id": "t7",
+      "number": 7,
+      "name": "Patient has died",
+      "rule": "The guarantor is marked deceased, or someone has told the practice the patient died. Every reminder stops.",
+      "assumedRate": 0.003,
+      "sql": "WITH death_signal AS (\n  SELECT account_id, 'marked deceased' AS signal, guarantor_status_at AS reported_at\n  FROM accounts\n  WHERE guarantor_status = 'deceased'\n  UNION ALL\n  SELECT account_id, 'family reported', received_at\n  FROM contact_events\n  WHERE topic = 'death_reported'\n),\nfirst_signal AS (\n  SELECT account_id,\n         MIN(reported_at) AS reported_at,\n         GROUP_CONCAT(DISTINCT signal) AS signals\n  FROM death_signal\n  GROUP BY account_id\n)\nSELECT a.account_id,\n       a.practice_id,\n       f.signals,\n       f.reported_at,\n       (SELECT COUNT(*)\n          FROM outreach_log o\n         WHERE o.account_id = a.account_id\n           AND o.sent_at > f.reported_at) AS reminders_since,\n       a.statement_balance,\n       a.statement_balance AS amount_in_question\nFROM accounts a\nJOIN first_signal f USING (account_id)\nORDER BY a.account_id;",
+      "caught": 6,
+      "statementDollars": 1327.67,
+      "inQuestionDollars": 1327.67,
+      "columns": [
+        "account_id",
+        "practice_id",
+        "signals",
+        "reported_at",
+        "reminders_since",
+        "statement_balance",
+        "amount_in_question"
+      ],
+      "sample": [
+        {
+          "account_id": "A100368",
+          "practice_id": "PR08",
+          "signals": "marked deceased",
+          "reported_at": "2026-11-11",
+          "reminders_since": 0,
+          "statement_balance": 288.28,
+          "amount_in_question": 288.28
+        },
+        {
+          "account_id": "A101118",
+          "practice_id": "PR02",
+          "signals": "family reported",
+          "reported_at": "2026-09-09",
+          "reminders_since": 5,
+          "statement_balance": 266.1,
+          "amount_in_question": 266.1
+        },
+        {
+          "account_id": "A103035",
+          "practice_id": "PR02",
+          "signals": "family reported",
+          "reported_at": "2026-09-23",
+          "reminders_since": 4,
+          "statement_balance": 169.79,
+          "amount_in_question": 169.79
+        }
+      ],
+      "check": {
+        "seeded": 6,
+        "missed": 0,
+        "extra": 0
+      }
+    }
+  ],
+  "union": {
+    "caught": 353,
+    "statementDollars": 234234.76,
+    "inQuestionDollars": 191679.4
+  }
+}
