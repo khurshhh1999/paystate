@@ -2,6 +2,8 @@
 
 export type Outcome = "resolved" | "correct_handoff" | "dead_end" | "wrong_collect";
 export type Version = "v1" | "v2";
+// How much of the account record the agent is shown. See recordForView in prompts.mjs.
+export type View = "full" | "statement";
 
 export type Action =
   | "send_pay_link"
@@ -51,7 +53,8 @@ export interface Results {
   generatedAt: string | null; // ISO timestamp, null until the bench has been run
   model: string;
   trials: number;
-  runs: Record<Version, Record<string, Trial[]>>; // runs.v1["qmb"] = [trial, trial, trial]
+  runs: Record<Version, Record<string, Trial[]>>; // full record. runs.v1["qmb"] = [trial, trial, trial]
+  statementRuns?: Record<Version, Record<string, Trial[]>>; // same cases, agent shown the statement only
 }
 
 export interface VersionSummary {
