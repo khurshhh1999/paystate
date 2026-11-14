@@ -1,26 +1,150 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+  Layout idea: a billing ledger. One narrow reading column for prose, full-width
+  ruled tables for data, figures in mono and right-aligned. Colour is reserved for
+  outcomes; everything else is ink on paper.
+*/
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root {
+  --paper: #f7f8f6;
+  --surface: #ffffff;
+  --sunken: #eef0ec;
+  --ink: #15201c;
+  --ink-2: #4a5852;
+  --ink-3: #7b8882;
+  --rule: #dde1dc;
+  --rule-strong: #b9c0ba;
+  --accent: #0b5d4e;
+  --accent-ink: #ffffff;
+  --accent-soft: #e2efeb;
+
+  /* outcome colours: the only saturated colour on the page */
+  --ok: #1f7a4d;
+  --ok-soft: #e3f2e9;
+  --handoff: #2b5fa8;
+  --handoff-soft: #e4ecf7;
+  --stuck: #9a6a00;
+  --stuck-soft: #f7efd9;
+  --wrong: #b3261e;
+  --wrong-soft: #fae6e4;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    color-scheme: dark;
+    --paper: #101513;
+    --surface: #171d1a;
+    --sunken: #0c100f;
+    --ink: #e8ece9;
+    --ink-2: #a9b4ae;
+    --ink-3: #7c8882;
+    --rule: #28312d;
+    --rule-strong: #3d4843;
+    --accent: #5fc4ae;
+    --accent-ink: #0c1512;
+    --accent-soft: #16302a;
+
+    --ok: #6fcf97;
+    --ok-soft: #153223;
+    --handoff: #8db4ee;
+    --handoff-soft: #172a45;
+    --stuck: #e3b341;
+    --stuck-soft: #3a2e0e;
+    --wrong: #f2857d;
+    --wrong-soft: #45191a;
   }
 }
 
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-sunken: var(--sunken);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-handoff: var(--handoff);
+  --color-handoff-soft: var(--handoff-soft);
+  --color-stuck: var(--stuck);
+  --color-stuck-soft: var(--stuck-soft);
+  --color-wrong: var(--wrong);
+  --color-wrong-soft: var(--wrong-soft);
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+h1, h2, h3 {
+  text-wrap: balance;
+  letter-spacing: -0.01em;
+}
+
+/* Figures line up in columns everywhere. */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Running prose: keep the measure readable. */
+.prose-col {
+  max-width: 64ch;
+}
+
+/* Ruled data table used across pages. Wrap in .table-scroll on narrow screens. */
+.table-scroll {
+  overflow-x: auto;
+}
+.ledger {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.ledger th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--ink-2);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--rule-strong);
+  white-space: nowrap;
+}
+.ledger td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+.ledger th.r, .ledger td.r {
+  text-align: right;
+}
+.ledger tbody tr:hover {
+  background: var(--sunken);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

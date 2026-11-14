@@ -1,0 +1,10 @@
+import type { Action, Case, Turn, Verdict, Version } from "./types";
+export const ACTIONS: Action[];
+export const AGENT_V1: string;
+export const AGENT_V2: string;
+export const AGENT_PROMPTS: Record<Version, string>;
+export const JUDGE_SYSTEM: string;
+export function buildAgentInput(kase: Case, transcript: Turn[]): string;
+export function parseAgentReply(raw: string): { text: string; actions: Action[] };
+export function buildJudgeInput(kase: Case, transcript: Turn[]): string;
+export function parseVerdict(raw: string): Verdict;
