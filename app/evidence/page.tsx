@@ -138,7 +138,7 @@ export default function BenchPage() {
           asking for, accepting or scheduling any payment.
         </p>
         <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2">
-          <DiscoverButton href="/lab" label="Open the prompt lab" />
+          <DiscoverButton href="/evidence/lab" label="Open the prompt lab" />
           <span className="text-[14px] text-ink-2">Write your own instructions and run all {CASES.length} cases against them.</span>
         </div>
       </section>
@@ -247,7 +247,7 @@ export default function BenchPage() {
         </dl>
         <p className="mt-4 text-[14.5px]">
           How the cases, the scripted patient and the judge were built, and what this bench does not measure:{" "}
-          <Link href="/method" className="text-accent underline underline-offset-4">
+          <Link href="/evidence/method" className="text-accent underline underline-offset-4">
             Method
           </Link>
           .

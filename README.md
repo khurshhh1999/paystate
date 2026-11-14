@@ -1,35 +1,38 @@
 # Payable as Stated
 
-A test bench for patient billing agents. It asks one question of every conversation: should the agent have asked for money at all?
+A patient billing assistant that checks a bill is owed before it asks for money, with the two things around it that decide whether that works at a real practice: the queue its handoffs land in, and a check of what the practice has connected.
 
-I built it to work out what decides a good patient billing experience, using cases I could run and grade instead of opinions.
+Live: https://payable-as-stated.vercel.app
 
-## What it found
+## The product
 
-Twelve patient situations, each run 12 times (two sets of agent instructions, two views of the account record, three trials). 144 graded conversations on `claude-sonnet-5-5`.
+**Patient thread** (`/`). Pick one of twelve patients and reply to their statement text as them. The assistant answers from the practice's account record. Its actions show up in the thread in the patient's words: balance on hold, plan set up, sent to the billing team.
 
-| Agent sees | Instructions | Right outcome | Wrong collects | Dead ends |
+**Staff queue** (`/queue`). Every handoff arrives as a ticket: why it needs a person, the line of the record that decides it, what the patient has been told, the IDs they already gave, and one next step. Closing a ticket picks a resolution and writes the text the patient gets. Conversations you have on the patient page land here too.
+
+**Go-live check** (`/readiness`). Tick the feeds a practice has connected (remittance, eligibility, account ledger, visit record). The page shows how the assistant handled each patient question with exactly that much of the record, which feed to connect next, and how many conversations end with staff. Every cell is a recorded run, with the transcript one click away.
+
+**Decisions** (`/decisions`). Who it is for, what I chose and turned down, what each choice costs, the metrics I would hold it to, and what I would do in the first 30 days with real data.
+
+**Evidence** (`/evidence`). The bench behind all of it: scorecard, case pages with every transcript and verdict, a prompt lab, the statement gate, and the method.
+
+## What the runs found
+
+Twelve patient situations, 324 graded conversations on `claude-sonnet-5-5`: two sets of instructions, three trials, and every combination of feeds each case draws on.
+
+| The assistant can read | Right, check on | Right, check off | Wrong collects, check off | Ends with staff, check on |
 |---|---|---|---|---|
-| Full account record | v1 baseline | 35 / 36 | 0 | 1 |
-| Full account record | v2 with payable-as-stated check | 36 / 36 | 0 | 0 |
-| Statement only | v1 baseline | 23 / 36 | 2 | 11 |
-| Statement only | v2 with payable-as-stated check | 28 / 36 | 0 | 8 |
+| Statement balance only | 28 / 36 | 23 / 36 | 2 | 33 / 36 |
+| Balance + remittance | 31 / 36 | 30 / 36 | 0 | 27 / 36 |
+| Balance + eligibility | 34 / 36 | 29 / 36 | 2 | 27 / 36 |
+| Balance + account ledger | 30 / 36 | 25 / 36 | 2 | 33 / 36 |
+| Balance + visit record | 26 / 36 | 25 / 36 | 2 | 35 / 36 |
+| Balance + eligibility + account ledger | 36 / 36 | 31 / 36 | 2 | 27 / 36 |
+| Everything | 36 / 36 | 35 / 36 | 0 | 27 / 36 |
 
-I expected the instructions to matter most. They did not. With the full record both versions were right almost every time. With only what is printed on the statement, the baseline agent offered to take payment from a patient whose claim the practice had filed late, in two of three runs. Adding a rule to check the bill first removed the wrong collects, but the agent then refused valid payment plans because it could no longer tell a good bill from a bad one.
+"Check" is one rule in the instructions: confirm the balance is payable as stated before asking for, accepting or scheduling money.
 
-A rule can stop the harm. Only the data resolves the question.
-
-## What is in it
-
-**Bench** (`/`). The 2×2 scorecard, every case with its twelve outcomes, and what I would build next.
-
-**Case pages** (`/cases/[id]`). The account record as the agent sees it under each view, what a senior biller would do, the recorded transcripts with the judge's verdict, a button to run the case again live, and a chat where you play the patient.
-
-**Prompt lab** (`/lab`). Edit the agent's instructions, run all twelve cases, and compare your scorecard with the recorded ones.
-
-**Statement gate** (`/outreach`). The same checks run before a statement is sent. Seven rules written as SQL against a synthetic panel of 5,000 open balances, the message each patient would get instead of a bill, a test design, and a calculator. The SQL runs in the build script and the page shows its output: 353 accounts caught, $191,679 not owed as stated. The incidence rates behind those figures are my assumptions and are listed on the page.
-
-**Method** (`/method`). How a run works, the full instructions and judge rubric, what changed after the first run, and what the bench does not show.
+I expected the instructions to matter most. With the whole record they barely mattered. With only the statement balance, the assistant without the check offered to take payment from a patient whose claim the practice had filed late. The remittance is what stops that. Eligibility rescues the most answers. Missing feeds also push more conversations to staff. A difference of one or two in this table is within run-to-run variation.
 
 ## The cases
 
@@ -78,7 +81,9 @@ Recorded results are checked in under `data/`, so the site works without running
 ```bash
 npm run bench                       # full record, both versions, 3 trials
 npm run bench -- --view statement   # same cases, statement fields only
+npm run bench -- --view feeds       # statement plus each partial set of feeds
 npm run bench -- --only qmb         # one case
+npm run tickets:build               # rebuild the recorded staff queue from the runs
 npm run outreach:build              # rebuild the synthetic panel and rerun the SQL
 npm test
 ```
@@ -87,14 +92,18 @@ npm test
 
 ```
 lib/cases.mjs        the twelve cases: record, scripted patient, answer key
-lib/prompts.mjs      agent instructions v1 and v2, record views, judge rubric
+lib/feeds.mjs        which record fields arrive through which feed
+lib/prompts.mjs      assistant instructions v1 and v2, record views, judge rubric
 lib/run.mjs          one conversation end to end
+lib/tickets.mjs      turns a handed-off conversation into a ticket for staff
+lib/closeout.ts      resolutions and the text the patient gets when a ticket closes
 lib/score.mjs        outcome counts and wrong-collect dollars
 lib/limits.mjs       rate limits for the public API routes
 scripts/run-bench.mjs       runs the bench, writes data/results.json
+scripts/build-tickets.mjs   writes data/tickets.json from the recorded runs
 scripts/build-outreach.mjs  builds the panel in SQLite, runs the rules, writes data/outreach.json
-app/api/             run-case, chat, judge
-app/                 bench, case pages, lab, statement gate, method
+app/api/             chat, ticket, run-case, judge
+app/                 patient thread, queue, readiness, decisions, evidence
 ```
 
 ## Limits
@@ -104,6 +113,8 @@ app/                 bench, case pages, lab, statement gate, method
 - The judge is the same model as the agent and is sometimes wrong at the edges. The method page lists the calls I disagree with.
 - The scripted patients often say the deciding fact out loud, which protects them even when the agent cannot see it. Real traffic would likely do worse in the statement-only view.
 - Text only. No voice.
+- No identity check, no real payments, and a hold is a flag in the demo, not a write to a practice system.
+- The staff queue keeps your tickets and closures in your browser. Nothing is sent to anyone.
 - Answer keys are my reading of the rules. State law varies on who owes a deceased patient's balance, which is why that case goes to a person.
 
 ## Who built this

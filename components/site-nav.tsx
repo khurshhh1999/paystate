@@ -4,16 +4,21 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const LINKS = [
-  { href: "/", label: "Bench" },
-  { href: "/lab", label: "Prompt lab" },
-  { href: "/outreach", label: "Statement gate" },
-  { href: "/method", label: "Method" },
+  { href: "/", label: "Patient" },
+  { href: "/queue", label: "Staff queue" },
+  { href: "/readiness", label: "Go-live check" },
+  { href: "/decisions", label: "Decisions" },
+  { href: "/evidence", label: "Evidence" },
 ];
 
 export function SiteNav() {
   const pathname = usePathname();
   const isActive = (href: string) =>
-    href === "/" ? pathname === "/" || pathname.startsWith("/cases") : pathname.startsWith(href);
+    href === "/"
+      ? pathname === "/"
+      : href === "/evidence"
+        ? pathname.startsWith("/evidence") || pathname.startsWith("/cases")
+        : pathname.startsWith(href);
 
   return (
     <header className="border-b border-rule bg-surface">

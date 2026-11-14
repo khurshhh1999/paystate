@@ -64,7 +64,7 @@ export default async function CasePage({ params }: Props) {
   return (
     <div>
       <p className="text-[14px]">
-        <Link href="/" className="text-ink-2 underline decoration-rule-strong underline-offset-4 hover:text-ink">
+        <Link href="/evidence" className="text-ink-2 underline decoration-rule-strong underline-offset-4 hover:text-ink">
           All cases
         </Link>
       </p>
@@ -165,7 +165,7 @@ export default async function CasePage({ params }: Props) {
             Next: {next.title}
           </Link>
         ) : (
-          <Link href="/" className="underline decoration-rule-strong underline-offset-4 hover:text-accent">
+          <Link href="/evidence" className="underline decoration-rule-strong underline-offset-4 hover:text-accent">
             Back to all cases
           </Link>
         )}

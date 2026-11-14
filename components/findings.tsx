@@ -6,6 +6,7 @@ import { CASES } from "@/lib/cases.mjs";
 import type { Results, Trial, Version } from "@/lib/types";
 import resultsJson from "@/data/results.json";
 import { OutcomeDot } from "@/components/ui";
+import { FeedTable } from "@/components/feed-table";
 
 const RESULTS = resultsJson as unknown as Results;
 
@@ -128,10 +129,27 @@ export function Findings() {
         </>
       )}
 
+      <h2 className="mt-12 text-[20px] font-semibold">Feed by feed</h2>
+      <p className="prose-col mt-3">
+        Two views is coarse, so I ran every case again with each partial set of feeds: 180 more conversations. The
+        remittance is what stops the wrong collects when the check is off. Eligibility rescues the most answers. The
+        visit record changes almost nothing for these twelve questions. Missing feeds also send more conversations to
+        staff. The{" "}
+        <Link href="/readiness" className="underline decoration-rule-strong underline-offset-2 hover:decoration-ink">
+          go-live check
+        </Link>{" "}
+        lets you pick any combination.
+      </p>
+      <div className="mt-4">
+        <FeedTable />
+      </div>
+
       <h2 className="mt-12 text-[20px] font-semibold">What I would build next</h2>
       <ol className="prose-col mt-4 flex list-decimal flex-col gap-4 pl-5">
         <li>
-          <span className="font-medium">Score each practice by what its agent can read, before go-live.</span> Remittance
+          <span className="font-medium">Score each practice by what its agent can read, before go-live.</span> The{" "}
+          <Link href="/readiness" className="underline decoration-rule-strong underline-offset-2 hover:decoration-ink">go-live check</Link>{" "}
+          is a first version. Remittance
           lines with group codes, eligibility with termination dates and aid category, the payment ledger including
           unapplied money, intake flags. A practice missing a feed will dead-end on a known set of questions, and that
           is knowable during implementation instead of in week three. It also turns integration depth from a
@@ -146,17 +164,13 @@ export function Findings() {
         <li>
           <span className="font-medium">Run the same check before the statement goes out.</span> If an account can be
           recognised mid-conversation it can be recognised at adjudication, and the first contact can be a correction
-          instead of a bill. The <Link href="/outreach" className="underline decoration-rule-strong underline-offset-2 hover:decoration-ink">statement gate</Link>{" "}
+          instead of a bill. The <Link href="/evidence/statement-gate" className="underline decoration-rule-strong underline-offset-2 hover:decoration-ink">statement gate</Link>{" "}
           page works that through with rules, SQL, messages and a test design.
         </li>
         <li>
           <span className="font-medium">Report right-outcome rate next to resolution rate.</span> A payment taken on a
           late-filed claim counts as resolved and collected on most dashboards. Graded against the record it is the
           worst outcome on the page. Wrong-collect dollars should sit beside escalation rate in what a practice sees.
-        </li>
-        <li>
-          <span className="font-medium">Cut the record feed by feed.</span> Two views is coarse. Hiding one feed at a
-          time would rank them by how many conversations each one rescues, which is the order to build integrations in.
         </li>
       </ol>
     </section>

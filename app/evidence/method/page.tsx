@@ -325,6 +325,12 @@ export default function MethodPage() {
             Then the statement view was added, to test whether the agent&apos;s good behaviour came from the
             instructions or from the data. Cases, prompts and rubric were not adjusted to favour either version.
           </p>
+          <p>
+            Last, the record was split into four feeds (remittance, eligibility, account ledger, visit record) and each
+            case was run with every partial set of the feeds it draws on: 30 sets, 180 conversations. A case that uses
+            two feeds has two partial sets; a case that uses one has none, because the full and statement runs already
+            cover it. Those runs are what the go-live check reads.
+          </p>
         </div>
       </Section>
 
@@ -374,7 +380,7 @@ export default function MethodPage() {
           </li>
           <li>No real patient data. Every patient, account and amount is invented.</li>
           <li>
-            The <Link href="/outreach" className="text-accent underline underline-offset-2">statement gate</Link>{" "}
+            The <Link href="/evidence/statement-gate" className="text-accent underline underline-offset-2">statement gate</Link>{" "}
             numbers come from a synthetic panel with assumed incidence rates. They show the queries work, not how often
             these errors happen.
           </li>
@@ -397,6 +403,10 @@ export default function MethodPage() {
           <li>
             Run it again with the statement view: <Code>npm run bench -- --view statement</Code>. Each view has its own
             section in the file, so this keeps the full-record results.
+          </li>
+          <li>
+            Run the feed-by-feed sets: <Code>npm run bench -- --view feeds</Code>. Then rebuild the recorded staff
+            queue from the full-record runs: <Code>npm run tickets:build</Code>.
           </li>
           <li>
             Rebuild the statement gate panel: <code className="num text-[13.5px]">npm run outreach:build</code>. It

@@ -18,7 +18,7 @@ const plexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "Payable as Stated",
   description:
-    "A test bench for patient billing agents: twelve patient situations, a scripted patient, and a judge that checks whether the agent should have asked for money at all.",
+    "A patient billing assistant that checks a bill is owed before it asks for money: the patient's thread, the staff queue its handoffs land in, and a go-live check for the practice.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
