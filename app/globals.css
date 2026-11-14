@@ -111,6 +111,8 @@ h1, h2, h3 {
 /* Ruled data table used across pages. Wrap in .table-scroll on narrow screens. */
 .table-scroll {
   overflow-x: auto;
+  /* Keeps screen-reader-only labels inside the scroll box instead of widening the page. */
+  position: relative;
 }
 .ledger {
   width: 100%;

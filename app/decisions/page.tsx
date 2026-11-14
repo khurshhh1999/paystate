@@ -85,6 +85,13 @@ const DECISIONS = [
     cost: "Every such case costs staff a phone call. That is the right price.",
   },
   {
+    title: "Whether money can be taken is decided in code",
+    chose: "A payment gate reads the reason codes, eligibility, ledger and the payer's stated patient share, and returns payable, part payable, not payable or cannot verify. The assistant explains; the gate decides. Collect actions it does not allow are removed.",
+    declined: "Leaving the check as a rule in the assistant's instructions.",
+    why: "A rule in a prompt is a test result. A rule in code is a guarantee, gives the same answer every time, and can be read by the practice's billing lead. It matches the answer key on all 28 records.",
+    cost: "The gate only knows the feeds it can read. With remittance alone it passes the Medicare and Medicaid patient and the copay paid at the desk, so the instruction to hold back when the patient raises something the record does not show stays in.",
+  },
+  {
     title: "The owed part of a wrong bill can still be paid",
     chose: "On the out-of-network anesthesia bill the patient owes $420 of $2,310. The assistant may take the $420 and holds the rest.",
     declined: "Refusing all payment until the statement is corrected.",
@@ -131,7 +138,7 @@ const LEFT_OUT = [
   ["Taking a payment", "The pay link and the plan are declared actions. Nothing moves money."],
   ["Voice", "Text only. Phone calls have different failure modes and need their own cases."],
   ["Writing back to the practice system", "A hold here is a flag in the demo. In production it has to stop statements in the system that sends them."],
-  ["Weighting by volume", "Twelve hard questions, counted equally. Real traffic is mostly simple balance questions."],
+  ["Real traffic", "The traffic set weights 28 situations by an assumed mix and uses simulated patients. It is closer than twelve hard cases, and it is still my guess at the mix until a practice supplies its own."],
 ];
 
 const FIRST_30 = [
