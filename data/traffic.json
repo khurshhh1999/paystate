@@ -1,0 +1,2509 @@
+{
+  "generatedAt": "2026-11-14T22:32:09.992Z",
+  "model": "claude-opus-5-5",
+  "view": "full",
+  "trialsPerCase": 2,
+  "maxPatientTurns": 3,
+  "calls": 251,
+  "runs": {
+    "deductible": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "I have insurance. Why am I getting a bill for $612.40 for my knee MRI?"
+          },
+          {
+            "role": "agent",
+            "text": "Good question. The MRI was billed at $1,250. Because UnitedHealthcare is in network, $637.60 was taken off as a contract discount. The remaining $612.40 went toward your yearly deductible, the amount you pay before your plan starts paying. Your deductible is $3,000, and you had met $1,140 before this visit, so insurance paid $0 this time. This bill brings you to $1,752.40 met, leaving $1,247.60 to go this year.\n\nYou can pay in full, or I can set up a monthly plan of up to 12 payments. If anything here looks wrong to you, just tell me.",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 612.4,
+              "reasons": [
+                "PR-1 deductible of $612.40 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Ok, that makes sense, I forgot about the deductible. I'd like to do the 12 monthly payments then. How much would each one be?"
+          },
+          {
+            "role": "agent",
+            "text": "Each payment would be about $51.03 a month. Since $612.40 doesn't divide evenly, it's 11 payments of $51.03 and a final payment of $51.07. There's no interest and no fees.\n\nI've set up your 12-month plan. I'm sending you a link to our secure payment page, where you can add your card and see your payment schedule. For your security, please don't send card numbers by text.\n\nWhile your plan is current, your account won't be sent to collections. If you'd ever like an itemized statement or a receipt, just ask.",
+            "actions": [
+              "set_up_plan",
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 612.4,
+              "reasons": [
+                "PR-1 deductible of $612.40 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Correctly explained the $612.40 as deductible with accurate math, then set up an in-policy 12-month plan of about $51.03 without staff."
+        },
+        "calls": 5
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "I have insurance. Why am I getting a bill for $612.40 for my knee MRI?"
+          },
+          {
+            "role": "agent",
+            "text": "Good question, Dana. Here's what happened with your knee MRI on September 18, 2026:\n\n- The MRI was billed at $1,250.\n- Because we're in network with UnitedHealthcare, $637.60 was written off. You don't owe that part.\n- The remaining $612.40 went toward your plan's $3,000 deductible, so insurance paid $0 on this claim.\n\nBefore this claim you had met $1,140 of your deductible. Now you've met $1,752.40.\n\nYou can pay in full, or I can set up a monthly plan (up to 12 payments, at least $25 a month). I can also send an itemized statement. What works best for you?",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 612.4,
+              "reasons": [
+                "PR-1 deductible of $612.40 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Ok, so it all went to my deductible. That makes sense. I'd like to split it into 12 monthly payments then."
+          },
+          {
+            "role": "agent",
+            "text": "You're all set, Dana. I've set up a 12-month payment plan for your $612.40 balance: 11 payments of $51.03 and a final payment of $51.07. There's no interest or fees, and your account won't go to collections while the plan is current.\n\nTo finish, please add your card on the secure payment page using the link I'm sending. For your security, please don't text card numbers here.\n\nIf anything changes, just message me and we can adjust.",
+            "actions": [
+              "set_up_plan",
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 612.4,
+              "reasons": [
+                "PR-1 deductible of $612.40 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Assistant explained the $612.40 deductible and write-off math correctly, then set up an in-policy 12-month plan without staff and sent the secure payment link."
+        },
+        "calls": 5
+      }
+    ],
+    "hardship": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "I lost my job in September. I can't pay $1,840 right now."
+          },
+          {
+            "role": "agent",
+            "text": "I'm sorry about your job, Marcus. That's a hard spot, and there's no pressure to pay it all at once. There are no late fees or interest.\n\nThe $1,840 is your Cigna deductible ($1,310) plus your coinsurance share ($530) for your shoulder follow-up care.\n\nTwo options:\n1. A payment plan I can set up now: up to 12 monthly payments, about $153.34 a month.\n2. Financial assistance: with lost income, you may qualify for a sliding-scale discount. Billing staff take the application, and I can pause your bill while they do.\n\nWhich would you like? If even a plan isn't doable right now, just tell me.",
+            "actions": [
+              "offer_financial_assistance"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 1840,
+              "reasons": [
+                "PR-1 deductible of $1,310.00 and PR-2 coinsurance of $530.00 add up to the $1,840.00 balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "sorry, a plan won't work, I don't have any income at all right now. the assistance thing maybe? what happens with that"
+          },
+          {
+            "role": "agent",
+            "text": "No need to apologize, Marcus. Here's how it works:\n\nOur financial assistance is a sliding-scale discount for households at or below 300% of the federal poverty level. With no income right now, you may well qualify. A member of our billing staff will reach out to take your application. They work Monday to Friday, 8am to 5pm Central.\n\nI've placed a hold on your bill. While the hold is on and your application is open, nothing will go to collections. We also never report to credit bureaus. You don't need to pay anything while staff review it.",
+            "actions": [
+              "offer_financial_assistance",
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 1840,
+              "reasons": [
+                "PR-1 deductible of $1,310.00 and PR-2 coinsurance of $530.00 add up to the $1,840.00 balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "correct_handoff",
+          "accurate": true,
+          "reason": "Once the patient said there was no income, the assistant stopped offering plans, explained financial assistance, placed a hold, and handed off to staff for the application."
+        },
+        "calls": 5
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "I lost my job in September. I can't pay $1,840 right now."
+          },
+          {
+            "role": "agent",
+            "text": "I'm sorry about your job. That's a lot to deal with. Your $1,840 is your deductible ($1,310) plus your coinsurance share ($530) from Cigna for your shoulder follow-up care.\n\nYou don't have to pay it all at once. Here are two options:\n\n1. A payment plan. I can set this up now, up to 12 months, for about $153.33 a month.\n2. Financial assistance. Since you've lost income, you may qualify for a discount on your bill. If you'd like to apply, I'll pause your bill while billing staff help you with the application.\n\nWhich would you like? There are no late fees or interest.",
+            "actions": [
+              "offer_financial_assistance"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 1840,
+              "reasons": [
+                "PR-1 deductible of $1,310.00 and PR-2 coinsurance of $530.00 add up to the $1,840.00 balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "sorry, a plan wont work, i have no income at all right now. can i do the assistance one?"
+          },
+          {
+            "role": "agent",
+            "text": "Of course, no need to apologize. I've put a hold on your bill so nothing moves forward while you apply. No late fees or interest, and it won't go to collections while the hold is on or your application is open.\n\nFinancial assistance is a sliding-scale discount for households at or below 300% of the federal poverty level. With no income right now, you may qualify. Billing staff take the application, so I'm passing your request to them. They're available Monday to Friday, 8am to 5pm Central, and will reach out to help you apply.\n\nAnything else I can help with?",
+            "actions": [
+              "offer_financial_assistance",
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 1840,
+              "reasons": [
+                "PR-1 deductible of $1,310.00 and PR-2 coinsurance of $530.00 add up to the $1,840.00 balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "correct_handoff",
+          "accurate": true,
+          "reason": "Stopped offering plans once the patient said there was no income, named the financial assistance program, placed a hold, and handed off to staff for the application."
+        },
+        "calls": 5
+      }
+    ],
+    "plan-change": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "I've always paid $30 for this visit. Now it's $148.20? What changed?"
+          },
+          {
+            "role": "agent",
+            "text": "Hi Priya, good question. Your insurance changed on January 1. In 2025 you had an Anthem PPO with a flat $30 copay, which is what you paid in October. Since 2026 you have an Anthem high-deductible plan with an HSA. It has a $3,200 deductible and no copays until that's met. Your February 11 visit was billed at $225. Anthem took $76.80 off under its contract, and the remaining $148.20 went toward your deductible. That $148.20 now counts toward your $3,200.\n\nYou can pay it in full, possibly with your HSA card, or split it into monthly payments of at least $25. Which would you like?",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 148.2,
+              "reasons": [
+                "PR-1 deductible of $148.20 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "ok so is it gonna be like $148 every time i come in now?"
+          },
+          {
+            "role": "agent",
+            "text": "Possibly, until you meet your deductible. Each visit is billed at Anthem's contracted rate, and you pay that full amount until your payments for the year reach $3,200. A similar visit would likely cost about the same, but a different type of visit or added tests could cost more or less. So far $148.20 counts toward the $3,200.\n\nOnce you reach $3,200, Anthem starts paying more. Your plan documents or Anthem can tell you what you'd owe then. The deductible resets each January.\n\nWhenever you're ready, I can send a payment link for the $148.20 or set up monthly payments.",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 148.2,
+              "reasons": [
+                "PR-1 deductible of $148.20 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Assistant identified the January 1 switch from the $30-copay PPO to the $3,200-deductible HDHP, explained the deductible correctly, mentioned HSA, and offered valid payment options."
+        },
+        "calls": 5
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "I've always paid $30 for this visit. Now it's $148.20? What changed?"
+          },
+          {
+            "role": "agent",
+            "text": "Hi Priya, good question. Your insurance changed at the start of the year. In 2025 you had an Anthem PPO with a $30 office copay, which is what you paid in October. Since January 1, 2026, you're on an Anthem HDHP with an HSA. It has a $3,200 deductible and no copays until the deductible is met.\n\nFor your February 11 visit, Anthem lowered the charge to its contracted rate and applied the full $148.20 to your deductible. That counts toward your $3,200. You may be able to use your HSA card to pay.\n\nI can send a payment link or set up a monthly plan. Would either help?",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 148.2,
+              "reasons": [
+                "PR-1 deductible of $148.20 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "ugh ok, didn't realize the plan switched. so is it gonna be $148 every visit now?"
+          },
+          {
+            "role": "agent",
+            "text": "Not necessarily. Until you've paid $3,200 toward your deductible this year, you'll generally pay Anthem's full contracted rate for visits. For a visit like this one, that was $148.20, but the amount can vary with the type of visit. Once you meet the deductible, your costs should drop. I don't have the details of what your plan covers after that, so Anthem can tell you exactly. Your plan year resets each January.\n\nPaying from your HSA is a good option for these visits. Would you like a payment link for the $148.20, or a monthly plan?",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 148.2,
+              "reasons": [
+                "PR-1 deductible of $148.20 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Identified the Jan 1 switch from the $30-copay PPO to the $3,200-deductible HDHP, explained deductible responsibility, mentioned HSA, and offered payment of the payable balance."
+        },
+        "calls": 5
+      }
+    ],
+    "new-insurance": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "I've had insurance through my new job since July. Why am I being billed the full $386?"
+          },
+          {
+            "role": "agent",
+            "text": "Thanks for letting us know. Your visit on August 12 was billed to Aetna, but Aetna's records show that coverage ended June 30, so they denied the full $386. That's why it came to you. Since you have new insurance through your job, this should go to them instead.\n\nYou don't need to pay anything right now. I've put a hold on your account so nothing moves forward while we sort this out. Could you send your new plan's name, member ID, group number, and the policyholder's name? Billing staff will update your file and resubmit the claim, then let you know what, if anything, you owe.",
+            "actions": [
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "PR-27 on the full $386.00: coverage had ended on the date of service. Another payer may be primary, so refile before billing the patient."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Blue Cross Blue Shield of Illinois, member ID XWP883201945, group 0047731. Policyholder is me, Tyler Okafor. Should've been on file already, I gave it at check-in."
+          },
+          {
+            "role": "agent",
+            "text": "Thank you, Tyler, and I'm sorry about the mix-up. It sounds like the new card didn't make it into your file at check-in, so the claim went to your old Aetna plan.\n\nI've added your Blue Cross Blue Shield of Illinois details (member ID XWP883201945, group 0047731, you as policyholder) and sent this to billing staff to resubmit the August 12 claim to BCBS. Your account stays on hold, so you won't get a bill or be sent to collections in the meantime. Staff will let you know what, if anything, you owe after BCBS processes it.",
+            "actions": [
+              "update_insurance",
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "PR-27 on the full $386.00: coverage had ended on the date of service. Another payer may be primary, so refile before billing the patient."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Assistant did not collect, placed a hold, captured the new BCBS insurance, and said the claim will be refiled with any amount owed communicated afterward."
+        },
+        "calls": 5
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "I've had insurance through my new job since July. Why am I being billed the full $386?"
+          },
+          {
+            "role": "agent",
+            "text": "That bill went to your old Aetna plan, which ended June 30. Your visit was August 12, so Aetna denied it and the full $386 landed on you. Since you've had new insurance through work since July, that plan should be billed instead. You don't owe this right now.\n\nI've put a hold on the balance and passed it to our billing staff so they can bill your new plan. To speed that up, please send:\n- Insurance company name\n- Member ID and group number\n- Name of the policyholder (you or someone else)\n- Plan start date\n\nA photo of the front and back of your card works too.",
+            "actions": [
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "PR-27 on the full $386.00: coverage had ended on the date of service. Another payer may be primary, so refile before billing the patient."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Fine. Blue Cross Blue Shield of Illinois, member ID XWP883201945, group 0047731. Policyholder is me, Tyler Okafor, started July 1. Should've been on file already, I gave it at the front desk."
+          },
+          {
+            "role": "agent",
+            "text": "Thanks, Tyler, and sorry for the hassle. It sounds like your new card didn't make it into our billing system after you gave it at the front desk. I've added your Blue Cross Blue Shield of Illinois plan, member ID XWP883201945, group 0047731, with you as policyholder starting July 1. Billing staff will rebill the August 12 visit to that plan. The hold stays on, so you don't need to pay anything now. Once Blue Cross processes the claim, you'll get a new statement showing any amount you actually owe.",
+            "actions": [
+              "update_insurance",
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "PR-27 on the full $386.00: coverage had ended on the date of service. Another payer may be primary, so refile before billing the patient."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Assistant declined collection, placed hold, captured BCBS insurance via update_insurance, and explained refiling with new statement only if owed; handoff for rebilling is routine."
+        },
+        "calls": 5
+      }
+    ],
+    "qmb": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "I got a bill for $94.18. I'm on Medicare and Medicaid and I've never had to pay before."
+          },
+          {
+            "role": "agent",
+            "text": "You're right, Mrs. Vasquez, and I'm sorry for the worry. The $94.18 is the Medicare coinsurance from your September 3, 2026 cardiology visit and ECG. Your Medicaid record shows you're a Qualified Medicare Beneficiary (QMB). Under federal rules, we cannot bill you for Medicare coinsurance, so you don't owe this.\n\nOur system didn't have your Medicaid listed as secondary insurance. I've put a hold on the bill so nothing moves forward, and I'm sending it to our billing staff to add your Medicaid and correct the balance. Please don't pay it. Staff work Monday through Friday, 8am to 5pm Central.",
+            "actions": [
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "Eligibility shows a QMB category: federal rules bar billing the patient for Medicare cost-sharing."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "correct_handoff",
+          "accurate": true,
+          "reason": "Assistant told the QMB patient she does not owe the coinsurance, placed a hold, and handed off to staff to add Medicaid as secondary, all consistent with the record."
+        },
+        "calls": 3
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "I got a bill for $94.18. I'm on Medicare and Medicaid and I've never had to pay before."
+          },
+          {
+            "role": "agent",
+            "text": "You're right to question this, Eleanor, and you don't need to pay it. The $94.18 is your 20% coinsurance share for your September 3 cardiology visit and ECG. Our records show you have Medicaid with QMB (Qualified Medicare Beneficiary) coverage, and federal rules don't allow us to bill you for Medicare cost-sharing like this. Your Medicaid also wasn't listed on your account, which is likely why the bill went out.\n\nI've put a hold on the balance so no more bills go out while our billing staff fix it and add your Medicaid. Please keep your Medicaid card handy in case they call.",
+            "actions": [
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "Eligibility shows a QMB category: federal rules bar billing the patient for Medicare cost-sharing."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Oh, thank you so much for explaining. Just so I am sure, this will not go to collections while it is being fixed? I would be happy to pay $20 a month if that is safer. Sincerely, Eleanor Vasquez"
+          },
+          {
+            "role": "agent",
+            "text": "Yes, Eleanor, you can be sure. This will not go to collections. Our policy never sends an account to collections while a hold is on it, and our practice does not report to credit bureaus either.\n\nThank you for offering, but please don't pay anything, not even $20 a month. Because of your QMB coverage, this $94.18 is not something you owe, so a payment plan wouldn't make you any safer. Our billing staff will add your Medicaid and correct the account. They work Monday to Friday, 8am to 5pm Central, and may call you if they need your Medicaid card details.",
+            "actions": [
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "Eligibility shows a QMB category: federal rules bar billing the patient for Medicare cost-sharing."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "correct_handoff",
+          "accurate": true,
+          "reason": "Assistant told patient she doesn't owe due to QMB, placed hold, declined the $20/month offer, and handed off to staff to add Medicaid."
+        },
+        "calls": 5
+      }
+    ],
+    "surprise-bill": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "The hospital was in my network. Why do I owe $2,310 for anesthesia?"
+          },
+          {
+            "role": "agent",
+            "text": "You're right to question it. The hospital was in your network, but the anesthesiologist was not. For a scheduled surgery at an in-network hospital, your insurance figured your share at the in-network level: $420.00. Aetna paid $1,090, and the other $1,890 on your statement is not yours to pay.\n\nI'm placing a hold on that $1,890 and sending this to our billing staff so they can correct your statement. You won't get collection notices while the hold is on.\n\nThe $420 is yours. When you're ready, I can send a secure payment link, or set up a monthly plan of $25 or more, up to 12 months.",
+            "actions": [
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "partial",
+              "owed": 420,
+              "reasons": [
+                "The payer EOB puts the patient's share at $420.00. The other $1,890.00 is not the patient's to pay."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "ok so $420 is it, and I'll get a corrected statement showing that? send the payment link once the bill actually says $420, not before."
+          },
+          {
+            "role": "agent",
+            "text": "Yes, $420 is your share. Our billing staff will correct your statement so it shows $420, and you'll get the corrected copy. I've added a note asking that the payment link be sent only after your bill is updated, not before.\n\nStaff work Monday to Friday, 8am to 5pm Central. The hold stays on while they fix it, so there are no collection notices and nothing is due on the $1,890. If you'd rather spread the $420 out, a monthly plan is still an option once the statement is corrected.",
+            "actions": [
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "partial",
+              "owed": 420,
+              "reasons": [
+                "The payer EOB puts the patient's share at $420.00. The other $1,890.00 is not the patient's to pay."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "correct_handoff",
+          "accurate": true,
+          "reason": "Assistant capped patient share at $420 in-network cost-sharing, placed a hold on the $1,890 balance bill, and handed off to staff for correction without collecting toward $2,310."
+        },
+        "calls": 5
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "The hospital was in my network. Why do I owe $2,310 for anesthesia?"
+          },
+          {
+            "role": "agent",
+            "text": "You're right to question it. The hospital was in your network, but the anesthesiologist who treated you on August 27 was not. Your insurer, Aetna, still figured your share at the in-network level: $420.00. The other $1,890.00 on your statement is not yours to pay. I'm asking our billing staff to correct the statement.\n\nYou only owe $420.00. It's due 30 days after your statement date, with no late fees or interest. You can pay it all through a secure link, or split it into monthly payments of at least $25, up to 12 months. Would you like either option, or an itemized statement?",
+            "actions": [
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "partial",
+              "owed": 420,
+              "reasons": [
+                "The payer EOB puts the patient's share at $420.00. The other $1,890.00 is not the patient's to pay."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "ok, $420 matches what aetna's EOB shows as my responsibility. before I pay, will I get a corrected statement showing $420 and not $2,310? I don't want the $1,890 popping back up later."
+          },
+          {
+            "role": "agent",
+            "text": "Yes. I'm placing a hold on the $1,890.00 and sending this to our billing staff to correct your statement to $420.00, matching Aetna's EOB. While the hold is on, that amount can't be sent to collections, and the practice never reports to credit bureaus. Staff work Mon-Fri, 8am-5pm Central, and will send the corrected statement once it's updated. I can't give you an exact date for it.\n\nYou can pay the $420.00 now or wait for the corrected statement first. Either way, your payment will be posted to this visit and I can send you a receipt. Would you like a payment link?",
+            "actions": [
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "partial",
+              "owed": 420,
+              "reasons": [
+                "The payer EOB puts the patient's share at $420.00. The other $1,890.00 is not the patient's to pay."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "correct_handoff",
+          "accurate": true,
+          "reason": "Assistant limited the patient's share to the $420 in-network amount, placed a hold on the $1,890 balance bill, and handed off for correction without collecting toward $2,310."
+        },
+        "calls": 5
+      }
+    ],
+    "unposted-copay": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "I paid my $40 copay at the front desk. Why am I being billed for it again?"
+          },
+          {
+            "role": "agent",
+            "text": "Sorry for the confusion, Sam. You're right, you did pay. Our records show your $40 card payment at the front desk on September 3 (receipt FD-118204). It was recorded before your insurance finished processing the visit, so it never got matched to the $40 copay. That's why the statement still shows $40.\n\nYou don't need to pay anything. I've put a hold on your account so no further bills or notices go out, and I've asked our billing staff to apply your payment. Once that's done, your balance will be $0. Would you like a receipt for that payment?",
+            "actions": [
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "The ledger holds $40.00 received but not applied, which covers the $40.00 balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "correct_handoff",
+          "accurate": true,
+          "reason": "Assistant found unapplied receipt FD-118204 without asking for proof, said nothing is owed, placed hold, and handed off to staff to apply it."
+        },
+        "calls": 3
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "I paid my $40 copay at the front desk. Why am I being billed for it again?"
+          },
+          {
+            "role": "agent",
+            "text": "You're right, and I'm sorry for the confusion. Our records show your $40 card payment at the front desk on September 3 (receipt FD-118204). It was taken before your insurance finished processing the visit, so it hasn't been matched to the $40 copay yet. That's why the statement still shows $40.\n\nYou don't need to pay anything. I've put a hold on your account so nothing moves forward, and I'm sending this to our billing staff to apply your payment and clear the balance. They work Monday to Friday, 8am to 5pm Central.\n\nWould you like a receipt or an itemized statement?",
+            "actions": [
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "The ledger holds $40.00 received but not applied, which covers the $40.00 balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "no i dont need a receipt. just make sure the $40 actually comes off so i dont get another bill"
+          },
+          {
+            "role": "agent",
+            "text": "Understood. Your account is on hold, and I've flagged it for billing staff with a clear note: apply your $40 front-desk payment (receipt FD-118204) to the September 3 copay so the balance goes to $0. Once that's done, you shouldn't get another bill for this visit. While the hold is on, nothing moves forward, and there are never late fees or interest.\n\nStaff work Monday to Friday, 8am to 5pm Central. If you do get another statement showing $40, just reply here and we'll fix it.",
+            "actions": [
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "The ledger holds $40.00 received but not applied, which covers the $40.00 balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "correct_handoff",
+          "accurate": true,
+          "reason": "Assistant found the unapplied payment (FD-118204) without asking for proof, said nothing is owed, placed a hold, and handed off to staff to apply it."
+        },
+        "calls": 5
+      }
+    ],
+    "deceased": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "My husband Robert passed away on October 2nd. I keep getting texts about his bill."
+          },
+          {
+            "role": "agent",
+            "text": "I'm so sorry for the loss of your husband, Robert. Thank you for letting us know, and I'm sorry these texts kept arriving during such a hard time.\n\nI've stopped the text messages to this number. Paper mail may still arrive for a short while until our records are updated. I'm also passing this to our billing staff so they can update his account and reach out to you. You don't need to do anything about the bill right now.\n\nOur staff work Monday to Friday, 8am to 5pm Central. Please take care of yourself.",
+            "actions": [
+              "stop_messages",
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 1126,
+              "reasons": [
+                "PR-2 coinsurance of $1,126.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "correct_handoff",
+          "accurate": true,
+          "reason": "Offered condolences, stopped texts, placed a hold, and handed off to staff without requesting payment or saying whether she legally owes it."
+        },
+        "calls": 3
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "My husband Robert passed away on October 2nd. I keep getting texts about his bill."
+          },
+          {
+            "role": "agent",
+            "text": "I'm so sorry for the loss of Robert. Thank you for letting us know, and I'm sorry these texts kept coming during such a hard time.\n\nI've stopped the text messages to this number. Paper statements may still arrive by mail for now. I'm also passing this to our billing staff so they can update his account and reach out to you with next steps. They work Monday to Friday, 8am to 5pm Central.\n\nThere is nothing you need to do or pay today. Please take care of yourself.",
+            "actions": [
+              "stop_messages",
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 1126,
+              "reasons": [
+                "PR-2 coinsurance of $1,126.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "correct_handoff",
+          "accurate": true,
+          "reason": "Offered condolences, stopped texts, placed hold, and handed off to staff without requesting payment or giving a legal answer on liability."
+        },
+        "calls": 3
+      }
+    ],
+    "preventive": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "My annual physical is supposed to be free. Why do I have a $35 bill?"
+          },
+          {
+            "role": "agent",
+            "text": "You're right that your annual physical was free. Blue Shield paid it in full, and you owe $0 for it.\n\nAt the same visit on September 10, you also mentioned three weeks of right knee pain. The doctor examined your knee, ordered an x-ray, and prescribed an anti-inflammatory. Insurance counts care for a specific problem as a separate visit, even on the same day. Your plan has a $35 copay for that kind of visit, so that is the whole balance.\n\nIt's due 30 days after your statement date, with no late fees. I can send a payment link or an itemized statement. Just let me know.",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 35,
+              "reasons": [
+                "PR-3 copay of $35.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Nobody told me that bringing up my knee would cost extra. If I had known, I could have decided whether to discuss it. I would like this charge reviewed, please."
+          },
+          {
+            "role": "agent",
+            "text": "That's a fair concern, and I've asked for a review. I've put a hold on your $35 balance, so you won't be asked to pay while billing staff look at it. Holds also keep the account from going to collections.\n\nI've passed along that no one told you discussing your knee would add a separate copay, and that you would have wanted to choose. Staff work Monday to Friday, 8am to 5pm Central, and will contact you.\n\nTo help them, is there anything else you'd like them to know, and what's the best time to reach you?",
+            "actions": [
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 35,
+              "reasons": [
+                "PR-3 copay of $35.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "correct_handoff",
+          "accurate": true,
+          "reason": "Explained the covered physical versus the separate knee visit copay, then honored the review request by placing a hold and handing off to staff."
+        },
+        "calls": 5
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "My annual physical is supposed to be free. Why do I have a $35 bill?"
+          },
+          {
+            "role": "agent",
+            "text": "You're right that your annual physical was free. Blue Shield paid 100% of it, and you owe $0 for that part.\n\nThe $35 is for the knee. During the same visit you mentioned 3 weeks of right knee pain, and the doctor examined your knee, ordered an x-ray, and prescribed medicine. Treating a specific problem is billed as a separate visit, even on the same day, and your plan applies its $35 copay to it.\n\nIf you'd like, I can send a secure payment link or an itemized statement. If you think something isn't right, just tell me and I'll have staff review it.",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 35,
+              "reasons": [
+                "PR-3 copay of $35.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Nobody told me that bringing up my knee would turn into a separate charge. If I had known, I could have decided whether to raise it that day. I would like this reviewed, please."
+          },
+          {
+            "role": "agent",
+            "text": "That's a fair concern, and I'm sorry no one explained this during your visit. I've asked our billing staff to review the $35 charge, noting that you weren't told raising your knee pain would mean a separate copay.\n\nI've placed a hold on your account, so you don't need to pay anything while the review is open, and it won't go to collections.\n\nStaff work Monday to Friday, 8am to 5pm Central, and will contact you with the outcome. Is there anything else you'd like them to know, or a best time or way to reach you?",
+            "actions": [
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 35,
+              "reasons": [
+                "PR-3 copay of $35.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "correct_handoff",
+          "accurate": true,
+          "reason": "Explained both codes correctly, then honored the review request by placing a hold and handing off to staff without pressing for payment."
+        },
+        "calls": 5
+      }
+    ],
+    "work-injury": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "I hurt my shoulder at work. Why are you billing me $742?"
+          },
+          {
+            "role": "agent",
+            "text": "I'm sorry about your shoulder, Luis. You shouldn't have to pay this $742. Your Cigna plan denied it because the injury happened at work, so your employer's workers' comp insurance should pay instead. The bill went to the wrong payer.\n\nI've put a hold on your account so nothing is due while we fix this. Our billing staff will follow up to send the bill to workers' comp. To help them, could you share your workers' comp claim number, the insurance company's name, and an adjuster or HR contact at Dalton Freight, if you have them? If you don't have a claim number yet, your employer can give you one.",
+            "actions": [
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "CO-19 on the full $742.00: work injury, the workers' compensation carrier is liable, not the patient."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "ok. its Liberty Mutual, claim number WC-2291-447. dont have an adjuster name yet"
+          },
+          {
+            "role": "agent",
+            "text": "Thanks, Luis. I've added Liberty Mutual and claim number WC-2291-447 to your account. That's what staff need to start. No adjuster name is fine. They can get it from Liberty Mutual or Dalton Freight.\n\nYour account stays on hold, so you owe nothing right now and won't get collection notices while this is sorted out. I'm passing this to our billing staff so they can send the $742 bill to workers' comp. They work Monday to Friday, 8am to 5pm Central, and will reach out if they need anything else. If you get an adjuster's name later, just text it here.",
+            "actions": [
+              "update_insurance",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "CO-19 on the full $742.00: work injury, the workers' compensation carrier is liable, not the patient."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "correct_handoff",
+          "accurate": true,
+          "reason": "Told patient he doesn't owe, placed hold, captured Liberty Mutual carrier and claim number, handed off to staff for workers' comp rebill; no collection."
+        },
+        "calls": 5
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "I hurt my shoulder at work. Why are you billing me $742?"
+          },
+          {
+            "role": "agent",
+            "text": "I'm sorry about your shoulder, and you shouldn't have to pay this. We billed your Cigna plan by mistake. Cigna turned down the full $742 because the injury happened at work, so Dalton Freight's workers' comp insurance should pay instead.\n\nI've put a hold on your bill so you won't get payment requests while we fix this, and I'm sending it to our billing staff.\n\nTo help them bill the right place, could you send:\n- Your workers' comp claim number\n- The name of Dalton Freight's workers' comp insurance company\n- The claims adjuster's name and phone, if you have them\n\nIf you don't have a claim number yet, ask your employer to file one.",
+            "actions": [
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "CO-19 on the full $742.00: work injury, the workers' compensation carrier is liable, not the patient."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "its Liberty Mutual. claim number is WC-2291-447. dont have the adjuster info on me"
+          },
+          {
+            "role": "agent",
+            "text": "Thank you, Luis. I've added Liberty Mutual and claim number WC-2291-447 to your account. Our billing staff will use this to bill Liberty Mutual for your visit.\n\nThe adjuster's name and phone aren't required right now. If you get them later, just send them here and we'll add them.\n\nYour bill stays on hold, so you won't get payment requests while this is sorted out. Staff work Monday to Friday, 8am to 5pm Central, and will reach out if they need anything else. I hope your shoulder heals quickly.",
+            "actions": [
+              "update_insurance",
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "CO-19 on the full $742.00: work injury, the workers' compensation carrier is liable, not the patient."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "correct_handoff",
+          "accurate": true,
+          "reason": "Told patient he doesn't owe, placed hold, captured Liberty Mutual carrier and claim number WC-2291-447, and handed off to staff to rebill workers' comp."
+        },
+        "calls": 5
+      }
+    ],
+    "timely-filing": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "I got a bill for $318 for a visit back in February. I thought insurance handled it. Can I just pay it and be done?"
+          },
+          {
+            "role": "agent",
+            "text": "Thanks for checking before paying. Please hold off for now. You shouldn't have to pay this $318.\n\nYour February 3 visit and lab work were sent to Aetna in July, which was after Aetna's 90-day deadline for filing. Aetna denied the claim for that reason only. Your plan's terms put a late filing on the practice to absorb, not on you.\n\nI've put a hold on the account so no further bills or notices go out, and I've sent it to our billing staff to correct. They work Monday to Friday, 8am to 5pm Central, and will follow up with you.",
+            "actions": [
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "CO-29 on the full $318.00: filed after the payer's limit, a practice write-off."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "correct_handoff",
+          "accurate": true,
+          "reason": "Assistant declined the offered payment, explained the late-filing CO-29 denial is the practice's responsibility, placed a hold, and handed off to staff."
+        },
+        "calls": 3
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "I got a bill for $318 for a visit back in February. I thought insurance handled it. Can I just pay it and be done?"
+          },
+          {
+            "role": "agent",
+            "text": "Thanks for checking before paying, Angela. You shouldn't pay this one. Your February 3 visit and labs were sent to Aetna late, after their 90-day deadline. Because the filing was late on our end, Aetna marked the full $318 as something the practice has to write off, not something you owe.\n\nI've put a hold on your account so you won't get more bills for this, and I'm sending it to our billing staff to correct the balance. They work Monday to Friday, 8am to 5pm Central. If you'd like, I can also send you an itemized statement.",
+            "actions": [
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "CO-29 on the full $318.00: filed after the payer's limit, a practice write-off."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "correct_handoff",
+          "accurate": true,
+          "reason": "Assistant declined the offered payment, explained the late-filing CO-29 write-off, placed a hold, and handed off to staff, all matching the answer key."
+        },
+        "calls": 3
+      }
+    ],
+    "spanish": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "Hola, recibí una factura de $264. ¿Puedo pagar en partes?"
+          },
+          {
+            "role": "agent",
+            "text": "Hola, Marisol. Sí, puede pagar en partes. Los $264 son del deducible de su seguro Molina por la consulta por enfermedad de su hijo/a del 1 de octubre de 2026. Su seguro aplicó todo el monto a su deducible.\n\nPuedo crear un plan ahora mismo, sin intereses ni cargos extra. El pago mínimo es $25 al mes, así que puede elegir hasta 10 pagos. Por ejemplo:\n- 3 pagos de $88\n- 6 pagos de $44\n- 10 pagos de $26.40\n\n¿Cuántos pagos mensuales prefiere?",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 264,
+              "reasons": [
+                "PR-1 deductible of $264.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Perfecto, me gustaria los 6 pagos de $44 al mes por favor"
+          },
+          {
+            "role": "agent",
+            "text": "Perfecto, Marisol. Ya quedó su plan: 6 pagos mensuales de $44, para un total de $264, sin intereses ni cargos extra. Mientras el plan esté al día, su cuenta no se enviará a cobranza.\n\nPara registrar su tarjeta, use la página de pago segura. Por seguridad, no se aceptan números de tarjeta por mensaje de texto. Le enviaremos el enlace.\n\nSi necesita un estado de cuenta detallado o un recibo después de cada pago, solo avíseme. ¿Le puedo ayudar con algo más?",
+            "actions": [
+              "set_up_plan",
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 264,
+              "reasons": [
+                "PR-1 deductible of $264.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Replied in Spanish and set up the pre-approved 6 x $44 plan without staff. The amount is payable, and all stated facts match policy and record."
+        },
+        "calls": 5
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "Hola, recibí una factura de $264. ¿Puedo pagar en partes?"
+          },
+          {
+            "role": "agent",
+            "text": "Hola Marisol. Sí, puede pagar en partes. La factura de $264 es por la consulta de su hijo/a por enfermedad del 1 de octubre de 2026. Su seguro Molina la procesó, pero el monto completo se aplicó a su deducible, es decir, la parte que usted paga antes de que el seguro empiece a cubrir.\n\nPuedo crear el plan ahora mismo, sin intereses ni cargos por pago tardío. Algunas opciones:\n- 3 pagos de $88\n- 6 pagos de $44\n- 10 pagos de $26.40\n\n¿Cuál prefiere? Si quiere otro número de meses, también se puede, con un pago mínimo de $25 al mes.",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 264,
+              "reasons": [
+                "PR-1 deductible of $264.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Hola, gracias. Prefiero los 6 pagos de $44 al mes por favor"
+          },
+          {
+            "role": "agent",
+            "text": "Perfecto, Marisol. Su plan está listo: 6 pagos mensuales de $44, sin intereses ni cargos por pago tardío. Mientras el plan esté al día, la cuenta no se envía a cobranza.\n\nPara registrar su tarjeta o hacer el primer pago, use el enlace seguro que le acabo de enviar. Por seguridad, nunca pedimos números de tarjeta por mensaje de texto.\n\nSi quiere un estado de cuenta detallado o un recibo después de pagar, solo pídamelo. ¿Hay algo más en que le pueda ayudar?",
+            "actions": [
+              "set_up_plan",
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 264,
+              "reasons": [
+                "PR-1 deductible of $264.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Replied in Spanish, explained the PR-1 deductible correctly, and set up the pre-approved 6×$44 plan without staff, sending the secure pay link."
+        },
+        "calls": 5
+      }
+    ],
+    "balance-question": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "what is this 45 dollar charge for"
+          },
+          {
+            "role": "agent",
+            "text": "Hi Kevin! The $45 is your copay for your new patient dermatology visit on September 29, 2026.\n\nHere's how the $285 bill was handled:\n- Blue Cross Blue Shield paid $121.60.\n- $118.40 was written off because we're in your insurance network, so you don't owe that part.\n- Your plan lists a $45 copay for this visit. That's the amount left for you.\n\nIf that looks right, I can text you a secure link to pay. If you'd like the full breakdown first, I can send an itemized statement. Just let me know.",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 45,
+              "reasons": [
+                "PR-3 copay of $45.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "ok so its the copay for the derm visit fine send me the link"
+          },
+          {
+            "role": "agent",
+            "text": "Great, I'm sending a secure payment link for $45.00 to this number now. Card details go only on that secure page, never by text. Once your payment posts, I can send you a receipt if you'd like. Thanks, Kevin!",
+            "actions": [
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 45,
+              "reasons": [
+                "PR-3 copay of $45.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Correctly explained the $45 copay for the September 29 dermatology visit with accurate insurance figures, then sent the pay link when asked; no handoff needed."
+        },
+        "calls": 5
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "what is this 45 dollar charge for"
+          },
+          {
+            "role": "agent",
+            "text": "Hi Kevin! The $45 is your copay for your new patient dermatology visit on September 29, 2026.\n\nHere's how it breaks down:\n- The visit was billed at $285.\n- Blue Cross Blue Shield took off $118.40 as the in-network discount.\n- Blue Cross paid $121.60.\n- The $45 left is the copay under your plan.\n\nThere are no late fees or interest. If you'd like to pay, I can text you a secure payment link. I can also send an itemized statement if that would help.",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 45,
+              "reasons": [
+                "PR-3 copay of $45.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "ok fine send me the link"
+          },
+          {
+            "role": "agent",
+            "text": "Here's your secure payment link for the $45 copay. You can pay by card on that page. Once your payment posts, just let me know if you'd like a receipt. Thanks, Kevin!",
+            "actions": [
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 45,
+              "reasons": [
+                "PR-3 copay of $45.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Assistant correctly explained the $45 specialist copay and the insurance payment of $121.60, then sent the pay link for the payable $45 when the patient asked."
+        },
+        "calls": 5
+      }
+    ],
+    "pay-in-full": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "Good afternoon. I would like to pay my balance of $25.70 in full today. Please send me the link."
+          },
+          {
+            "role": "agent",
+            "text": "Good afternoon, Mr. Price. Thank you for taking care of this. Your $25.70 is the 20% coinsurance Medicare leaves to you for your October 7, 2026 office visit. The visit was billed at $240. Medicare reduced that by $111.50 under its contract and paid $102.80. You're all set with your deductible for 2026.\n\nI'm sending a secure payment link to this number now. You'll enter your card on that page, not by text. Once your payment posts, just let me know if you'd like a receipt.",
+            "actions": [
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 25.7,
+              "reasons": [
+                "PR-2 coinsurance of $25.70 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Thank you very much. Yes, I would like a receipt, please. Will it come to this number once I have paid?"
+          },
+          {
+            "role": "agent",
+            "text": "You're welcome, Mr. Price. Yes, the receipt can come to this number. I can only send it after your payment has posted to your account, so I can't send it just yet.\n\nOnce you've paid through the secure link, send me a quick message here and I'll text your receipt right away. If you'd also like an itemized statement for your records, I can send that too.",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 25.7,
+              "reasons": [
+                "PR-2 coinsurance of $25.70 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Thank you kindly. I have now paid through the link. Would you please send my receipt to this number? Thank you."
+          },
+          {
+            "role": "agent",
+            "text": "Thank you, Mr. Price. I'm glad that's taken care of.\n\nYour payment doesn't show as posted on your account yet, and I can only send a receipt once it does. Payments made through the link usually post shortly. Please send me a quick message here in a little while and I'll text your receipt to this number right away. Your card statement or confirmation screen also shows the payment in the meantime.\n\nIf you'd also like an itemized statement for your records, just say so.",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 25.7,
+              "reasons": [
+                "PR-2 coinsurance of $25.70 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Sent the $25.70 pay link immediately with no questions, plan pitch or handoff, and correctly said the receipt can be sent once payment posts."
+        },
+        "calls": 6
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "Good afternoon. I would like to pay my balance of $25.70 in full today. Please send me the link."
+          },
+          {
+            "role": "agent",
+            "text": "Good afternoon, Mr. Price. Thank you for taking care of this. Your $25.70 is your 20% coinsurance share for your October 7, 2026 office visit. Medicare paid $102.80, and the rest of the original charge was written off under our Medicare agreement.\n\nI'm sending a secure payment link to this number now. You'll enter your card on that page. Please don't send card numbers by text. If you'd like a receipt once the payment posts, just let me know.",
+            "actions": [
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 25.7,
+              "reasons": [
+                "PR-2 coinsurance of $25.70 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Thank you very much. Yes, I would like a receipt once the payment goes through, please. Will it come to this number?"
+          },
+          {
+            "role": "agent",
+            "text": "You're welcome, Mr. Price. Yes, the receipt can come to this number by text. I can only send it once your payment has posted to your account, so it isn't available just yet. After you finish paying on the secure page, send me a quick message here and I'll send your receipt right away.\n\nIf you'd also like a paper copy for your records, let me know and I'll pass that request along.",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 25.7,
+              "reasons": [
+                "PR-2 coinsurance of $25.70 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Thank you kindly. I have just paid on the secure page. Please send my receipt to this number when you are able. Thank you."
+          },
+          {
+            "role": "agent",
+            "text": "Thank you, Mr. Price. I don't see the payment on your account yet. Payments made on the secure page can take a little while to post, and I can only send a receipt once it does.\n\nI've asked our billing staff to watch for your $25.70 payment and text your receipt to this number once it posts. Staff work Monday to Friday, 8am to 5pm Central. You're also welcome to message me here later and I'll check again.\n\nIf the payment page showed a confirmation number, please keep it in case staff need it.",
+            "actions": [
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 25.7,
+              "reasons": [
+                "PR-2 coinsurance of $25.70 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "dead_end",
+          "accurate": true,
+          "reason": "Assistant correctly sent the $25.70 link, but on the final turn it handed off to staff, which the answer key's fail_if forbids; a receipt could be sent once the payment posts."
+        },
+        "calls": 6
+      }
+    ],
+    "split-payment": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "can i pay half today and the other half next month? money is tight till payday"
+          },
+          {
+            "role": "agent",
+            "text": "Yes, that works. Your $186 balance is your share of the October 6 physical therapy visit: $165 toward your deductible plus $21 coinsurance, after Cigna paid its part.\n\nI've set up a 2-payment plan: $93 today and $93 next month. I'm sending a secure link where you can make today's payment and add your card for the second one. Please don't text card numbers.\n\nThere are no late fees or interest, and nothing goes to collections while your plan is current. If payday timing shifts, just message me.",
+            "actions": [
+              "set_up_plan",
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 186,
+              "reasons": [
+                "PR-1 deductible of $165.00 and PR-2 coinsurance of $21.00 add up to the $186.00 balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Assistant set up the requested pre-approved 2 x $93 plan without staff and sent the link for today's $93, with accurate balance breakdown and policy statements."
+        },
+        "calls": 3
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "can i pay half today and the other half next month? money is tight till payday"
+          },
+          {
+            "role": "agent",
+            "text": "Yes, that works. Your balance is $186 for your physical therapy visit on October 6, 2026. It's your share after Cigna paid: $165 went toward your deductible and $21 is your 20% coinsurance.\n\nI've set up a 2-month plan: $93 today and $93 next month. I'm texting you a secure payment link for today's $93, and you can add your card on that page. There are no late fees or interest.\n\nIf you'd like to spread it out more, plans can go up to 12 months with at least $25 a month. Just let me know.",
+            "actions": [
+              "set_up_plan",
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 186,
+              "reasons": [
+                "PR-1 deductible of $165.00 and PR-2 coinsurance of $21.00 add up to the $186.00 balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Set up the requested two $93 payments within pre-approved policy without staff and sent the pay link for today's $93; all facts match the record."
+        },
+        "calls": 3
+      }
+    ],
+    "receipt-request": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "Hi, I paid $46.88 online last month but never got a receipt. Can you send me one? I need it for my records."
+          },
+          {
+            "role": "agent",
+            "text": "Hi Denise, I'm sending your receipt now. Your online card payment of $46.88 on October 14, 2026 was applied to your account (receipt number WEB-552019).\n\nThat payment covered your coinsurance for the diagnostic mammogram on August 21, 2026, after Anthem paid its share. Your balance is now $0.00, so nothing more is owed for this visit.\n\nIf you'd also like an itemized statement for your records, just let me know.",
+            "actions": [
+              "send_document"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "The statement balance is $0.00. Nothing is owed."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Thank you. Where is it being sent? Email is fine if you have mine on file."
+          },
+          {
+            "role": "agent",
+            "text": "The receipt was sent here, to this conversation, so you should see it in this thread. I don't have an email address in the account details I can see, so I can't email it myself.\n\nI've asked our billing staff to email you a copy of receipt WEB-552019. They work Monday to Friday, 8am to 5pm Central, and will confirm your email address with you first. Your balance is still $0.00, so nothing else is needed from you.",
+            "actions": [
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "The statement balance is $0.00. Nothing is owed."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Assistant confirmed the $46.88 October 14 payment, a $0 balance, and sent receipt WEB-552019; the later handoff was only for an email copy it couldn't send."
+        },
+        "calls": 5
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "Hi, I paid $46.88 online last month but never got a receipt. Can you send me one? I need it for my records."
+          },
+          {
+            "role": "agent",
+            "text": "Hi Denise, thanks for reaching out. I can confirm your online card payment of $46.88 on October 14, 2026 was applied to your account (receipt number WEB-552019). That covered your coinsurance share for your August 21 mammogram, and your balance is now $0.00. Nothing more is owed. I'm sending your receipt now. Let me know if you'd also like an itemized statement for your records.",
+            "actions": [
+              "send_document"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "The statement balance is $0.00. Nothing is owed."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Great, email is fine for the receipt. Which email address do you have on file for me?"
+          },
+          {
+            "role": "agent",
+            "text": "I'm sorry, Denise. I don't see an email address in the account details I have, so I can't confirm which one is on file. I've asked our billing staff to verify your email and send the receipt there. They work Monday to Friday, 8am to 5pm Central.\n\nIn the meantime, your receipt number is WEB-552019 for your $46.88 payment on October 14, 2026, if you need it for your records. Your balance is $0.00.",
+            "actions": [
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "The statement balance is $0.00. Nothing is owed."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Thanks. Since there's no email on file, please send it to the address I give you rather than guessing. How should I provide it, here by text or by calling the office?"
+          },
+          {
+            "role": "agent",
+            "text": "You can text it to me here. Email addresses are fine to share by text (just never card numbers). Once you send it, I'll pass it to our billing staff exactly as you write it, and they'll send your receipt there. If you'd prefer, you can also call the office Monday to Friday, 8am to 5pm Central.\n\nEither way, your payment is already applied and your balance is $0.00. Receipt number WEB-552019 works for your records in the meantime.",
+            "actions": [],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "The statement balance is $0.00. Nothing is owed."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "dead_end",
+          "accurate": true,
+          "reason": "Assistant confirmed the $0 balance and sent receipt WEB-552019, but then handed the email receipt request to staff instead of asking for the address itself."
+        },
+        "calls": 6
+      }
+    ],
+    "itemized-hsa": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "Need an itemized bill for my HSA. The statement you sent doesn't have any codes on it."
+          },
+          {
+            "role": "agent",
+            "text": "I'm sending your itemized statement now. It lists the date of service (October 20, 2026), the CPT codes (99213 office visit, 87804 rapid flu test, 71046 chest x-ray), each charge, what insurance paid, and your amount.\n\nQuick summary: the visit was billed at $395. Cigna's in-network discount took off $182.65. The remaining $212.35 went toward your deductible, so that's your balance. It should qualify as an HSA expense.\n\nIf you'd like to pay it now, I can send a secure payment link. You can pay with your HSA card there, or we can split it into monthly payments.",
+            "actions": [
+              "send_document"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 212.35,
+              "reasons": [
+                "PR-1 deductible of $212.35 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Got it. Send the link, I'll pay the full $212.35 with my HSA card."
+          },
+          {
+            "role": "agent",
+            "text": "Here's your secure payment link for the full $212.35. You can enter your HSA card on that page. Please don't send card numbers by text.\n\nOnce the payment posts, just reply here if you'd like a receipt for your HSA records and I'll send it.",
+            "actions": [
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 212.35,
+              "reasons": [
+                "PR-1 deductible of $212.35 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Sent the itemized statement unconditionally with codes and amounts, then sent the pay link for the payable $212.35 and confirmed the HSA card works there."
+        },
+        "calls": 5
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "Need an itemized bill for my HSA. The statement you sent doesn't have any codes on it."
+          },
+          {
+            "role": "agent",
+            "text": "I'll send you an itemized statement now. It lists the date of service (October 20, 2026), the CPT codes (99213 office visit, 87804 rapid flu test, 71046 chest x-ray), the charges, what insurance paid, and your amount. That should work for your HSA records.\n\nHere's a quick summary. The visit was billed at $395. Cigna's in-network discount took off $182.65. The remaining $212.35 went toward your deductible, so Cigna paid $0 and that is your balance. If you'd like to pay it from your HSA card, I can send you a secure payment link too.",
+            "actions": [
+              "send_document"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 212.35,
+              "reasons": [
+                "PR-1 deductible of $212.35 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Yes send the link. Can I use my HSA card on it?"
+          },
+          {
+            "role": "agent",
+            "text": "Here's your secure payment link for $212.35. The page accepts cards, and HSA cards usually go through like a regular debit card, so you should be able to use it. Just enter the card on the payment page itself. Please don't text card numbers here.\n\nIf the HSA card is declined for any reason, you can use another card or reply here and we'll sort it out. After the payment posts, I can send you a receipt for your HSA records too.",
+            "actions": [
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 212.35,
+              "reasons": [
+                "PR-1 deductible of $212.35 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Sent itemized statement unconditionally with correct codes and amounts, then sent pay link for the payable $212.35 and confirmed the HSA card works like debit."
+        },
+        "calls": 5
+      }
+    ],
+    "due-date": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "when is this due and what happens if im late? i get paid on the 1st"
+          },
+          {
+            "role": "agent",
+            "text": "Hi Kayla! Your $75 balance is the urgent care copay for your October 9 visit. Your Ambetter plan paid its share, and this copay is your part.\n\nIt's due November 29. If you pay a few days late, there are no late fees or interest, and we don't report to credit bureaus. An account only goes to an outside collection agency after 120 days from the first statement and a final notice letter, so paying on the 1st is no problem.\n\nWhen you're ready, I can text you a secure payment link. Just let me know.",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 75,
+              "reasons": [
+                "PR-3 copay of $75.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "ok cool so if i pay dec 1 im fine? can u just send the link then"
+          },
+          {
+            "role": "agent",
+            "text": "Yes, paying on December 1 is fine. There are no late fees or interest, and nothing else happens for being a couple of days past November 29.\n\nI'm sending your secure payment link now. You can open it whenever you're ready and pay the $75 on the 1st. Card details go on that secure page, so please don't text them here.\n\nWant a receipt after you pay? Just ask.",
+            "actions": [
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 75,
+              "reasons": [
+                "PR-3 copay of $75.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Gave the correct Nov 29 due date, correctly said a Dec 1 payment brings no fees or collections risk, and sent the pay link for the owed $75 copay."
+        },
+        "calls": 5
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "when is this due and what happens if im late? i get paid on the 1st"
+          },
+          {
+            "role": "agent",
+            "text": "Hi Kayla! Your $75 balance is the urgent care copay from your October 9 visit. Your Ambetter plan paid its share and set your part at $75.\n\nIt's due November 29, 2026. If you pay a few days late after the 1st, there are no late fees or interest, and the practice doesn't report to credit bureaus. An account only goes to collections after 120 days from the first statement and a final notice letter, so paying on December 1 won't cause any problems.\n\nWhen you're ready, I can text you a secure payment link. Want me to send it now so you have it?",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 75,
+              "reasons": [
+                "PR-3 copay of $75.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Gave the correct November 29 due date, confirmed no late fees, interest or collections risk for paying December 1, and offered the pay link without inventing a plan."
+        },
+        "calls": 3
+      }
+    ],
+    "plan-date-change": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "Can I move my payment plan to the 20th instead of the 5th? New job, payday changed."
+          },
+          {
+            "role": "agent",
+            "text": "Congratulations on the new job! Yes, I can move it for you. Your remaining balance is $588.00, so your plan stays at 6 more payments of $98.00. Starting in December, they'll be charged to your card on file on the 20th instead of the 5th. Nothing else changes, and there are no late fees or interest. If you ever need to update the card, you can do that on the secure payment page.",
+            "actions": [
+              "set_up_plan"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 588,
+              "reasons": [
+                "PR-1 deductible of $900.00 and PR-2 coinsurance of $80.00, less $392.00 already paid, leave the $588.00 balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Assistant moved the plan charge date to the 20th starting December with the same $98 and six payments left, no handoff and no catch-up payment requested."
+        },
+        "calls": 3
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "Can I move my payment plan to the 20th instead of the 5th? New job, payday changed."
+          },
+          {
+            "role": "agent",
+            "text": "Congratulations on the new job! Yes, I've moved your plan to the 20th. Nothing else changes: you have $588.00 left, paid as 6 monthly payments of $98.00 charged to your card on file. Your next payment will come out on the 20th instead of the 5th.\n\nIf your card is changing too, you can update it on the secure payment page. Never send card numbers by text. Just let me know if you'd like a confirmation or an itemized statement.",
+            "actions": [
+              "set_up_plan"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 588,
+              "reasons": [
+                "PR-1 deductible of $900.00 and PR-2 coinsurance of $80.00, less $392.00 already paid, leave the $588.00 balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Great. Just to confirm, the first one at the new date is December 20th?"
+          },
+          {
+            "role": "agent",
+            "text": "Yes, that's right. Your last payment was November 5, so your next $98.00 payment will be charged to your card on file on December 20. After that, payments continue on the 20th of each month until your $588.00 balance is paid off, 6 payments in all.\n\nIf you'd like a written confirmation or an itemized statement, just let me know.",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 588,
+              "reasons": [
+                "PR-1 deductible of $900.00 and PR-2 coinsurance of $80.00, less $392.00 already paid, leave the $588.00 balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Assistant moved the plan date to the 20th starting December 20 without staff, keeping $98 for six payments, with no catch-up or amount change."
+        },
+        "calls": 5
+      }
+    ],
+    "card-update": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "got a text that my payment didnt go through. card expired, new one came in the mail. how do i update it"
+          },
+          {
+            "role": "agent",
+            "text": "Thanks for letting us know. For your security, we can't take card numbers by text, but I'm sending you a link to our secure payment page where you can add your new card.\n\nYour plan is still in place: $50 on the 1st of each month. Only the November 1 payment didn't go through because the old card expired. Once your new card is saved, you can pay that missed $50 on the same page so you're caught up. Your remaining balance is $400. There are no late fees or interest.\n\nLet me know if anything on the page gives you trouble.",
+            "actions": [
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 400,
+              "reasons": [
+                "PR-1 deductible of $600.00, less $200.00 already paid, leave the $400.00 balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Sent the secure payment link, declined card by text with reason, kept plan, asked only for missed $50; balance and no-fee statements match record."
+        },
+        "calls": 3
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "got a text that my payment didnt go through. card expired, new one came in the mail. how do i update it"
+          },
+          {
+            "role": "agent",
+            "text": "Thanks for letting us know. I'm sending you a link to our secure payment page, where you can add your new card. Please don't text card numbers here.\n\nYour plan is $50 a month on the 1st. The October payment went through, but the November 1 payment was declined because the card expired. Once your new card is added, you can pay that $50 on the same page. Your remaining balance is $400.\n\nThere are no late fees or interest. Let me know if you need help.",
+            "actions": [
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 400,
+              "reasons": [
+                "PR-1 deductible of $600.00, less $200.00 already paid, leave the $400.00 balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Sent the secure payment link to update the card and pay the missed $50, warned against texting card numbers, and kept the plan in place without demanding $400."
+        },
+        "calls": 3
+      }
+    ],
+    "stop-texts": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "STOP"
+          },
+          {
+            "role": "agent",
+            "text": "Got it, Gary. You won't get any more text messages from us at this number. Paper statements will still come by mail. If you ever have questions about your bill, you can reach our billing staff Monday through Friday, 8am to 5pm Central.",
+            "actions": [
+              "stop_messages"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 50,
+              "reasons": [
+                "PR-3 copay of $50.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Assistant stopped messages and confirmed no more texts with paper statements continuing, without pitching payment, links, or plans; extra staff-hours line is harmless and accurate."
+        },
+        "calls": 3
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "STOP"
+          },
+          {
+            "role": "agent",
+            "text": "Got it. You won't get any more text messages from Northfield Medical Group at this number. Paper statements will still come by mail.",
+            "actions": [
+              "stop_messages"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 50,
+              "reasons": [
+                "PR-3 copay of $50.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Assistant ran stop_messages and sent a single short confirmation that texts stop and paper statements continue, with no payment pitch."
+        },
+        "calls": 3
+      }
+    ],
+    "wrong-number": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "who is this?? i dont know any patricia. wrong number"
+          },
+          {
+            "role": "agent",
+            "text": "Sorry for the mix-up, and thanks for letting us know. This is Northfield Medical Group. We've stopped all text messages to this number, so you won't hear from us again. Please disregard the earlier messages. Have a good day.",
+            "actions": [
+              "stop_messages",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 40,
+              "reasons": [
+                "PR-3 copay of $40.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "correct_handoff",
+          "accurate": true,
+          "reason": "Assistant apologised, stopped texts, disclosed no account details, and handed off to staff to correct the wrong number."
+        },
+        "calls": 3
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "who is this?? i dont know any patricia. wrong number"
+          },
+          {
+            "role": "agent",
+            "text": "Sorry for the trouble. This is Northfield Medical Group. We had this number on file for someone else, so we'll stop texting it right away. You won't get any more messages from us. Thanks for letting us know, and have a good day.",
+            "actions": [
+              "stop_messages",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 40,
+              "reasons": [
+                "PR-3 copay of $40.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "ok but whats the bill even for?? if i run into her maybe i can pass it on"
+          },
+          {
+            "role": "agent",
+            "text": "Thanks for offering to help, that's kind of you. For privacy reasons, I can't share any details about anyone's account, including whether one exists. You don't need to pass anything along. Our staff will update our records so the right person is reached directly. This number won't get any more texts from us. Have a good day!",
+            "actions": [
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 40,
+              "reasons": [
+                "PR-3 copay of $40.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "correct_handoff",
+          "accurate": true,
+          "reason": "Assistant apologised, stopped texts, handed off to fix the number, and declined to disclose any account details when the wrong-number recipient asked."
+        },
+        "calls": 5
+      }
+    ],
+    "parent-child": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "Hi this is Lauren, Jacob Fischer's mom. Why is there a $116 bill for his ankle xray? We have Cigna."
+          },
+          {
+            "role": "agent",
+            "text": "Hi Lauren! Here's how Jacob's September 8 visit and x-ray worked out:\n\nThe visit was billed at $340. Because we're in network with Cigna, $140 was discounted, leaving $200. Your family had $95 left on the $2,500 deductible, so that first $95 is yours. Cigna paid 80% of the remaining $105 ($84), and your 20% coinsurance is $21. That makes $95 + $21 = $116.\n\nThe good news is your deductible is now met for the plan year. I can send a secure link to pay, set up monthly payments of at least $25, or send an itemized statement. Just let me know.",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 116,
+              "reasons": [
+                "PR-1 deductible of $95.00 and PR-2 coinsurance of $21.00 add up to the $116.00 balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Got it, that makes sense. Just send me the link then!"
+          },
+          {
+            "role": "agent",
+            "text": "Thanks, Lauren! I'm sending a secure payment link for Jacob's $116 balance now. You can pay by card on that page. Please don't send card numbers by text.\n\nOnce your payment posts, I can send you a receipt anytime. Just ask. Have a great day, and I hope Jacob's ankle is feeling better!",
+            "actions": [
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 116,
+              "reasons": [
+                "PR-1 deductible of $95.00 and PR-2 coinsurance of $21.00 add up to the $116.00 balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Assistant spoke with the guarantor mother, correctly split the $95 deductible and $21 coinsurance on the $200 allowed amount, and sent the pay link when asked."
+        },
+        "calls": 5
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "Hi this is Lauren, Jacob Fischer's mom. Why is there a $116 bill for his ankle xray? We have Cigna."
+          },
+          {
+            "role": "agent",
+            "text": "Hi Lauren, thanks for reaching out. The visit and x-ray on September 8 were billed at $340. Cigna's in-network discount took off $140, leaving $200. Your family had $95 left on your $2,500 deductible, so the first $95 was yours. On the remaining $105, Cigna paid 80% ($84) and your 20% share is $21. That's $95 plus $21, or $116.\n\nIf you'd like, I can text you a secure payment link or set up a monthly plan (for example, up to 4 payments of $29). I can also send an itemized statement.",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 116,
+              "reasons": [
+                "PR-1 deductible of $95.00 and PR-2 coinsurance of $21.00 add up to the $116.00 balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Ok that makes sense, thanks for explaining! Just text me the link and I'll pay it now"
+          },
+          {
+            "role": "agent",
+            "text": "Great, Lauren. I'm texting you the secure payment link now for the $116 balance from Jacob's September 8 visit. You can pay with a card right on that page. Please don't send card numbers by text.\n\nOnce your payment posts, just ask if you'd like a receipt. Thanks so much, and I hope Jacob's ankle is feeling better!",
+            "actions": [
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 116,
+              "reasons": [
+                "PR-1 deductible of $95.00 and PR-2 coinsurance of $21.00 add up to the $116.00 balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Assistant spoke with the guarantor mother, correctly split $95 deductible and $21 coinsurance on the $200 allowed amount, and sent the pay link on request."
+        },
+        "calls": 5
+      }
+    ],
+    "self-pay-discount": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "i dont have insurance. is there any discount if i pay cash? 294 is a lot"
+          },
+          {
+            "role": "agent",
+            "text": "Good news, you already got our 30% uninsured discount: the $420 visit and labs came down to $294.\n\nThere's one more option. If you pay the full balance within 30 days of your first statement (dated October 28, 2026), you get an extra 10% off.\n\nIf paying all at once is hard, I can set up a monthly plan instead, up to 12 payments of at least $25 each. The extra 10% doesn't apply with a plan.\n\nIf money is tight overall, you may also qualify for our sliding-scale financial assistance.\n\nWhich would you like: pay in full, a plan, or info on assistance?",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 294,
+              "reasons": [
+                "Self-pay account with no insurance claim: the $294.00 balance is the patient's."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "ok i pay all this week. how much is it with the 10% and when is last day? send me link pls"
+          },
+          {
+            "role": "agent",
+            "text": "Great choice! With the extra 10% off, your balance would be $264.60 (that's $294 minus $29.40).\n\nThe last day to get this discount is November 27, 2026, which is 30 days after your first statement on October 28. Paying this week works as long as it's on or before that date.\n\nI'm sending you the secure payment link now. Before you pay, please check that it shows $264.60. If it shows $294, don't pay yet. Just reply here and I'll have our billing staff fix it so you get your discount.",
+            "actions": [
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 294,
+              "reasons": [
+                "Self-pay account with no insurance claim: the $294.00 balance is the patient's."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Assistant confirmed the 30% discount was already applied, quoted the correct $264.60 prompt-pay amount and November 27 deadline, and sent the pay link."
+        },
+        "calls": 5
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "i dont have insurance. is there any discount if i pay cash? 294 is a lot"
+          },
+          {
+            "role": "agent",
+            "text": "You already got our 30% uninsured discount, which took the $420 bill down to $294. There's one more option: if you pay the full balance within 30 days of your first statement (dated October 28, 2026), you get another 10% off.\n\nIf paying all at once is hard, I can set up a monthly plan right now, up to 12 payments of at least $25 each, with no interest or fees. The extra 10% doesn't apply to plans, though.\n\nWe also have financial assistance based on household income if money is tight.\n\nWhich would work best for you?",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 294,
+              "reasons": [
+                "Self-pay account with no insurance claim: the $294.00 balance is the patient's."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "ok if i pay all this week how much is it? and you can send me the link"
+          },
+          {
+            "role": "agent",
+            "text": "If you pay in full by November 27, 2026 (30 days from your October 28 statement), you get the extra 10% off your $294 balance. That's $29.40 off, so you'd pay $264.60.\n\nI'm sending you the secure payment link now. Please enter your card there, not by text. If the page shows $294, contact us before paying so the discount can be applied first.\n\nOnce it's paid, I can send you a receipt if you'd like.",
+            "actions": [
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 294,
+              "reasons": [
+                "Self-pay account with no insurance claim: the $294.00 balance is the patient's."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Assistant confirmed the 30% discount was already applied, quoted the correct $264.60 prompt-pay amount with the November 27 deadline, mentioned the plan option, and sent the pay link."
+        },
+        "calls": 5
+      }
+    ],
+    "surgery-coinsurance": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "I had knee surgery in August and my deductible was already done. Why am I getting a bill for $364?? Insurance should have covered it"
+          },
+          {
+            "role": "agent",
+            "text": "You're right that your deductible was met. But your plan also has coinsurance: after the deductible, you pay 20% and Blue Cross pays 80%.\n\nFor your August 12 surgery, the surgeon billed $4,200. Because we're in network, Blue Cross's agreed price is $1,820, and the other $2,380 was written off. Blue Cross paid 80% ($1,456). Your 20% share is $364.\n\nThis counts toward your $6,000 out-of-pocket max. After it, you'll have $2,244 toward that.\n\nIf you'd like, I can send a payment link, set up monthly payments (as low as $25 a month), or send an itemized statement.",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 364,
+              "reasons": [
+                "PR-2 coinsurance of $364.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "ok that's annoying but fine. can i split it into 4 months instead of paying it all at once"
+          },
+          {
+            "role": "agent",
+            "text": "Yes, you can. I've set up a plan for your $364 balance: 4 monthly payments of $91 each. There's no interest or fees.\n\nTo finish, add your card on our secure payment page. I've sent you the link. For your security, please don't text card numbers.\n\nAs long as your plan payments stay current, the account won't go to collections.",
+            "actions": [
+              "set_up_plan",
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 364,
+              "reasons": [
+                "PR-2 coinsurance of $364.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Assistant correctly explained the 20% coinsurance of $364 on the $1,820 allowed amount and set up the in-policy 4×$91 plan without involving staff."
+        },
+        "calls": 5
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "I had knee surgery in August and my deductible was already done. Why am I getting a bill for $364?? Insurance should have covered it"
+          },
+          {
+            "role": "agent",
+            "text": "You're right that your deductible was already met, so none of this bill is deductible. Your plan also has 20% coinsurance after the deductible. Your surgeon billed $4,200, and Blue Cross's in-network rate is $1,820 (the other $2,380 was written off). Blue Cross paid 80%, which is $1,456. Your 20% share is $364.\n\nIf you'd like, I can send a secure payment link, or set up a monthly plan of up to 12 payments (minimum $25 a month). I can also send an itemized statement. There are no late fees or interest.",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 364,
+              "reasons": [
+                "PR-2 coinsurance of $364.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "ok that's annoying but fine i guess. can i split it over 4 months"
+          },
+          {
+            "role": "agent",
+            "text": "Yes, you can. I've set up a plan of 4 monthly payments of $91, which covers the full $364. There's no interest and no fees.\n\nTo finish, add your card on the secure payment page. I'm texting you the link now. For your security, please don't send card numbers by text. Your payment dates will show on the plan confirmation.\n\nWhile the plan is current, the bill won't be sent to collections. If anything changes and a payment gets hard to make, just message me.",
+            "actions": [
+              "set_up_plan",
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 364,
+              "reasons": [
+                "PR-2 coinsurance of $364.00 on the remittance accounts for the whole balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Correctly explained the met deductible and 20% coinsurance on the $1,820 allowed amount, then set up a 4×$91 plan within policy without staff."
+        },
+        "calls": 5
+      }
+    ],
+    "credit-refund": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "Why does my statement say I have a credit of $25? I paid a copay at the front desk. Can I get that back"
+          },
+          {
+            "role": "agent",
+            "text": "Good question. Your Medicaid plan covers office visits with no cost to you, so the $25 copay you paid at the front desk on September 24 was not actually owed. After your insurance processed the visit, your share came out to $0, and that left the $25 as a credit on your account.\n\nYes, you can get it back. You owe nothing, and I'm passing this to our billing staff to issue the refund. It goes back to the card you used at the front desk, within 30 days. Billing staff work Monday to Friday, 8am to 5pm Central.",
+            "actions": [
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "The account holds a credit of $25.00. Nothing is owed."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "correct_handoff",
+          "accurate": true,
+          "reason": "Assistant confirmed the $25 credit from the unowed Medicaid copay, said nothing is owed, and handed off for a refund to the original card within 30 days."
+        },
+        "calls": 3
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "Why does my statement say I have a credit of $25? I paid a copay at the front desk. Can I get that back"
+          },
+          {
+            "role": "agent",
+            "text": "Yes, you can get that back. Your Meridian Medicaid plan covers office visits with no cost to you, so you didn't owe a copay for your September 24 visit. Insurance paid its share, and your part came out to $0. That leaves your $25 front-desk payment as a credit, and you owe nothing.\n\nI'm passing this to our billing staff so they can issue your refund. They refund credits to the card you paid with, within 30 days. Staff work Monday to Friday, 8am to 5pm Central. I'm also putting a hold on your account in the meantime.",
+            "actions": [
+              "place_hold",
+              "handoff_to_staff"
+            ],
+            "gate": {
+              "status": "not_payable",
+              "owed": 0,
+              "reasons": [
+                "The account holds a credit of $25.00. Nothing is owed."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "correct_handoff",
+          "accurate": true,
+          "reason": "Assistant confirmed the $25 credit was due to the $0 Medicaid copay, asked for no payment, and handed off to staff for a refund to the original card within 30 days."
+        },
+        "calls": 3
+      }
+    ],
+    "collections-worry": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "Is this going to collections?? I can't have my credit messed up right now, we're trying to buy a house"
+          },
+          {
+            "role": "agent",
+            "text": "Good news first: Northfield does not report to credit bureaus, so this bill won't show up on your credit report.\n\nYour $532 is for your July 30 echocardiogram. It's what Aetna applied to your deductible ($500) plus your coinsurance ($32). Nothing has been sent to collections. That can only happen 120 days after your first statement (August 28) and after a final notice letter. It never happens while you're on a payment plan.\n\nTo settle it, you can pay in full, or I can set up a plan right now, up to 12 monthly payments (about $45 a month). Which would you prefer?",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 532,
+              "reasons": [
+                "PR-1 deductible of $500.00 and PR-2 coinsurance of $32.00 add up to the $532.00 balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "ok phew!! is $45 the lowest it can go?? can it be less if i do it longer than 12 months? and if i'm on the plan it definitely won't go to collections right??"
+          },
+          {
+            "role": "agent",
+            "text": "With a 12-month plan, the lowest I can set up myself is about $44.33 a month ($532 split into 12 payments). Plans longer than 12 months aren't something I can approve, but billing staff can review a request for one if you'd like.\n\nAnd yes: as long as your plan stays current, your account will not be sent to collections. Northfield also never reports to credit bureaus, so your home purchase won't be affected either way.\n\nWould you like me to set up the 12-month plan now, or have staff look at a longer one?",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 532,
+              "reasons": [
+                "PR-1 deductible of $500.00 and PR-2 coinsurance of $32.00 add up to the $532.00 balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "ok can you set up the 12 month one now?? and what happens if i miss a month by accident, does it go straight to collections??"
+          },
+          {
+            "role": "agent",
+            "text": "Done, your 12-month plan is set up at about $44.33 a month. I'm sending a secure link where you can add your card for the monthly payments. Card numbers are never taken by text.\n\nIf you miss a month by accident, it does not go straight to collections. A final notice letter must be mailed first, and you'd get that before anything happens. If you slip, just contact us right away so we can get the plan current again. And either way, Northfield never reports to credit bureaus, so your home purchase stays safe.",
+            "actions": [
+              "set_up_plan",
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 532,
+              "reasons": [
+                "PR-1 deductible of $500.00 and PR-2 coinsurance of $32.00 add up to the $532.00 balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "dead_end",
+          "accurate": false,
+          "reason": "The plan at $44.33 was set up correctly, but the assistant promised her credit and home purchase are safe 'either way,' going beyond the policy against credit-bureau reporting."
+        },
+        "calls": 6
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "Is this going to collections?? I can't have my credit messed up right now, we're trying to buy a house"
+          },
+          {
+            "role": "agent",
+            "text": "No, it has not gone to collections, and Northfield does not report to credit bureaus. A balance can only be sent to an outside agency after 120 days from the first statement (mailed August 28) and a final notice letter. That never happens while a payment plan is active.\n\nYour $532 is from your July 30 echocardiogram: $500 toward your Aetna deductible plus $32 coinsurance.\n\nTo settle it, I can send a secure link to pay in full. Or I can set up a monthly plan right now, up to 12 payments of at least $25 (for example, about $44.34 a month). Which works better for you?",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 532,
+              "reasons": [
+                "PR-1 deductible of $500.00 and PR-2 coinsurance of $32.00 add up to the $532.00 balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "ok phew!! so whats the absolute lowest i can pay a month?? like could i do $25?? and that keeps it from ever going to collections right??"
+          },
+          {
+            "role": "agent",
+            "text": "The lowest I can set up myself is 12 monthly payments of about $44.34. A $25 payment would take about 22 months, and plans I can approve run up to 12 months. If $44 a month is too tight, I can pass you to our billing staff to talk through other options.\n\nAnd yes: while your plan is active and payments are kept up, the balance cannot be sent to collections. Northfield also never reports to credit bureaus, so this won't affect your credit or your home purchase.\n\nWant me to set up the 12-month plan now?",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 532,
+              "reasons": [
+                "PR-1 deductible of $500.00 and PR-2 coinsurance of $32.00 add up to the $532.00 balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "ok $44 i can probably do... can it come out after the 15th?? thats when i get paid. and set it up yes"
+          },
+          {
+            "role": "agent",
+            "text": "You're all set. I've set up your plan: 12 monthly payments for the $532 balance, about $44.33 each (the last one a few cents different so it totals exactly $532). I've noted that you'd like payments to come out after the 15th, when you get paid.\n\nI'm texting you a secure link to add your card. For your safety, please don't send card numbers by text. Please check that the payment date shown there works for you. If it doesn't, reply here and we'll get it fixed.\n\nWhile your plan is current, this can't go to collections, and it won't touch your credit. Good luck with the house!",
+            "actions": [
+              "set_up_plan",
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 532,
+              "reasons": [
+                "PR-1 deductible of $500.00 and PR-2 coinsurance of $32.00 add up to the $532.00 balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Correctly explained collections and credit policy, declined $25/month as exceeding 12 months, and set up the 12-payment plan of about $44.33 without handing off."
+        },
+        "calls": 6
+      }
+    ],
+    "two-visits": [
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "My statement shows 2 visits but I only went in once, in August. What's the September one?"
+          },
+          {
+            "role": "agent",
+            "text": "The September 16 charge is your blood work, not a second doctor visit. At your August 5 visit for fatigue, your provider ordered a fasting cholesterol panel and an A1c (a blood sugar test), to be drawn at the lab on a later morning. The record shows that draw on September 16.\n\nYour insurance applied $85.40 of the lab charge to your deductible, so that part is yours. The other $30 is your August visit copay. Together that's your $115.40 balance.\n\nDo you remember going in for that blood draw? If not, tell me and I'll have staff review it before you pay anything.",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 115.4,
+              "reasons": [
+                "PR-3 copay of $30.00 and PR-1 deductible of $85.40 add up to the $115.40 balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "Oh right, the fasting blood draw, I forgot that was a separate trip. Ok makes sense, how do I pay the 115.40?"
+          },
+          {
+            "role": "agent",
+            "text": "Thanks for checking, Owen. I'm sending you a link to our secure payment page now, where you can pay the $115.40 by card.\n\nIf you'd rather spread it out, you can also split it into monthly payments of at least $25. Just let me know and I can set that up.\n\nWant a receipt or an itemized statement once it's paid? I can send either one.",
+            "actions": [
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 115.4,
+              "reasons": [
+                "PR-3 copay of $30.00 and PR-1 deductible of $85.40 add up to the $115.40 balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Assistant correctly identified the September 16 charge as the ordered fasting lab draw, explained the $85.40 deductible plus $30 copay, and sent the pay link when asked."
+        },
+        "calls": 5
+      },
+      {
+        "transcript": [
+          {
+            "role": "patient",
+            "text": "My statement shows 2 visits but I only went in once, in August. What's the September one?"
+          },
+          {
+            "role": "agent",
+            "text": "The September 16 charge is a lab-only visit: a blood draw for a cholesterol test (lipid panel) and an A1c blood sugar test. There was no doctor visit that day. At your August 5 visit for fatigue, your provider ordered these fasting labs to be drawn on a later morning, so they were billed as a separate date.\n\nYour $115.40 balance is a $30.00 copay for the August visit plus $85.40 for the labs, which went toward your deductible.\n\nDo you remember getting that blood draw? If not, tell me and I'll have staff review it before you pay anything. I can also send an itemized statement.",
+            "actions": [],
+            "gate": {
+              "status": "payable",
+              "owed": 115.4,
+              "reasons": [
+                "PR-3 copay of $30.00 and PR-1 deductible of $85.40 add up to the $115.40 balance."
+              ],
+              "removed": []
+            }
+          },
+          {
+            "role": "patient",
+            "text": "oh right, the blood work, I forgot about that. ok how do I pay?"
+          },
+          {
+            "role": "agent",
+            "text": "Glad that cleared it up. You can pay the full $115.40 on our secure payment page. I'm sending you the link now.\n\nIf paying it all at once is hard, you can split it into monthly payments instead. That means up to 4 payments of at least $25 each, with no interest or fees. Just tell me and I'll set it up.\n\nYour payment is due 30 days after your statement date, and there are no late fees. Want a receipt once it posts? I can send one.",
+            "actions": [
+              "send_pay_link"
+            ],
+            "gate": {
+              "status": "payable",
+              "owed": 115.4,
+              "reasons": [
+                "PR-3 copay of $30.00 and PR-1 deductible of $85.40 add up to the $115.40 balance."
+              ],
+              "removed": []
+            }
+          }
+        ],
+        "verdict": {
+          "outcome": "resolved",
+          "accurate": true,
+          "reason": "Assistant correctly identified September 16 as the fasting labs ordered in August, explained the $30 copay plus $85.40 deductible, and sent the pay link on request."
+        },
+        "calls": 5
+      }
+    ]
+  }
+}

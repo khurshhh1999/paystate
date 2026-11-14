@@ -3,13 +3,14 @@
 // on the practice's side. Owns the conversation, the feed setting and the staff ticket.
 
 import { useRef, useState } from "react";
-import type { Action, Ticket, Turn } from "@/lib/types";
+import type { Action, Gate, Ticket, Turn } from "@/lib/types";
 import { CASES } from "@/lib/cases.mjs";
 import { needsTicket } from "@/lib/ticket-kinds.mjs";
 import type { TicketBody } from "@/lib/tickets.mjs";
 import { ApiError, postJSON } from "@/components/api";
 import { saveTicket } from "@/components/ticket-store";
 import { PatientList } from "./patient-list";
+import { HEADLINE } from "./headlines";
 import { Thread } from "./thread";
 import { PracticeSide, type FeedSetting, type TicketState } from "./practice-side";
 import { PATIENT_ORDER, STATEMENT_TEXT, patientName } from "./statement-text";
@@ -102,12 +103,13 @@ export function PatientDesk() {
     setPending(true);
     setError(null);
     try {
-      const reply = await postJSON<{ text: string; actions?: Action[] }>(
+      // The product instructions: the assistant runs with the payment gate.
+      const reply = await postJSON<{ text: string; actions?: Action[]; gate?: Gate }>(
         "/api/chat",
-        { caseId: kase.id, version: "v2", view, transcript: next },
+        { caseId: kase.id, version: "product", view, transcript: next },
         ctrl.signal,
       );
-      const agent: Turn = { role: "agent", text: reply.text, actions: reply.actions ?? [] };
+      const agent: Turn = { role: "agent", text: reply.text, actions: reply.actions ?? [], gate: reply.gate };
       const full = [...next, agent];
       setTranscript(full);
       // One ticket request per turn that hands off. A later handoff rewrites the same ticket.
@@ -147,7 +149,20 @@ export function PatientDesk() {
     setView(v);
   }
 
+  const headline = HEADLINE[kase.id];
+
   return (
+    <div className="flex flex-col gap-6">
+      <header className="flex flex-col gap-2">
+        <h1 className="text-[28px] font-semibold leading-tight sm:text-[32px]">{headline.title}</h1>
+        <p className="prose-col">
+          {headline.body} Reply as {patientName(kase).split(" ")[0]} and see what the assistant does.
+        </p>
+        <p className="prose-col text-ink-2">
+          Paystate is a billing assistant that reads the practice&apos;s account before it asks a patient for money.
+          Twelve patients are in the list. Some of them owe every cent.
+        </p>
+      </header>
     <div className="grid gap-8 lg:grid-cols-[236px_420px_minmax(0,1fr)] lg:gap-6">
       <PatientList cases={ORDERED_CASES} selected={kase.id} onSelect={selectCase} />
       <Thread
@@ -172,6 +187,7 @@ export function PatientDesk() {
         onRetryTicket={() => void requestTicket(ticketTranscript.current)}
         hasReply={hasReply}
       />
+    </div>
     </div>
   );
 }

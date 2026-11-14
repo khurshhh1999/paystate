@@ -2,7 +2,8 @@
 // input validation and error responses. Server-only.
 
 import { CASES } from "./cases.mjs";
-import { ACTIONS, AGENT_PROMPTS, FORMAT } from "./prompts.mjs";
+// Transcripts accept the product action names too; the v1/v2 prompts never see past actions.
+import { PRODUCT_ACTIONS, AGENT_PROMPTS, FORMAT } from "./prompts.mjs";
 import { isView } from "./feeds.mjs";
 import { checkLimits, clientIp } from "./limits.mjs";
 import type { Action, Case, Turn, View } from "./types";
@@ -87,20 +88,33 @@ export function resolveView(body: Record<string, unknown>): View {
 }
 
 /**
+ * True when the caller asked for the product instructions (`version: "product"`), which run
+ * with the payment gate. Throws if a custom prompt is sent alongside it.
+ */
+export function isProductRequest(body: Record<string, unknown>): boolean {
+  if (body.version !== "product") return false;
+  if (body.customPrompt !== undefined && body.customPrompt !== null) {
+    throw new ApiError(400, 'Send exactly one of "version" ("v1", "v2" or "product") or "customPrompt".');
+  }
+  return true;
+}
+
+/**
  * Picks the agent system prompt: a saved version or the visitor's own prompt.
  * Exactly one of the two must be given. A custom prompt always gets the output
  * format block appended so the reply still parses into text + actions.
+ * `version: "product"` is handled before this by isProductRequest.
  */
 export function resolveSystemPrompt(body: Record<string, unknown>): string {
   const { version, customPrompt } = body;
   const hasVersion = version !== undefined && version !== null;
   const hasCustom = customPrompt !== undefined && customPrompt !== null;
   if (hasVersion === hasCustom) {
-    throw new ApiError(400, 'Send exactly one of "version" ("v1" or "v2") or "customPrompt".');
+    throw new ApiError(400, 'Send exactly one of "version" ("v1", "v2" or "product") or "customPrompt".');
   }
   if (hasVersion) {
     if (version !== "v1" && version !== "v2") {
-      throw new ApiError(400, 'version must be "v1" or "v2".');
+      throw new ApiError(400, 'version must be "v1", "v2" or "product".');
     }
     return AGENT_PROMPTS[version];
   }
@@ -139,7 +153,7 @@ export function validateTranscript(raw: unknown, endsWith: "patient" | "agent"):
     }
     if (role === "patient") return { role, text };
     const acts = Array.isArray(actions)
-      ? (actions.filter((a) => typeof a === "string" && (ACTIONS as string[]).includes(a)) as Action[])
+      ? (actions.filter((a) => typeof a === "string" && (PRODUCT_ACTIONS as string[]).includes(a)) as Action[])
       : [];
     return { role, text, actions: acts };
   });

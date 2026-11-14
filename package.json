@@ -9,6 +9,7 @@
     "lint": "eslint",
     "outreach:build": "node scripts/build-outreach.mjs",
     "bench": "node scripts/run-bench.mjs",
+    "traffic": "node scripts/run-traffic.mjs",
     "tickets:build": "node scripts/build-tickets.mjs",
     "test": "node --test \"lib/*.test.mjs\""
   },

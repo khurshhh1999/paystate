@@ -18,7 +18,7 @@ Live: https://paystate.vercel.app
 
 ## What the runs found
 
-Twelve patient situations, 324 graded conversations on `claude-sonnet-5-5`: two sets of instructions, three trials, and every combination of feeds each case draws on.
+Twelve patient situations, 324 graded conversations on `claude-sonnet-5-5` with thinking off: two sets of instructions, three trials, and every combination of feeds each case draws on.
 
 | The assistant can read | Right, check on | Right, check off | Wrong collects, check off | Ends with staff, check on |
 |---|---|---|---|---|
@@ -33,6 +33,16 @@ Twelve patient situations, 324 graded conversations on `claude-sonnet-5-5`: two 
 "Check" is one rule in the instructions: confirm the balance is payable as stated before asking for, accepting or scheduling money.
 
 I expected the instructions to matter most. With the whole record they barely mattered. With only the statement balance, the assistant without the check offered to take payment from a patient whose claim the practice had filed late. The remittance is what stops that. Eligibility rescues the most answers. Missing feeds also push more conversations to staff. A difference of one or two in this table is within run-to-run variation.
+
+## Toward real traffic
+
+The bench above is twelve hard cases with a scripted patient. Three changes move it closer to what a practice would see (`/evidence/traffic`):
+
+- **A weighted set of 28 situations.** The twelve hard cases plus sixteen ordinary ones (what is this charge, send me the link, a receipt, STOP, wrong number), each with an assumed share of inbound conversations. The ordinary ones carry 87% of the mix. The page lets you change the weights.
+- **Unscripted patients.** A simulated patient with a persona and a goal replies in their own words for up to three messages.
+- **A payment gate in code.** `lib/gate.mjs` reads the reason codes, eligibility, ledger and the payer's stated patient share and decides whether the balance can be collected. The assistant is told the result and collect actions it does not allow are removed in code. It matches the answer key on 28 of 28 records, with no model call.
+
+First run, 56 conversations on `claude-opus-5-5` at low effort: 53 right, 89.3% weighted by the assumed mix, no wrong collects. The gate never had to remove an action, because the assistant did not attempt one it disallowed. All three misses were on ordinary cases and all three were about the edge of what the assistant can do, not about judgment: it handed a receipt to staff because it could not see a payment that had just been made, handed an email receipt to staff because it had no email on file, and reassured a patient about her credit more broadly than policy supports. Two runs per situation is a first reading.
 
 ## The cases
 
@@ -84,6 +94,8 @@ npm run bench -- --view statement   # same cases, statement fields only
 npm run bench -- --view feeds       # statement plus each partial set of feeds
 npm run bench -- --only qmb         # one case
 npm run tickets:build               # rebuild the recorded staff queue from the runs
+npm run traffic                     # 28 weighted situations, simulated patients, payment gate (about 250 calls)
+npm run traffic -- --dry-run        # print the plan and the worst-case call count
 npm run outreach:build              # rebuild the synthetic panel and rerun the SQL
 npm test
 ```
@@ -95,11 +107,15 @@ lib/cases.mjs        the twelve cases: record, scripted patient, answer key
 lib/feeds.mjs        which record fields arrive through which feed
 lib/prompts.mjs      assistant instructions v1 and v2, record views, judge rubric
 lib/run.mjs          one conversation end to end
+lib/gate.mjs         the payment gate: rules in code that decide whether a balance can be collected
+lib/cases-common.mjs sixteen ordinary cases; lib/traffic.mjs adds weights, personas and goals
+lib/simulate.mjs     the simulated patient and the unscripted conversation loop
 lib/tickets.mjs      turns a handed-off conversation into a ticket for staff
 lib/closeout.ts      resolutions and the text the patient gets when a ticket closes
 lib/score.mjs        outcome counts and wrong-collect dollars
 lib/limits.mjs       rate limits for the public API routes
 scripts/run-bench.mjs       runs the bench, writes data/results.json
+scripts/run-traffic.mjs     runs the traffic set under a hard call cap, writes data/traffic.json
 scripts/build-tickets.mjs   writes data/tickets.json from the recorded runs
 scripts/build-outreach.mjs  builds the panel in SQLite, runs the rules, writes data/outreach.json
 app/api/             chat, ticket, run-case, judge
@@ -108,7 +124,7 @@ app/                 patient thread, queue, readiness, decisions, evidence
 
 ## Limits
 
-- Twelve cases, chosen to be hard. This is not a sample of real traffic.
+- The bench is twelve cases chosen to be hard. The traffic set adds ordinary ones and weights, but the weights are my assumptions and the patients are simulated by a model. Neither is real traffic.
 - The agent here is a stand-in with declared actions, not a production agent with real tools.
 - The judge is the same model as the agent and is sometimes wrong at the edges. The method page lists the calls I disagree with.
 - The scripted patients often say the deciding fact out loud, which protects them even when the agent cannot see it. Real traffic would likely do worse in the statement-only view.
