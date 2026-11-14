@@ -5,4 +5,7 @@ export function callClaude(opts: {
   model?: string;
   temperature?: number;
   thinking?: Record<string, unknown>;
+  effort?: "low" | "medium" | "high" | "max";
 }): Promise<string>;
+export function callStats(): { calls: number };
+export function setCallCap(n: number | null): void;

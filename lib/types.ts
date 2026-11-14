@@ -13,12 +13,25 @@ export type Action =
   | "place_hold"
   | "update_insurance"
   | "offer_financial_assistance"
-  | "handoff_to_staff";
+  | "handoff_to_staff"
+  // Product actions only (PRODUCT_ACTIONS). v1/v2 never produce these.
+  | "send_document"
+  | "stop_messages";
+
+// The payment gate's decision for one record (lib/gate.mjs). `owed` is null when unverified.
+// `removed` lists collect actions the assistant chose and the gate took out.
+export interface Gate {
+  status: "payable" | "not_payable" | "partial" | "unverified";
+  owed: number | null;
+  reasons: string[];
+  removed?: Action[];
+}
 
 export interface Turn {
   role: "patient" | "agent";
   text: string;
   actions?: Action[]; // agent turns only
+  gate?: Gate; // agent turns from the product instructions only
 }
 
 export interface Verdict {
