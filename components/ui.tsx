@@ -96,3 +96,58 @@ export function Button({
 export function Panel({ children, className = "" }: { children: ReactNode; className?: string }) {
   return <div className={"rounded-lg border border-rule bg-surface " + className}>{children}</div>;
 }
+
+// Placeholder square for a trial that has not been run.
+export function EmptyDot() {
+  return (
+    <span
+      title="Not run yet"
+      aria-label="Not run yet"
+      className="inline-block h-3 w-3 rounded-[3px] border border-rule-strong"
+    />
+  );
+}
+
+// A small row of mutually exclusive buttons (trial 1/2/3, v1/v2). Real buttons with aria-pressed.
+export function Segmented<T extends string>({
+  options,
+  value,
+  onChange,
+  label,
+  disabled = false,
+}: {
+  options: { value: T; label: string }[];
+  value: T;
+  onChange: (v: T) => void;
+  label: string;
+  disabled?: boolean;
+}) {
+  return (
+    <div role="group" aria-label={label} className="inline-flex rounded-md border border-rule-strong p-0.5">
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          aria-pressed={o.value === value}
+          disabled={disabled}
+          onClick={() => onChange(o.value)}
+          className={
+            "h-7 min-w-8 rounded px-2.5 text-[13px] transition-colors disabled:cursor-not-allowed disabled:opacity-50 " +
+            (o.value === value ? "bg-accent-soft font-medium text-accent" : "text-ink-2 hover:bg-sunken hover:text-ink")
+          }
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// Inline error shown next to the control that caused it.
+export function ErrorText({ children }: { children: ReactNode }) {
+  return (
+    <p role="alert" className="text-[13.5px] text-wrong">
+      {children}
+    </p>
+  );
+}

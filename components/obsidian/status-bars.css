@@ -1,0 +1,21 @@
+/* Adapted from ObsidianUI "Status Bars" (MIT). Colours come from the outcome tokens in app/globals.css. */
+
+.status-bars__pulse {
+  animation: status-bars-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes status-bars-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-bars__pulse {
+    animation: none;
+  }
+}
