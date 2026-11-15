@@ -4,13 +4,15 @@ A patient billing assistant that checks a bill is owed before it asks for money,
 
 Live: https://paystate.vercel.app
 
+Every patient, account and record in it is synthetic. I wrote them.
+
 ## The product
 
 **Patient thread** (`/`). Pick one of twelve patients and reply to their statement text as them. The assistant answers from the practice's account record. Its actions show up in the thread in the patient's words: balance on hold, plan set up, sent to the billing team.
 
 **Staff queue** (`/queue`). Every handoff arrives as a ticket: why it needs a person, the line of the record that decides it, what the patient has been told, the IDs they already gave, and one next step. Closing a ticket picks a resolution and writes the text the patient gets. Conversations you have on the patient page land here too.
 
-**Go-live check** (`/readiness`). Tick the feeds a practice has connected (remittance, eligibility, account ledger, visit record). The page shows how the assistant handled each patient question with exactly that much of the record, which feed to connect next, and how many conversations end with staff. Every cell is a recorded run, with the transcript one click away.
+**Go-live check** (`/readiness`). Tick the feeds a practice has connected (remittance, eligibility, account ledger, visit record). The page shows how the assistant handled each patient question with exactly that much of the record, which feed to connect next, and how many conversations involve staff. Every cell is a recorded run, with the transcript one click away.
 
 **Decisions** (`/decisions`). Who it is for, what I chose and turned down, what each choice costs, the metrics I would hold it to, and what I would do in the first 30 days with real data.
 
@@ -20,19 +22,21 @@ Live: https://paystate.vercel.app
 
 Twelve patient situations, 324 graded conversations on `claude-sonnet-5-5` with thinking off: two sets of instructions, three trials, and every combination of feeds each case draws on.
 
-| The assistant can read | Right, check on | Right, check off | Wrong collects, check off | Ends with staff, check on |
+| The assistant can read | Right, check on | Right, check off | Wrong collects, check off | Involved staff, check on |
 |---|---|---|---|---|
-| Statement balance only | 28 / 36 | 23 / 36 | 2 | 33 / 36 |
+| Balance only | 28 / 36 | 23 / 36 | 2 | 33 / 36 |
 | Balance + remittance | 31 / 36 | 30 / 36 | 0 | 27 / 36 |
 | Balance + eligibility | 34 / 36 | 29 / 36 | 2 | 27 / 36 |
 | Balance + account ledger | 30 / 36 | 25 / 36 | 2 | 33 / 36 |
 | Balance + visit record | 26 / 36 | 25 / 36 | 2 | 35 / 36 |
 | Balance + eligibility + account ledger | 36 / 36 | 31 / 36 | 2 | 27 / 36 |
-| Everything | 36 / 36 | 35 / 36 | 0 | 27 / 36 |
+| All feeds | 36 / 36 | 35 / 36 | 0 | 27 / 36 |
 
-"Check" is one rule in the instructions: confirm the balance is payable as stated before asking for, accepting or scheduling money.
+"Check" is one rule in the instructions: confirm the balance is payable as stated before asking for, accepting or scheduling money. "Involved staff" counts conversations with a handoff at any point, including some that were also resolved. The 2 in the wrong-collect column is the same two conversations in every row: the late-filing case draws only on the remittance, so each row without it reuses its balance-only runs.
 
-I expected the instructions to matter most. With the whole record they barely mattered. With only the statement balance, the assistant without the check offered to take payment from a patient whose claim the practice had filed late. The remittance is what stops that. Eligibility rescues the most answers. Missing feeds also push more conversations to staff. A difference of one or two in this table is within run-to-run variation.
+I expected the instructions to matter most. With the whole record they barely mattered. Each cell is 36 conversations, and a rough 95% interval on a rate from 36 is about 15 points either side, so gaps of fewer than about eight conversations are within noise. The gaps that clear that line all come from connecting the record: balance only to all feeds is 28 to 36 with the check on (about 22 points) and 23 to 35 with it off. No gap between check on and check off with the same feeds clears it. With the check on, eligibility adds the most of any single feed (28 to 34); that is under the line by count, but all six come from two cases that go from none of three right to three of three. Missing feeds also mean more conversations involve staff.
+
+Wrong collects: two in all 324 conversations, both the late-filing case, check off, balance only. With the remittance connected or the check on, it did not happen in these runs. Two events show the failure exists; they are too few to give a rate.
 
 ## Toward real traffic
 
@@ -40,9 +44,9 @@ The bench above is twelve hard cases with a scripted patient. Three changes move
 
 - **A weighted set of 28 situations.** The twelve hard cases plus sixteen ordinary ones (what is this charge, send me the link, a receipt, STOP, wrong number), each with an assumed share of inbound conversations. The ordinary ones carry 87% of the mix. The page lets you change the weights.
 - **Unscripted patients.** A simulated patient with a persona and a goal replies in their own words for up to three messages.
-- **A payment gate in code.** `lib/gate.mjs` reads the reason codes, eligibility, ledger and the payer's stated patient share and decides whether the balance can be collected. The assistant is told the result and collect actions it does not allow are removed in code. It matches the answer key on 28 of 28 records, with no model call.
+- **A payment gate in code.** `lib/gate.mjs` reads the reason codes, eligibility, ledger and the payer's stated patient share and returns payable, part payable, not payable or cannot verify, with no model call. The assistant cannot send a pay link or set up a plan on a balance the gate has blocked. Where there is no remittance to check, the gate says it cannot verify and blocks nothing; the instructions decide, which is where both wrong collects in the bench happened. On a part-payable bill the gate passes the supported amount to the assistant, but the amount on the pay link is not checked in code. On the 28 records I wrote, the gate returns the decision I expected for each; 20 of the 28 are payable as stated, 14 of them ordinary accounts with nothing wrong.
 
-First run, 56 conversations on `claude-opus-5-5` at low effort: 53 right, 89.3% weighted by the assumed mix, no wrong collects. The gate never had to remove an action, because the assistant did not attempt one it disallowed. All three misses were on ordinary cases and all three were about the edge of what the assistant can do, not about judgment: it handed a receipt to staff because it could not see a payment that had just been made, handed an email receipt to staff because it had no email on file, and reassured a patient about her credit more broadly than policy supports. Two runs per situation is a first reading.
+First run, 56 conversations on `claude-opus-5-5` at low effort (the model the live site uses, so not comparable with the bench above): 53 right, about 89% weighted by the assumed mix, no wrong collects. With 56 conversations, the unweighted 53 of 56 has a rough 95% interval of 85% to 98%. The gate never had to remove an action, because the assistant did not attempt one it disallowed. All three misses were on ordinary cases and all three were about the edge of what the assistant can do, not about judgment: it handed a receipt to staff because it could not see a payment that had just been made, handed an email receipt to staff because it had no email on file, and reassured a patient about her credit more broadly than policy supports. Two runs per situation is a first reading.
 
 Each miss became a product change: receipts are texted automatically when a payment posts, the assistant can save an email address the patient gives, and it states policy without predicting what lenders or credit bureaus will do. The three situations were run again and came out 6 of 6, after one more fix (the assistant had been offering to ask staff for plan terms the policy does not allow). That is a fix checked on the cases it was written for, so the headline stays at the first run; the other 25 situations were not rerun.
 
@@ -59,7 +63,7 @@ The go-live check also runs the gate for whatever feeds are ticked. With remitta
 | Plan request in Spanish | Yes |
 | Billed in full, has new coverage (PR-27) | No |
 | Medicare and Medicaid, offers to pay (QMB) | No |
-| In-network hospital, out-of-network anesthesia (No Surprises Act) | No |
+| In-network hospital, out-of-network anesthesia (No Surprises Act) | Part: $420 of $2,310 |
 | Already paid at the desk (unapplied payment) | No |
 | Hurt at work, billed personally (CO-19) | No |
 | Wants to just pay it (CO-29 timely filing) | No |
@@ -90,15 +94,15 @@ echo "ANTHROPIC_API_KEY=your-key" > .env.local
 npm run dev
 ```
 
-Recorded results are checked in under `data/`, so the site works without running the bench. To run it yourself:
+Recorded results are checked in under `data/`, so the site works without running the bench. `npm run bench` uses the same model as the recorded table (`claude-sonnet-5-5`, thinking off). The traffic run, the prompt lab and the patient page use `claude-opus-5-5` at low effort. To run it yourself:
 
 ```bash
 npm run bench                       # full record, both versions, 3 trials
-npm run bench -- --view statement   # same cases, statement fields only
+npm run bench -- --view statement   # same cases, balance only (statement fields)
 npm run bench -- --view feeds       # statement plus each partial set of feeds
 npm run bench -- --only qmb         # one case
 npm run tickets:build               # rebuild the recorded staff queue from the runs
-npm run traffic                     # 28 weighted situations, simulated patients, payment gate (about 250 calls)
+npm run traffic                     # 28 weighted situations, simulated patients, payment gate (the recorded run took 300 calls, including the reruns)
 npm run traffic -- --dry-run        # print the plan and the worst-case call count
 npm run outreach:build              # rebuild the synthetic panel and rerun the SQL
 npm test
@@ -131,11 +135,14 @@ app/                 patient thread, queue, readiness, decisions, evidence
 - The bench is twelve cases chosen to be hard. The traffic set adds ordinary ones and weights, but the weights are my assumptions and the patients are simulated by a model. Neither is real traffic.
 - The agent here is a stand-in with declared actions, not a production agent with real tools.
 - The judge is the same model as the agent and is sometimes wrong at the edges. The method page lists the calls I disagree with.
-- The scripted patients often say the deciding fact out loud, which protects them even when the agent cannot see it. Real traffic would likely do worse in the statement-only view.
+- The scripted patients often say the deciding fact out loud, which protects them even when the agent cannot see it. Real traffic would likely do worse in the balance-only view.
 - Text only. No voice.
 - No identity check, no real payments, and a hold is a flag in the demo, not a write to a practice system.
 - The staff queue keeps your tickets and closures in your browser. Nothing is sent to anyone.
-- Answer keys are my reading of the rules. State law varies on who owes a deceased patient's balance, which is why that case goes to a person.
+- I wrote the answer keys from the billing rules, and no biller has reviewed them. State law varies on who owes a deceased patient's balance, which is why that case goes to a person.
+- Dollar amounts are illustrative and are not taken from any fee schedule. Payer names in the records are placeholders.
+- In a real practice, network status and filing limits would come from payer contract data, and coverage history from the practice management system. Here they are grouped under the eligibility and remittance feeds for simplicity.
+- The payment gate does not model secondary payers.
 
 ## Who built this
 

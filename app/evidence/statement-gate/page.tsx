@@ -55,8 +55,10 @@ export default function OutreachPage() {
             unapplied payment is on the ledger.
           </p>
           <p>
-            So the same checks can run before a statement or reminder goes out. An account that trips a rule gets a
-            correction, a question, or no contact and a staff task, instead of a bill the patient should not pay.
+            So the same rules can run before a statement or reminder goes out, instead of during a conversation. That
+            is what this page calls the statement gate. An account that
+            trips a rule gets a correction, a question, or no contact and a staff task, instead of a bill the patient
+            should not pay.
           </p>
         </div>
       </header>
@@ -176,8 +178,9 @@ export default function OutreachPage() {
 
       <section className="prose-col flex flex-col gap-2 text-[14px] text-ink-2">
         <p>
-          Two conditions apply to every message below. Texts go only to patients with documented consent to receive
-          billing texts, which the TCPA makes a condition of automated texting; everyone else gets email, or a letter. Messages go out in the patient&apos;s
+          Two conditions apply to every message below. Texts go only to patients who have agreed to receive billing
+          texts; everyone else gets email or a letter. Consent and opt-out rules apply to texts, and the
+          practice&apos;s counsel decides what they require. Messages go out in the patient&apos;s
           preferred language, and each translation is reviewed by a fluent speaker before use. The example amounts
           and dates come from the matching bench case.
         </p>
@@ -271,7 +274,7 @@ export default function OutreachPage() {
         </div>
         <p className="prose-col">
           At an assumed {n(EXPERIMENT.openBalancesPerMonth)} open balances a month, enrolment takes about{" "}
-          {Math.ceil(ss.months)} months, and the 60-day guardrail adds two more. The guardrail is underpowered at this
+          {ss.months.toFixed(1)} months, and the 60-day guardrail adds two more. The guardrail is underpowered at this
           size, so it is read as a threshold to watch, not a test to pass.
         </p>
 

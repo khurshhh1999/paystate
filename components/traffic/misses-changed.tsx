@@ -56,7 +56,8 @@ export function MissesChanged() {
       </h2>
       <p className="prose-col mt-1 text-[14px] text-ink-2">
         Each miss in the first run pointed at something the product could not do, or said too loosely. These situations
-        were run again after the change. The other {notRerun} were not.
+        were run again after the change, two runs each. The other {notRerun} were not. The reruns appear only here; the
+        result and the table above are the first run.
       </p>
       <div className="table-scroll relative mt-4">
         <table className="ledger min-w-[760px]">
@@ -66,7 +67,7 @@ export function MissesChanged() {
               <th scope="col">What went wrong</th>
               <th scope="col">What changed</th>
               <th scope="col">First run</th>
-              <th scope="col">Rerun</th>
+              <th scope="col">Rerun after the change</th>
               <th scope="col">
                 <span className="sr-only">Conversation</span>
               </th>
@@ -88,7 +89,7 @@ export function MissesChanged() {
                       <Dots trials={before} label="First run" />
                     </td>
                     <td>
-                      <Dots trials={after} label="Rerun" />
+                      <Dots trials={after} label="Rerun after the change" />
                     </td>
                     <td className="r">
                       {failing && (

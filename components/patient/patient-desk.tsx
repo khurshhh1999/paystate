@@ -7,7 +7,7 @@ import type { Action, Gate, Ticket, Turn } from "@/lib/types";
 import { CASES } from "@/lib/cases.mjs";
 import { needsTicket } from "@/lib/ticket-kinds.mjs";
 import type { TicketBody } from "@/lib/tickets.mjs";
-import { ApiError, postJSON } from "@/components/api";
+import { ApiError, isLimited, postJSON } from "@/components/api";
 import { saveTicket } from "@/components/ticket-store";
 import { PatientList } from "./patient-list";
 import { HEADLINE } from "./headlines";
@@ -34,7 +34,11 @@ export function PatientDesk() {
   const [transcript, setTranscript] = useState<Turn[]>([]);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // A request limit is not a failure: it is shown as a note, without a retry button.
+  const [limited, setLimited] = useState(false);
   const [ticket, setTicket] = useState<TicketState>({ status: "idle" });
+  // The feed setting the visitor picked while a conversation is open, waiting on their yes.
+  const [confirmView, setConfirmView] = useState<FeedSetting | null>(null);
   // Bumped on every reset so the thread drops its draft.
   const [threadKey, setThreadKey] = useState(0);
 
@@ -42,6 +46,8 @@ export function PatientDesk() {
   const ticketAbort = useRef<AbortController | null>(null);
   const conversationId = useRef<string | null>(null);
   const ticketTranscript = useRef<Turn[]>([]);
+  // Bumped on every reset; a ticket that arrives for an earlier conversation is saved but not shown.
+  const generation = useRef(0);
 
   const kase = ORDERED_CASES.find((c) => c.id === caseId) ?? ORDERED_CASES[0];
   const patientTurns = transcript.filter((t) => t.role === "patient").length;
@@ -54,15 +60,18 @@ export function PatientDesk() {
 
   function reset() {
     chatAbort.current?.abort();
-    ticketAbort.current?.abort();
     chatAbort.current = null;
+    // A handoff being written is left to finish: the patient was told staff will follow up,
+    // so it still belongs in the queue. It just no longer updates this page.
     ticketAbort.current = null;
+    generation.current += 1;
     conversationId.current = null;
     ticketTranscript.current = [];
     setTranscript([]);
     setPending(false);
     setError(null);
     setTicket({ status: "idle" });
+    setConfirmView(null);
     setThreadKey((k) => k + 1);
   }
 
@@ -71,6 +80,9 @@ export function PatientDesk() {
     const ctrl = new AbortController();
     ticketAbort.current = ctrl;
     ticketTranscript.current = full;
+    const gen = generation.current;
+    if (!conversationId.current) conversationId.current = crypto.randomUUID();
+    const id = "live-" + conversationId.current;
     setTicket({ status: "pending" });
     try {
       const body = await postJSON<TicketBody & Pick<Ticket, "caseId" | "patient" | "balance" | "hold">>(
@@ -78,18 +90,11 @@ export function PatientDesk() {
         { caseId: kase.id, transcript: full },
         ctrl.signal,
       );
-      if (!conversationId.current) conversationId.current = crypto.randomUUID();
-      const t: Ticket = {
-        ...body,
-        id: "live-" + conversationId.current,
-        createdAt: new Date().toISOString(),
-        transcript: full,
-        source: "live",
-      };
+      const t: Ticket = { ...body, id, createdAt: new Date().toISOString(), transcript: full, source: "live" };
       saveTicket(t);
-      setTicket({ status: "done", ticket: t });
+      if (gen === generation.current) setTicket({ status: "done", ticket: t });
     } catch (err) {
-      if (isAbort(err)) return;
+      if (isAbort(err) || gen !== generation.current) return;
       setTicket({ status: "error", message: messageOf(err) });
     } finally {
       if (ticketAbort.current === ctrl) ticketAbort.current = null;
@@ -116,6 +121,7 @@ export function PatientDesk() {
       if (needsTicket([agent])) void requestTicket(full);
     } catch (err) {
       if (isAbort(err)) return;
+      setLimited(isLimited(err));
       setError(messageOf(err));
     } finally {
       if (chatAbort.current === ctrl) {
@@ -143,8 +149,24 @@ export function PatientDesk() {
     setCaseId(id);
   }
 
+  // A practice's feeds do not change mid-conversation, so a different setting means a new
+  // conversation. Once anything has been sent, ask before clearing it.
   function changeView(v: FeedSetting) {
-    if (v === view) return;
+    if (v === view) {
+      setConfirmView(null);
+      return;
+    }
+    if (transcript.length > 0 || pending) {
+      setConfirmView(v);
+      return;
+    }
+    reset();
+    setView(v);
+  }
+
+  function confirmChangeView() {
+    if (!confirmView) return;
+    const v = confirmView;
     reset();
     setView(v);
   }
@@ -162,6 +184,9 @@ export function PatientDesk() {
           Paystate is a billing assistant that reads the practice&apos;s account before it asks a patient for money.
           Twelve patients are in the list. Some of them owe every cent.
         </p>
+        <p className="prose-col text-[13.5px] text-ink-3">
+          Khursheed Khan built this as an independent project, and every patient, account and amount in it is made up.
+        </p>
       </header>
     <div className="grid gap-8 lg:grid-cols-[236px_420px_minmax(0,1fr)] lg:gap-6">
       <PatientList cases={ORDERED_CASES} selected={kase.id} onSelect={selectCase} />
@@ -175,6 +200,7 @@ export function PatientDesk() {
         canSend={!pending && !awaitingReply && !atCap}
         atCap={atCap}
         error={error}
+        limited={limited}
         onSend={send}
         onRetry={retry}
         onStartOver={reset}
@@ -183,6 +209,9 @@ export function PatientDesk() {
         kase={kase}
         view={view}
         onViewChange={changeView}
+        confirmView={confirmView}
+        onConfirmView={confirmChangeView}
+        onCancelView={() => setConfirmView(null)}
         ticket={ticket}
         onRetryTicket={() => void requestTicket(ticketTranscript.current)}
         hasReply={hasReply}

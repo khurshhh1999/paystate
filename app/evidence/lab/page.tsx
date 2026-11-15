@@ -25,9 +25,11 @@ export default function LabPage() {
         <h1 className="text-[28px] font-semibold leading-tight sm:text-[32px]">Prompt lab</h1>
         <p className="mt-3 text-[16px] text-ink-2">
           Edit the assistant&apos;s instructions and run all {CASES.length} cases against them. Each case runs once with
-          the same scripted patient and the same judge as the recorded bench. It starts on the statement-only record,
-          because that is where the recorded runs show instructions making a difference; with the full record both
-          recorded versions are close to the ceiling.
+          the same scripted patient and the same judge rubric as the recorded bench. The lab runs on Opus 5.5 at low
+          effort, the model the live site uses, for both the assistant and the judge. The recorded bench ran on Sonnet
+          5.5 with thinking off, so a lab result is not comparable with the recorded table. To compare instructions,
+          run v1 or v2 here too. The lab starts on the balance-only record, because that is where the recorded runs
+          show instructions making a difference; with all feeds both recorded versions are close to the ceiling.
         </p>
       </header>
 

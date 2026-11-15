@@ -6,7 +6,9 @@ import { CASES } from "@/lib/cases.mjs";
 import type { Results, Version, VersionSummary, View } from "@/lib/types";
 import { money, OUTCOME_LABEL, type Outcome } from "@/components/ui";
 import { StatusBars, type StripCell } from "@/components/obsidian/status-bars";
-import { orderedCases, trialsFor, VERSION_SHORT, VERSIONS, VIEW_LABEL, VIEW_ORDER } from "@/components/bench";
+import { orderedCases, trialsFor, VERSION_SHORT, VERSIONS, VIEW_ORDER } from "@/components/bench";
+
+const VIEW_LABEL: Record<View, string> = { full: "All feeds", statement: "Balance only" };
 
 const VIEW_NOTE: Record<View, string> = {
   full: "Remittance codes, eligibility, ledger, intake and notes.",
@@ -45,6 +47,10 @@ const LEGEND_BG: Record<Outcome, string> = {
 
 function Cell({ s, version, view, results }: { s: VersionSummary; version: Version; view: View; results: Results }) {
   const ran = s.trials > 0;
+  // Which cases the wrong collects came from. Two events is a count to read, so it is shown by case.
+  const wrongCases = orderedCases().filter((c) =>
+    trialsFor(version, c.id, view, results).some((t) => t.verdict.outcome === "wrong_collect"),
+  );
   return (
     <div className="min-w-0">
       <p className="text-[13px] text-ink-2 sm:hidden">{VERSION_SHORT[version]}</p>
@@ -72,11 +78,11 @@ function Cell({ s, version, view, results }: { s: VersionSummary; version: Versi
           <dt className="text-ink-2">Wrong collects</dt>
           <dd>
             <span className={"num " + (s.wrong_collect > 0 ? "font-medium text-wrong" : "")}>{s.wrong_collect}</span>
-            {s.wrong_collect > 0 && (
+            {s.wrong_collect > 0 && wrongCases.length === 1 && (
               <span className="text-ink-2">
                 {" "}
-                · <span className="tabular-nums">{money(s.wrongCollectDollars)}</span> not owed, each time the twelve cases are
-                run
+                · all on the case &ldquo;{wrongCases[0].title}&rdquo;, a{" "}
+                <span className="tabular-nums">{money(wrongCases[0].at_risk)}</span> balance not owed
               </span>
             )}
           </dd>

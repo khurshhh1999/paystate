@@ -6,10 +6,10 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { FEEDS, FEED_IDS } from "@/lib/feeds.mjs";
-import type { FeedId, Version } from "@/lib/types";
+import type { FeedId, Outcome, Version } from "@/lib/types";
 import { RESULTS } from "@/components/bench";
 import { Button } from "@/components/ui";
-import { caseRows, gateSummary, summarize, suggestions, type GateChange, type Suggestion } from "./compute";
+import { caseRows, gateSummary, isRight, summarize, suggestions, type GateChange, type Suggestion } from "./compute";
 import { ReadinessSummary } from "./summary";
 import { GateSummaryBlock } from "./gate-summary";
 import { CaseTable } from "./case-table";
@@ -20,16 +20,53 @@ function plural(n: number, one: string, many: string) {
   return `${n} ${n === 1 ? one : many}`;
 }
 
-// Three runs per question: a swing of one or two conversations is run-to-run noise.
+// 36 conversations per setting: a rough 95% interval is about 15 points either side, so a change
+// of fewer than about eight conversations is within noise. The exception is a change made of whole
+// questions flipping from never right to right every time (or back), which is not a coin toss.
 // Any change in wrong collects is reported as is, since each one is money taken that is not owed.
-const NOISE = 2;
+const NOISE = 7;
 
-function suggestionText(s: Suggestion): { text: string; clear: boolean } {
+// Questions that go from never right to right every time when the feed is added, and the reverse.
+interface Flips {
+  up: number;
+  down: number;
+  partial: boolean; // some question moved by less than all of its runs
+}
+
+function flipsFor(version: Version, connected: FeedId[], feed: FeedId): Flips {
+  const now = caseRows(RESULTS, version, connected);
+  const next = caseRows(RESULTS, version, FEED_IDS.filter((f) => f === feed || connected.includes(f)));
+  const rightOf = (trials: { verdict: { outcome: Outcome } }[]) => trials.filter((t) => isRight(t.verdict.outcome)).length;
+  const out: Flips = { up: 0, down: 0, partial: false };
+  for (const a of now) {
+    const b = next.find((r) => r.kase.id === a.kase.id);
+    if (!b || a.trials.length === 0 || b.trials.length === 0) continue;
+    const ra = rightOf(a.trials);
+    const rb = rightOf(b.trials);
+    if (ra === rb) continue;
+    if (ra === 0 && rb === b.trials.length) out.up++;
+    else if (ra === a.trials.length && rb === 0) out.down++;
+    else out.partial = true;
+  }
+  return out;
+}
+
+function suggestionText(s: Suggestion, f: Flips): { text: string; clear: boolean } {
   if (!s.ran) return { text: "not run yet", clear: false };
   const parts: string[] = [];
-  const smallRight = Math.abs(s.moreRight) <= NOISE;
-  if (s.moreRight > NOISE) parts.push(`${plural(s.moreRight, "more conversation", "more conversations")} right`);
-  if (s.moreRight < -NOISE) parts.push(`${plural(-s.moreRight, "fewer conversation", "fewer conversations")} right`);
+  // Clear by whole questions: at least two flip the same way and nothing else moves.
+  const byQuestions = !f.partial && ((f.up >= 2 && f.down === 0) || (f.down >= 2 && f.up === 0));
+  const smallRight = Math.abs(s.moreRight) <= NOISE && !byQuestions;
+  if (s.moreRight !== 0 && !smallRight) {
+    const n = Math.abs(s.moreRight);
+    const what = s.moreRight > 0 ? plural(n, "more conversation", "more conversations") : plural(n, "fewer conversation", "fewer conversations");
+    const why = byQuestions
+      ? f.up > 0
+        ? ` (${plural(f.up, "question goes", "questions go")} from never right to right every time)`
+        : ` (${plural(f.down, "question goes", "questions go")} from right every time to never right)`
+      : "";
+    parts.push(`${what} right${why}`);
+  }
   if (s.fewerWrong > 0) parts.push(plural(s.fewerWrong, "fewer wrong collect", "fewer wrong collects"));
   if (s.fewerWrong < 0) parts.push(plural(-s.fewerWrong, "more wrong collect", "more wrong collects"));
   if (parts.length > 0) {
@@ -109,7 +146,7 @@ export function GoLiveCheck() {
       rows: caseRows(RESULTS, version, connected),
       summary: summarize(RESULTS, version, connected),
       staffWithAll: all.unrun === 0 ? all.staffEnds : null,
-      next: suggestions(RESULTS, version, connected),
+      next: suggestions(RESULTS, version, connected).map((s) => ({ s, flips: flipsFor(version, connected, s.feed) })),
     };
   }, [connected, version]);
 
@@ -141,7 +178,7 @@ export function GoLiveCheck() {
               disabled={allConnected}
               className="h-8 text-[13.5px]"
             >
-              Everything
+              All feeds
             </Button>
           </div>
         </div>
@@ -203,17 +240,17 @@ export function GoLiveCheck() {
             Connect next
           </h2>
           {next.length === 0 ? (
-            <p className="mt-2 text-ink-2">Everything is connected.</p>
+            <p className="mt-2 text-ink-2">All feeds are connected.</p>
           ) : (
             <>
               <p className="mt-1 text-[13.5px] text-ink-2">
-                What adding one feed changes across the {summary.trials} conversations. Each question ran three times,
-                so a change of one or two conversations is noise. Gate changes are worked out from the record and are
-                exact.
+                What adding one feed changes across the {summary.trials} conversations. A change of fewer than about
+                eight conversations is within noise, unless whole questions go from never right to right every time.
+                Gate changes are worked out from the record and are exact.
               </p>
               <ol className="mt-2 divide-y divide-rule border-y border-rule" aria-live="polite">
-                {next.map((s) => {
-                  const { text, clear } = suggestionText(s);
+                {next.map(({ s, flips }) => {
+                  const { text, clear } = suggestionText(s, flips);
                   const g = gateChangeText(s.gate);
                   return (
                     <li key={s.feed} className="flex items-baseline justify-between gap-4 py-2.5">

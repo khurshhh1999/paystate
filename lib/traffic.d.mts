@@ -7,8 +7,8 @@ export interface TrafficCase extends Case {
 }
 
 export interface GateExpectation {
-  status: "payable" | "not_payable" | "partial";
-  owed: number;
+  status: "payable" | "not_payable" | "partial" | "unverified";
+  owed: number | null;
 }
 
 export const TRAFFIC_CASES: TrafficCase[];

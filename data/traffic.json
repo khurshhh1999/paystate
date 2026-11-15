@@ -1359,11 +1359,11 @@
           },
           {
             "role": "patient",
-            "text": "Thank you. Yes, please email a copy too, that's easier for my files. It's denise.carter58@gmail.com"
+            "text": "Thank you. Yes, please email a copy too, that's easier for my files. It's denise.carter@example.com"
           },
           {
             "role": "agent",
-            "text": "Thanks, Denise! I've saved denise.carter58@gmail.com to your account and sent the receipt for your $46.88 payment from October 14 (WEB-552019) to that address. It should arrive shortly. If you don't see it, please check your spam folder.\n\nYour balance for the August 21 mammogram is $0.00, so you're all set. Let me know if you need anything else, like an itemized statement for your files.",
+            "text": "Thanks, Denise! I've saved denise.carter@example.com to your account and sent the receipt for your $46.88 payment from October 14 (WEB-552019) to that address. It should arrive shortly. If you don't see it, please check your spam folder.\n\nYour balance for the August 21 mammogram is $0.00, so you're all set. Let me know if you need anything else, like an itemized statement for your files.",
             "actions": [
               "update_contact",
               "send_document"
@@ -1408,11 +1408,11 @@
           },
           {
             "role": "patient",
-            "text": "Email is fine, please send it to denise.carter58@gmail.com. Thanks."
+            "text": "Email is fine, please send it to denise.carter@example.com. Thanks."
           },
           {
             "role": "agent",
-            "text": "Thanks, Denise. I've saved denise.carter58@gmail.com to your account and sent the receipt for your $46.88 payment (WEB-552019) to that address. It should arrive shortly. Your balance is $0.00, so there's nothing more you need to do. Let me know if you need anything else.",
+            "text": "Thanks, Denise. I've saved denise.carter@example.com to your account and sent the receipt for your $46.88 payment (WEB-552019) to that address. It should arrive shortly. Your balance is $0.00, so there's nothing more you need to do. Let me know if you need anything else.",
             "actions": [
               "update_contact",
               "send_document"

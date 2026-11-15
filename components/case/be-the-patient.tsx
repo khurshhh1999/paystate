@@ -3,11 +3,27 @@
 import { useState } from "react";
 import type { Action, Turn, Verdict, Version, View } from "@/lib/types";
 import { Button, ErrorText, Panel, Segmented } from "@/components/ui";
-import { postJSON } from "@/components/api";
+import { isLimited, postJSON } from "@/components/api";
 import { Transcript, VerdictBlock } from "./transcript";
 import { VIEW_OPTIONS } from "./views";
 
 const MAX_PATIENT_TURNS = 5;
+
+type Problem = { message: string; limited: boolean };
+
+function problemOf(err: unknown): Problem {
+  return { message: (err as Error).message, limited: isLimited(err) };
+}
+
+// A usage limit reads as a note; anything else is an error.
+function ProblemText({ problem }: { problem: Problem }) {
+  if (!problem.limited) return <ErrorText>{problem.message}</ErrorText>;
+  return (
+    <p className="text-[13.5px] text-ink-2" aria-live="polite">
+      {problem.message}
+    </p>
+  );
+}
 
 export function BeThePatient({ caseId, opener, defaultView }: { caseId: string; opener: string; defaultView: View }) {
   const [version, setVersion] = useState<Version>("v2");
@@ -15,9 +31,9 @@ export function BeThePatient({ caseId, opener, defaultView }: { caseId: string; 
   const [turns, setTurns] = useState<Turn[]>([]);
   const [draft, setDraft] = useState(opener);
   const [sending, setSending] = useState(false);
-  const [sendError, setSendError] = useState<string | null>(null);
+  const [sendError, setSendError] = useState<Problem | null>(null);
   const [grading, setGrading] = useState(false);
-  const [gradeError, setGradeError] = useState<string | null>(null);
+  const [gradeError, setGradeError] = useState<Problem | null>(null);
   const [verdict, setVerdict] = useState<Verdict | null>(null);
 
   const patientTurns = turns.filter((t) => t.role === "patient").length;
@@ -47,7 +63,7 @@ export function BeThePatient({ caseId, opener, defaultView }: { caseId: string; 
       // Put the message back so the visitor can retry without retyping.
       setTurns(turns);
       setDraft(text);
-      setSendError((err as Error).message);
+      setSendError(problemOf(err));
     } finally {
       setSending(false);
     }
@@ -60,7 +76,7 @@ export function BeThePatient({ caseId, opener, defaultView }: { caseId: string; 
       const v = await postJSON<Verdict>("/api/judge", { caseId, view, transcript: turns });
       setVerdict(v);
     } catch (err) {
-      setGradeError((err as Error).message);
+      setGradeError(problemOf(err));
     } finally {
       setGrading(false);
     }
@@ -128,7 +144,7 @@ export function BeThePatient({ caseId, opener, defaultView }: { caseId: string; 
                 }
               }}
               rows={3}
-              maxLength={1000}
+              maxLength={600}
               disabled={sending}
               className="w-full resize-y rounded-md border border-rule-strong bg-surface px-3 py-2 text-[14.5px] text-ink placeholder:text-ink-3 disabled:opacity-60"
               placeholder="Write as the patient"
@@ -139,7 +155,7 @@ export function BeThePatient({ caseId, opener, defaultView }: { caseId: string; 
               </Button>
               <span className="text-[12.5px] text-ink-3">Ctrl or Cmd + Enter to send</span>
             </div>
-            {sendError && <ErrorText>{sendError}</ErrorText>}
+            {sendError && <ProblemText problem={sendError} />}
           </form>
         ) : (
           <p className="text-[14px] text-ink-2">That is the limit of {MAX_PATIENT_TURNS} patient messages. Grade it or start over.</p>
@@ -155,7 +171,7 @@ export function BeThePatient({ caseId, opener, defaultView }: { caseId: string; 
                 Start over
               </Button>
             </div>
-            {gradeError && <ErrorText>{gradeError}</ErrorText>}
+            {gradeError && <ProblemText problem={gradeError} />}
             {verdict && <VerdictBlock verdict={verdict} />}
           </div>
         )}

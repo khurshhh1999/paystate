@@ -2,7 +2,21 @@
 
 import type { Trial, Verdict } from "@/lib/types";
 
-export class ApiError extends Error {}
+export class ApiError extends Error {
+  status: number;
+  constructor(message: string, status = 0) {
+    super(message);
+    this.status = status;
+  }
+  /** A usage limit, not a failure: the message says when live runs open again. */
+  get limited(): boolean {
+    return this.status === 429;
+  }
+}
+
+export function isLimited(err: unknown): boolean {
+  return err instanceof ApiError && err.limited;
+}
 
 export async function postJSON<T>(url: string, body: unknown, signal?: AbortSignal): Promise<T> {
   let res: Response;
@@ -28,7 +42,7 @@ export async function postJSON<T>(url: string, body: unknown, signal?: AbortSign
       data && typeof data === "object" && "error" in data && typeof (data as { error: unknown }).error === "string"
         ? (data as { error: string }).error
         : `Request failed with status ${res.status}.`;
-    throw new ApiError(res.status === 429 ? `Rate limited. ${msg}` : msg);
+    throw new ApiError(msg, res.status);
   }
   return data as T;
 }

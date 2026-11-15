@@ -3,8 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CASES, PRACTICE_POLICY } from "@/lib/cases.mjs";
 import { recordForView } from "@/lib/prompts.mjs";
+import { GATE_EXPECTED } from "@/lib/traffic.mjs";
 import type { Trial, View } from "@/lib/types";
-import { Money } from "@/components/ui";
+import { Money, money } from "@/components/ui";
 import { getCase, orderedCases, RESULTS, SHOULD_PAY, trialsFor, VERSION_NOTE } from "@/components/bench";
 import { RecordView } from "@/components/case/record-view";
 import { RecordPanel } from "@/components/case/record-panel";
@@ -27,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!kase) return { title: "Case not found · Paystate" };
   return {
     title: `${kase.title} · Paystate`,
-    description: "One test case: the account record, what a senior biller would do, and every recorded conversation.",
+    description: "One test case: the account record, the answer key, and every recorded conversation.",
   };
 }
 
@@ -57,6 +58,10 @@ export default async function CasePage({ params }: Props) {
   const failed = (view: View) =>
     [...trials[view].v1, ...trials[view].v2].some((t) => t.verdict.outcome === "dead_end" || t.verdict.outcome === "wrong_collect");
   const defaultView: View = failed("statement") && !failed("full") ? "statement" : "full";
+
+  // A bill where only part is owed shows the owed part, from the gate's expected result.
+  const expected = GATE_EXPECTED[kase.id];
+  const partial = expected?.status === "partial" ? expected : null;
 
   const records = { full: recordForView(kase, "full"), statement: recordForView(kase, "statement") };
   const notes: Record<string, string> = {};
@@ -88,7 +93,7 @@ export default async function CasePage({ params }: Props) {
           </div>
           <div className="flex gap-2">
             <dt className="text-ink-2">Should pay as stated</dt>
-            <dd>{SHOULD_PAY[kase.group]}</dd>
+            <dd>{partial ? `Part: ${money(partial.owed ?? 0)}` : SHOULD_PAY[kase.group]}</dd>
           </div>
           {kase.at_risk > 0 && (
             <div className="flex gap-2">
@@ -107,7 +112,7 @@ export default async function CasePage({ params }: Props) {
 
       <Section
         title="What the assistant can see"
-        intro="The full record is what a practice management system and clearinghouse feed would supply. The statement-only assistant gets what the patient's statement prints. Both also get the practice policy, shown under the record."
+        intro="The full record is what a practice management system and clearinghouse feed would supply. The balance-only assistant gets what the patient's statement prints. Both also get the practice policy, shown under the record."
       >
         <RecordPanel records={records} notes={notes} />
         <details className="mt-3 text-[14px]">
@@ -118,7 +123,10 @@ export default async function CasePage({ params }: Props) {
         </details>
       </Section>
 
-      <Section title="What a senior biller would do" intro="The answer key. Only the judge sees it.">
+      <Section
+        title="Answer key"
+        intro="What should happen. I wrote it from the billing rules, and no biller has reviewed it. Only the judge sees it."
+      >
         <dl className="prose-col divide-y divide-rule border-y border-rule">
           <div className="grid gap-x-6 gap-y-0.5 py-3 sm:grid-cols-[160px_minmax(0,1fr)]">
             <dt className="text-ink-2">Payable as stated</dt>
@@ -137,21 +145,21 @@ export default async function CasePage({ params }: Props) {
 
       <Section
         title="Recorded runs"
-        intro={`Each version ran this case ${RESULTS.trials || 3} times with the full record and ${RESULTS.trials || 3} times with the statement only, with the same scripted patient. Pick what the assistant saw and a trial to read it.`}
+        intro={`Each version ran this case ${RESULTS.trials || 3} times with all feeds and ${RESULTS.trials || 3} times with the balance only, with the same scripted patient, on Sonnet 5.5 with thinking off. Pick what the assistant saw and a trial to read it.`}
       >
         <RecordedRuns trials={trials} notes={VERSION_NOTE} defaultView={defaultView} />
       </Section>
 
       <Section
         title="Run it again, live"
-        intro="Runs the same scripted conversation now and grades it. Outputs vary from run to run, which is why the recorded numbers use three trials."
+        intro="Runs the same scripted conversation now and grades it, on Opus 5.5 at low effort, the model the live site uses. The recorded runs used Sonnet 5.5, so a live result is not comparable with them. Outputs also vary from run to run, which is why the recorded numbers use three trials."
       >
         <LiveRun caseId={kase.id} defaultView={defaultView} />
       </Section>
 
       <Section
         title="Be the patient"
-        intro="Write the patient's side yourself and see how the assistant handles it. Up to five messages, then ask the judge to grade it against the same answer key."
+        intro="Write the patient's side yourself and see how the assistant handles it, also on Opus 5.5 at low effort. Up to five messages, then ask the judge to grade it against the same answer key."
       >
         <BeThePatient caseId={kase.id} opener={kase.opener} defaultView={defaultView} />
       </Section>

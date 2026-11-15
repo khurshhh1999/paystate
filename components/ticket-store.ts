@@ -76,10 +76,20 @@ export function useClosures(): Record<string, Closure> {
   );
 }
 
-/** Adds a ticket, or replaces the one with the same id (a conversation that hands off twice keeps one ticket). */
+/**
+ * Adds a ticket, replacing any earlier one for the same patient: one patient, one ticket.
+ * A conversation that hands off twice, or a new conversation with the same patient, keeps one.
+ */
 export function saveTicket(ticket: Ticket) {
-  const rest = read<Ticket[]>(TICKETS_KEY, []).filter((t) => t.id !== ticket.id);
-  write(TICKETS_KEY, [ticket, ...rest].slice(0, 30));
+  const all = read<Ticket[]>(TICKETS_KEY, []);
+  const replaced = all.filter((t) => t.id === ticket.id || t.caseId === ticket.caseId).map((t) => t.id);
+  write(TICKETS_KEY, [ticket, ...all.filter((t) => !replaced.includes(t.id))].slice(0, 30));
+  // A new handoff is open work, so closures on the tickets it replaces go too.
+  const closures = read<Record<string, Closure>>(CLOSED_KEY, {});
+  if (replaced.some((id) => id in closures)) {
+    for (const id of replaced) delete closures[id];
+    write(CLOSED_KEY, closures);
+  }
 }
 
 export function closeTicket(id: string, closure: Closure) {

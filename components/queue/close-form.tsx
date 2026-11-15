@@ -7,7 +7,7 @@ import { BLANK_AMOUNT, resolutionsFor } from "@/lib/closeout";
 import { closeTicket } from "@/components/ticket-store";
 import { Button } from "@/components/ui";
 
-export function CloseForm({ ticket }: { ticket: Ticket }) {
+export function CloseForm({ ticket, onClosed }: { ticket: Ticket; onClosed: () => void }) {
   const options = resolutionsFor(ticket);
   const [picked, setPicked] = useState<string | null>(null);
   const [message, setMessage] = useState("");
@@ -31,6 +31,7 @@ export function CloseForm({ ticket }: { ticket: Ticket }) {
       message: sendsText ? message.trim() : "",
       closedAt: new Date().toISOString(),
     });
+    onClosed();
   }
 
   return (

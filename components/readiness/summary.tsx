@@ -2,6 +2,7 @@
 // The first three count questions; wrong collects count conversations. The line above the grid says both.
 
 import { money } from "@/components/ui";
+import { RESULTS } from "@/components/bench";
 import type { Summary } from "./compute";
 
 export function Figure({
@@ -49,7 +50,11 @@ export function ReadinessSummary({
           value={s.wrongCollects}
           label="wrong collects"
           tone={s.wrongCollects > 0 ? "text-wrong" : ""}
-          note={s.wrongCollects > 0 ? `Averages ${money(s.wrongDollarsPerPass)} not owed each time all twelve are asked` : undefined}
+          note={
+            s.wrongCollects > 0
+              ? `Offered on balances not owed, ${money(s.wrongDollarsPerPass * (RESULTS.trials || 3))} in all. Too few to give a rate.`
+              : undefined
+          }
         />
       </div>
       {s.unrun > 0 && (
@@ -62,11 +67,11 @@ export function ReadinessSummary({
           <span className="font-medium tabular-nums">
             {s.staffEnds} of {s.trials}
           </span>{" "}
-          conversations end with staff.
+          conversations involved staff.
           {staffWithAll !== null && !allConnected && (
             <>
               {" "}
-              With everything connected it is <span className="tabular-nums">{staffWithAll}</span>.
+              With all feeds connected it is <span className="tabular-nums">{staffWithAll}</span>.
             </>
           )}
         </p>

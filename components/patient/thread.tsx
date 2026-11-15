@@ -13,8 +13,8 @@ const RECEIPT: Record<Action, string> = {
   handoff_to_staff: "Sent to the billing team. They reply by the end of the next business day.",
   set_up_plan: "Payment plan set up.",
   send_pay_link: "Payment link sent.",
-  update_insurance: "New insurance saved to the account.",
-  offer_financial_assistance: "Financial assistance application started.",
+  update_insurance: "New insurance details sent to the billing team to check.",
+  offer_financial_assistance: "Financial assistance offered.",
   send_document: "Receipt or itemized statement sent.",
   stop_messages: "Text messages stopped. Paper statements continue.",
   update_contact: "Contact details updated.",
@@ -51,6 +51,7 @@ export function Thread({
   canSend,
   atCap,
   error,
+  limited = false,
   onSend,
   onRetry,
   onStartOver,
@@ -63,6 +64,7 @@ export function Thread({
   canSend: boolean;
   atCap: boolean;
   error: string | null;
+  limited?: boolean;
   onSend: (text: string) => void;
   onRetry: () => void;
   onStartOver: () => void;
@@ -149,10 +151,18 @@ export function Thread({
           {/* A failed reply sits under the message that did not get an answer, as on a phone. */}
           {error && (
             <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-right">
-              <ErrorText>{error}</ErrorText>
-              <Button variant="quiet" className="h-7 px-2.5 text-[13px]" onClick={onRetry} disabled={pending}>
-                Retry
-              </Button>
+              {limited ? (
+                <p className="text-[13.5px] text-ink-2" aria-live="polite">
+                  {error}
+                </p>
+              ) : (
+                <>
+                  <ErrorText>{error}</ErrorText>
+                  <Button variant="quiet" className="h-7 px-2.5 text-[13px]" onClick={onRetry} disabled={pending}>
+                    Retry
+                  </Button>
+                </>
+              )}
             </div>
           )}
         </div>

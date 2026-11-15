@@ -34,7 +34,9 @@ export default function TrafficPage() {
           The bench uses {spell(CASES.length)} cases picked because they are hard. This set adds{" "}
           {spell(COMMON_CASES.length)} ordinary ones and weights all {TRAFFIC_CASES.length} by an assumed share of inbound
           conversations. Each was run with a simulated patient who replies in their own words for up to{" "}
-          {spell(TRAFFIC.maxPatientTurns)} messages, and a payment gate in code that decides whether money can be taken.
+          {spell(TRAFFIC.maxPatientTurns)} messages, and with the payment gate in code: the assistant cannot send a pay
+          link or set up a plan on a balance the gate has blocked. The run used Opus 5.5 at low effort, the model the
+          live site uses. The bench used Sonnet 5.5, so the two sets of figures are not comparable.
         </p>
       </header>
 

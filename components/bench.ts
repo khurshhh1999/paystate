@@ -17,8 +17,8 @@ export const VERSION_NOTE: Record<Version, string> = {
 export const VIEW_ORDER: View[] = ["full", "statement"];
 
 export const VIEW_LABEL: Record<View, string> = {
-  full: "Full record",
-  statement: "Statement only",
+  full: "All feeds",
+  statement: "Balance only",
 };
 
 export const VERSION_SHORT: Record<Version, string> = {

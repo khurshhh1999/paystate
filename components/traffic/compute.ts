@@ -105,6 +105,17 @@ export function summarize(data: TrafficData, weights: Weights): ResultSummary {
   };
 }
 
+/** Rough 95% interval (Wilson) for k right out of n, as 0..1. Null when n is 0. */
+export function interval95(k: number, n: number): { low: number; high: number } | null {
+  if (n <= 0) return null;
+  const z = 1.96;
+  const p = k / n;
+  const denom = 1 + (z * z) / n;
+  const centre = (p + (z * z) / (2 * n)) / denom;
+  const half = (z * Math.sqrt((p * (1 - p)) / n + (z * z) / (4 * n * n))) / denom;
+  return { low: Math.max(0, centre - half), high: Math.min(1, centre + half) };
+}
+
 /** The run as it stood before any rerun: the original trials put back over the current ones. */
 export function firstRun(data: TrafficData): TrafficData | null {
   const previous = data.previous ?? {};
@@ -158,46 +169,70 @@ export function caseRows(data: TrafficData, weights: Weights): CaseRow[] {
 // The gate on the full record against the answer key.
 export interface GateMismatch {
   kase: TrafficCase;
-  expected: { status: string; owed: number } | undefined;
+  expected: { status: string; owed: number | null } | undefined;
   actual: GateResult;
 }
+
+const sameOwed = (a: number | null, b: number | null) =>
+  a === null || b === null ? a === b : Math.abs(a - b) < 0.005;
 
 export function gateCheck(): { matches: number; total: number; mismatches: GateMismatch[] } {
   const mismatches: GateMismatch[] = [];
   for (const kase of TRAFFIC_CASES) {
     const expected = GATE_EXPECTED[kase.id];
     const actual = paymentGate(kase.record);
-    const ok =
-      expected !== undefined &&
-      actual.status === expected.status &&
-      actual.owed !== null &&
-      Math.abs(actual.owed - expected.owed) < 0.005;
+    const ok = expected !== undefined && actual.status === expected.status && sameOwed(actual.owed, expected.owed);
     if (!ok) mismatches.push({ kase, expected, actual });
   }
   return { matches: TRAFFIC_CASES.length - mismatches.length, total: TRAFFIC_CASES.length, mismatches };
 }
 
-export const GATE_STATUSES: GateResult["status"][] = ["payable", "partial", "not_payable", "unverified"];
+// Columns for the shrinking-record table: unverified is split by whether the gate blocks it.
+export type GateColumn = GateResult["status"] | "held";
+export const GATE_STATUSES: GateColumn[] = ["payable", "partial", "not_payable", "held", "unverified"];
 
-export const GATE_STATUS_LABEL: Record<GateResult["status"], string> = {
+export const GATE_STATUS_LABEL: Record<GateColumn, string> = {
   payable: "Payable",
   partial: "Part payable",
   not_payable: "Not payable",
+  held: "Held for staff",
   unverified: "Cannot verify",
 };
 
+export const gateColumn = (g: GateResult): GateColumn => (g.status === "unverified" && g.block ? "held" : g.status);
+
 export const GATE_VIEWS: { view: View; label: string }[] = [
-  { view: "full", label: "Everything" },
+  { view: "full", label: "All feeds" },
   { view: "feeds:remittance", label: "Balance + remittance" },
   { view: "feeds:eligibility", label: "Balance + eligibility" },
   { view: "statement", label: "Balance only" },
 ];
 
 /** How many of the 28 land in each gate status as the record shrinks. */
-export function gateByView(): { view: View; label: string; counts: Record<GateResult["status"], number> }[] {
+export function gateByView(): { view: View; label: string; counts: Record<GateColumn, number> }[] {
   return GATE_VIEWS.map(({ view, label }) => {
-    const counts: Record<GateResult["status"], number> = { payable: 0, partial: 0, not_payable: 0, unverified: 0 };
-    for (const kase of TRAFFIC_CASES) counts[paymentGate(recordForView(kase, view)).status]++;
+    const counts: Record<GateColumn, number> = { payable: 0, partial: 0, not_payable: 0, held: 0, unverified: 0 };
+    for (const kase of TRAFFIC_CASES) counts[gateColumn(paymentGate(recordForView(kase, view)))]++;
     return { view, label, counts };
   });
+}
+
+// Stored conversations carry the gate as it was when they ran. When a rule changes afterwards,
+// these are the cases whose stored gate (status and amount) differs from what the gate says now.
+export interface StoredGateChange {
+  kase: TrafficCase;
+  stored: { status: GateResult["status"]; owed: number | null };
+  now: GateResult;
+}
+
+export function storedGateChanges(data: TrafficData): StoredGateChange[] {
+  const out: StoredGateChange[] = [];
+  for (const kase of TRAFFIC_CASES) {
+    const now = paymentGate(recordForView(kase, data.view ?? "full"));
+    const stored = trialsOf(data, kase.id)
+      .flatMap((t) => t.transcript)
+      .find((turn) => turn.role === "agent" && turn.gate && (turn.gate.status !== now.status || !sameOwed(turn.gate.owed, now.owed)))?.gate;
+    if (stored) out.push({ kase, stored: { status: stored.status, owed: stored.owed }, now });
+  }
+  return out;
 }
