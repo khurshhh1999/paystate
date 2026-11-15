@@ -55,8 +55,24 @@ export async function readJsonBody(request: Request): Promise<Record<string, unk
  * Throws a 429 ApiError with Retry-After when limited.
  */
 export function enforceLimits(request: Request, route: Route, custom = false): void {
+  // Switches for the deployment: set LIVE_CALLS=off to stop every model call, or
+  // LIVE_CUSTOM_PROMPTS=off to stop only runs on a visitor's own instructions.
+  if (process.env.LIVE_CALLS === "off") {
+    throw new ApiError(503, "Live conversations are switched off right now. Recorded results on every page still work.");
+  }
+  if (custom && process.env.LIVE_CUSTOM_PROMPTS === "off") {
+    throw new ApiError(503, "Runs with custom instructions are switched off right now. The saved instructions and all recorded results still work.");
+  }
   const verdict = checkLimits(clientIp(request.headers), { units: COST[route], custom });
   if (!verdict.ok) {
     throw new ApiError(429, verdict.message, { "Retry-After": String(verdict.retryAfterSeconds) });
   }
+}
+
+// A reply to a patient is a text message. Anything much longer is not one, so it is cut
+// before it leaves the server; this also makes the routes poor value as a general model endpoint.
+export const MAX_REPLY_CHARS = 1200;
+
+export function clipReply<T extends { text: string }>(reply: T): T {
+  return reply.text.length > MAX_REPLY_CHARS ? { ...reply, text: `${reply.text.slice(0, MAX_REPLY_CHARS).trimEnd()}…` } : reply;
 }

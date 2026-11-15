@@ -143,7 +143,3 @@ app/                 patient thread, queue, readiness, decisions, evidence
 - Dollar amounts are illustrative and are not taken from any fee schedule. Payer names in the records are placeholders.
 - In a real practice, network status and filing limits would come from payer contract data, and coverage history from the practice management system. Here they are grouped under the eligibility and remittance feeds for simplicity.
 - The payment gate does not model secondary payers.
-
-## Who built this
-
-Khursheed Khan. This is an independent project and is not affiliated with any company.
