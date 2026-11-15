@@ -184,9 +184,6 @@ export function PatientDesk() {
           Paystate is a billing assistant that reads the practice&apos;s account before it asks a patient for money.
           Twelve patients are in the list. Some of them owe every cent.
         </p>
-        <p className="prose-col text-[13.5px] text-ink-3">
-          Khursheed Khan built this as an independent project, and every patient, account and amount in it is made up.
-        </p>
       </header>
     <div className="grid gap-8 lg:grid-cols-[236px_420px_minmax(0,1fr)] lg:gap-6">
       <PatientList cases={ORDERED_CASES} selected={kase.id} onSelect={selectCase} />

@@ -47,7 +47,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <footer className="border-t border-rule">
           <div className="max-w-[1120px] mx-auto px-4 sm:px-6 py-6 text-[13px] text-ink-2 flex flex-col gap-y-1 sm:flex-row sm:flex-wrap sm:gap-x-6">
             <span>Built by Khursheed Khan.</span>
-            <span>An independent project.</span>
             <span>Every patient, account and amount here is synthetic.</span>
             <a
               href="https://github.com/khurshhh1999/paystate"
