@@ -5,6 +5,7 @@
 // agent replies once. "product" runs with the payment gate.
 
 import {
+  charged,
   clipReply,
   checkRequest,
   enforceLimits,
@@ -27,9 +28,13 @@ export async function POST(request: Request) {
     const view = resolveView(body);
     const agent = resolveAgent(body);
     const transcript = validateTranscript(body.transcript, "patient");
-    enforceLimits(request, "chat", agent.kind === "custom");
-    if (agent.kind === "product") return Response.json(clipReply(await productTurn(kase, transcript, view)));
-    return Response.json(clipReply(await agentTurn(kase, agent.systemPrompt, transcript, view)));
+    const custom = agent.kind === "custom";
+    await enforceLimits(request, "chat", custom);
+    if (agent.kind === "product") {
+      return Response.json(clipReply(await charged(false, () => productTurn(kase, transcript, view))));
+    }
+    const { systemPrompt } = agent;
+    return Response.json(clipReply(await charged(custom, () => agentTurn(kase, systemPrompt, transcript, view))));
   } catch (err) {
     return errorResponse(err);
   }

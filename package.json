@@ -14,6 +14,7 @@
     "test": "node --test \"lib/*.test.mjs\""
   },
   "dependencies": {
+    "@vercel/functions": "^3.11.3",
     "clsx": "^2.1.1",
     "lucide-react": "^1.73.0",
     "motion": "^14.14.0",
