@@ -11,7 +11,7 @@ import { Transcript } from "@/components/case/transcript";
 import { Button, Money } from "@/components/ui";
 import { CloseForm } from "./close-form";
 import { CopyButton } from "./copy-button";
-import { patientName } from "./order";
+import { patientName, toldPatient } from "./order";
 import { formatCentral, formatReplyDue } from "./time";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -32,8 +32,20 @@ function Meta({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-export function TicketDetail({ ticket, closure }: { ticket: Ticket; closure: Closure | undefined }) {
+export function TicketDetail({
+  ticket,
+  closure,
+  onClosed,
+  onReopened,
+}: {
+  ticket: Ticket;
+  closure: Closure | undefined;
+  onClosed: () => void;
+  onReopened: () => void;
+}) {
   const [showThread, setShowThread] = useState(false);
+  const resolution = closure ? resolutionsFor(ticket).find((r) => r.id === closure.resolution) : undefined;
+  const told = toldPatient(ticket.told_patient);
 
   return (
     <article className="flex flex-col gap-5">
@@ -41,9 +53,15 @@ export function TicketDetail({ ticket, closure }: { ticket: Ticket; closure: Clo
       <header>
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
           <h2 className="text-[20px] font-semibold">{TICKET_KINDS[ticket.kind]}</h2>
-          <p className="text-[14px] text-ink-2">
-            Reply due <span className="whitespace-nowrap text-ink">{formatReplyDue(ticket.createdAt)}</span>
-          </p>
+          {closure ? (
+            <p className="text-[14px] text-ink-2">
+              Closed <span className="whitespace-nowrap text-ink">{formatCentral(closure.closedAt)}</span>
+            </p>
+          ) : (
+            <p className="text-[14px] text-ink-2">
+              Reply due <span className="whitespace-nowrap text-ink">{formatReplyDue(ticket.createdAt)}</span>
+            </p>
+          )}
         </div>
         <dl className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-[14px]">
           <Meta label="Patient">{patientName(ticket.patient)}</Meta>
@@ -53,17 +71,34 @@ export function TicketDetail({ ticket, closure }: { ticket: Ticket; closure: Clo
           <Meta label="In question">
             <Money value={ticket.amount} />
           </Meta>
-          <Meta label="Hold">
-            <span className={ticket.hold ? "text-ok" : "text-stuck"}>
-              {ticket.hold ? "Statements paused" : "None placed"}
-            </span>
-          </Meta>
+          {/* The hold belongs to open work; the queue's on-hold total leaves closed tickets out too. */}
+          {!closure && (
+            <Meta label="Hold">
+              <span className={ticket.hold ? "text-ok" : "text-stuck"}>
+                {ticket.hold ? "Statements paused" : "None placed"}
+              </span>
+            </Meta>
+          )}
           <Meta label="Arrived">{formatCentral(ticket.createdAt)}</Meta>
+          {closure && (
+            <div className="flex min-w-0 gap-1.5">
+              <dt className="text-ink-2">Closed as</dt>
+              <dd className="min-w-0">{resolution?.label ?? "Closed"}</dd>
+            </div>
+          )}
         </dl>
       </header>
 
       <Section title="Next step">
-        <p className="prose-col border-l-2 border-accent pl-3 text-[16px] font-medium leading-[1.5]">{ticket.next_step}</p>
+        {/* Once closed it is history, not a to-do, so it loses the emphasis. */}
+        <p
+          className={
+            "prose-col border-l-2 pl-3 leading-[1.5] " +
+            (closure ? "border-rule-strong text-ink-2" : "border-accent text-[16px] font-medium")
+          }
+        >
+          {ticket.next_step}
+        </p>
       </Section>
 
       {/* Side by side when the detail column is wide enough to keep each at a readable measure. */}
@@ -73,7 +108,7 @@ export function TicketDetail({ ticket, closure }: { ticket: Ticket; closure: Clo
         </Section>
 
         <Section title="Patient was told">
-          <p className="prose-col">{ticket.told_patient}</p>
+          <p className="prose-col">{told.clause ? told.text.charAt(0).toUpperCase() + told.text.slice(1) : told.text}</p>
         </Section>
       </div>
 
@@ -121,21 +156,22 @@ export function TicketDetail({ ticket, closure }: { ticket: Ticket; closure: Clo
 
       <Section title={closure ? "Closed" : "Close the ticket"}>
         <div aria-live="polite">
-          {closure ? <ClosedView ticket={ticket} closure={closure} /> : <CloseForm key={ticket.id} ticket={ticket} />}
+          {closure ? (
+            <ClosedView ticket={ticket} closure={closure} onReopened={onReopened} />
+          ) : (
+            <CloseForm key={ticket.id} ticket={ticket} onClosed={onClosed} />
+          )}
         </div>
       </Section>
     </article>
   );
 }
 
-function ClosedView({ ticket, closure }: { ticket: Ticket; closure: Closure }) {
+// How and when it was closed sit in the header; this shows what the patient got.
+function ClosedView({ ticket, closure, onReopened }: { ticket: Ticket; closure: Closure; onReopened: () => void }) {
   const resolution = resolutionsFor(ticket).find((r) => r.id === closure.resolution);
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-[14.5px]">
-        <span className="font-medium">{resolution?.label ?? "Closed"}</span>
-        <span className="text-ink-2"> · {formatCentral(closure.closedAt)}</span>
-      </p>
       {closure.message ? (
         <div className="flex flex-col items-end">
           <span className="mb-1 px-1 text-[12.5px] text-ink-3">Sent to {patientName(ticket.patient)}</span>
@@ -147,7 +183,11 @@ function ClosedView({ ticket, closure }: { ticket: Ticket; closure: Closure }) {
         <p className="text-[14px] text-ink-2">{resolution?.note ?? "No text was sent."}</p>
       )}
       <div>
-        <Button type="button" variant="quiet" onClick={() => reopenTicket(ticket.id)}>
+        <Button type="button" variant="quiet" onClick={() => {
+            reopenTicket(ticket.id);
+            onReopened();
+          }}
+        >
           Reopen
         </Button>
       </div>

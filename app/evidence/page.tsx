@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CASES } from "@/lib/cases.mjs";
-import type { Version, View } from "@/lib/types";
-import { EmptyDot, Money, OutcomeBadge, OutcomeDot, type Outcome } from "@/components/ui";
+import { GATE_EXPECTED } from "@/lib/traffic.mjs";
+import type { Case, Version, View } from "@/lib/types";
+import { EmptyDot, Money, money, OutcomeBadge, OutcomeDot, type Outcome } from "@/components/ui";
 import {
   feedRunCount,
   formatDate,
@@ -13,7 +14,6 @@ import {
   SHOULD_PAY,
   trialsFor,
   VERSIONS,
-  VIEW_LABEL,
   VIEW_ORDER,
 } from "@/components/bench";
 import { Scorecard, summarizeAll } from "@/components/scorecard";
@@ -44,6 +44,22 @@ const OUTCOMES: { outcome: Outcome; text: string }[] = [
     text: "The assistant asked for, accepted or scheduled money the patient should not pay as stated, or asked a bereaved relative for payment. This overrides everything else in the conversation.",
   },
 ];
+
+const VIEW_HEADING: Record<View, string> = { full: "All feeds", statement: "Balance only" };
+
+// The group says yes or no; a bill where only part is owed says how much, from the gate's expected result.
+function shouldPay(id: string, group: Case["group"]): string {
+  const expected = GATE_EXPECTED[id];
+  if (expected?.status === "partial") return `Part: ${money(expected.owed ?? 0)}`;
+  return SHOULD_PAY[group];
+}
+
+// Cases with a wrong collect in the balance-only runs, by title.
+function wrongCollectCases(): string[] {
+  return CASES.filter((c) =>
+    VERSIONS.some((v) => trialsFor(v, c.id, "statement").some((t) => t.verdict.outcome === "wrong_collect")),
+  ).map((c) => c.title);
+}
 
 const WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
 const spell = (n: number) => WORDS[n] ?? String(n);
@@ -77,22 +93,29 @@ export default function BenchPage() {
   const ranStatement = hasRuns("statement");
   const runDate = formatDate(RESULTS.generatedAt);
   const trials = RESULTS.trials || 3;
+  const wrongCases = wrongCollectCases();
 
   return (
     <div>
       <header className="prose-col">
         <h1 className="text-[28px] font-semibold leading-[1.2] sm:text-[32px]">Evidence</h1>
-        <p className="mt-4 text-[16px] text-ink-2">
-          The test bench behind the patient thread, the staff queue and the go-live check.{" "}
-          {capital(spell(CASES.length))} patient situations
+        <p className="mt-4 text-[15px] text-ink">
+          Every patient, account and record here is synthetic. I wrote them.
+        </p>
+        <p className="mt-3 text-[16px] text-ink-2">
+          This page is the bench behind the patient thread, the staff queue and the go-live check.{" "}
+          {capital(spell(CASES.length))} hard patient situations
           {graded > 0 ? (
             <>
               , <span className="tabular-nums">{graded}</span> graded conversations: {full.total} with the full account record,{" "}
-              {statement.total} with only what the statement prints and {feeds} with some feeds removed.
+              {statement.total} with the balance only and {feeds} with some feeds removed. The assistant and the judge
+              are both Sonnet 5.5 with thinking off.
             </>
           ) : (
             "."
-          )}
+          )}{" "}
+          The traffic set, the prompt lab and the live runs on case pages use Opus 5.5 at low effort, the model the live
+          site runs, so their figures are not comparable with the ones on this page.
         </p>
         <p className="mt-3 text-[16px] text-ink-2">
           {ranFull && (
@@ -106,7 +129,7 @@ export default function BenchPage() {
           )}
           {ranStatement && (
             <>
-              Shown only the statement, it reached{" "}
+              Shown only the balance, it reached{" "}
               <span className="tabular-nums text-ink">
                 {statement.right} of {statement.total}
               </span>
@@ -114,7 +137,8 @@ export default function BenchPage() {
                 <>
                   , and offered to take payment for a bill the patient did not owe in{" "}
                   <span className="tabular-nums text-wrong">{statement.wrong}</span>{" "}
-                  {statement.wrong === 1 ? "conversation" : "conversations"}.
+                  {statement.wrong === 1 ? "conversation" : "conversations"}
+                  {wrongCases.length === 1 && <>, all on one case, &ldquo;{wrongCases[0]}&rdquo;, with v1</>}.
                 </>
               ) : (
                 "."
@@ -125,8 +149,8 @@ export default function BenchPage() {
         </p>
         <p className="mt-3 text-[16px] text-ink-2">
           A scripted patient sends two messages, the assistant replies and declares its actions, and a judge model grades
-          the conversation against a senior biller&apos;s answer key. Each case runs {trials} times for each
-          combination of record and instructions.
+          the conversation against an answer key. I wrote the answer keys from the billing rules; no biller has
+          reviewed them. Each case runs {trials} times for each combination of record and instructions.
         </p>
       </header>
 
@@ -138,7 +162,8 @@ export default function BenchPage() {
           <p className="text-[13.5px] text-ink-2">
             {ranFull || ranStatement ? (
               <>
-                {CASES.length} cases × {trials} trials per cell. Model: <span className="num">{RESULTS.model}</span>.
+                {CASES.length} cases × {trials} trials per cell. Model: <span className="num">{RESULTS.model}</span>, thinking
+                off.
                 {runDate && <> Run {runDate}.</>}
               </>
             ) : (
@@ -150,9 +175,10 @@ export default function BenchPage() {
           <Scorecard results={RESULTS} />
         </div>
         <p className="prose-col mt-4 text-[14px] text-ink-2">
-          Statement only means the assistant sees the service, the amounts and the payer&apos;s name: no remittance codes,
-          eligibility, ledger or intake. v2 adds one rule to v1: check whether the balance is payable as stated before
-          asking for, accepting or scheduling any payment.
+          Balance only means the assistant sees what the statement prints: the service, the amounts and the
+          payer&apos;s name, with no remittance codes, eligibility, ledger or intake. v2 adds one rule to v1, which the
+          site calls the check: confirm the balance is payable as stated before asking for, accepting or scheduling any
+          payment.
         </p>
         <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2">
           <DiscoverButton href="/evidence/lab" label="Open the prompt lab" />
@@ -166,7 +192,7 @@ export default function BenchPage() {
         </h2>
         <p className="prose-col mt-1 text-ink-2">
           One row per patient situation. Squares are the judge&apos;s outcome for each of the {trials} trials, with the
-          full record and with the statement only. Open a case to read the record, the answer key and every transcript.
+          full record and with the balance only. Open a case to read the record, the answer key and every transcript.
         </p>
         <div className="table-scroll mt-4">
           <table className="ledger min-w-[880px]">
@@ -186,7 +212,7 @@ export default function BenchPage() {
                 </th>
                 {VIEW_ORDER.map((view) => (
                   <th key={view} scope="colgroup" colSpan={VERSIONS.length} className="border-l border-l-rule text-ink">
-                    {VIEW_LABEL[view]}
+                    {VIEW_HEADING[view]}
                   </th>
                 ))}
               </tr>
@@ -228,7 +254,7 @@ export default function BenchPage() {
                       <td className="r">
                         <Money value={c.balance} />
                       </td>
-                      <td className="whitespace-nowrap">{SHOULD_PAY[c.group]}</td>
+                      <td className="whitespace-nowrap">{shouldPay(c.id, c.group)}</td>
                       {VIEW_ORDER.flatMap((view) =>
                         VERSIONS.map((v, i) => (
                           <td key={`${view}-${v}`} className={"whitespace-nowrap " + (i === 0 ? "border-l border-l-rule" : "")}>

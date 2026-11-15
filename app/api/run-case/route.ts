@@ -2,20 +2,21 @@
 // Runs the scripted two-turn conversation for one case and grades it.
 // Node runtime is the default; with cacheComponents on, a `runtime` export is not allowed.
 
-import { enforceLimits, errorResponse, readJsonBody, resolveCase, resolveView, resolveSystemPrompt } from "@/lib/api-request";
+import { checkRequest, enforceLimits, errorResponse, readJsonBody, resolveAgent, resolveCase, resolveView } from "@/lib/api-request";
 import { runCase } from "@/lib/run.mjs";
 
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
   try {
-    enforceLimits(request);
+    checkRequest(request);
     const body = await readJsonBody(request);
     const kase = resolveCase(body);
     const view = resolveView(body);
-    const systemPrompt = resolveSystemPrompt(body);
-    const trial = await runCase(kase, systemPrompt, view);
-    return Response.json(trial);
+    // The scripted run only exists for the bench versions and custom instructions.
+    const agent = resolveAgent(body, { allowProduct: false });
+    enforceLimits(request, "run-case", agent.kind === "custom");
+    return Response.json(await runCase(kase, agent.systemPrompt, view));
   } catch (err) {
     return errorResponse(err);
   }

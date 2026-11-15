@@ -19,7 +19,11 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = path.join(ROOT, "data", "traffic.json");
 const CONCURRENCY = 4;
 const MAX_PATIENT_TURNS = 3;
-const WORST_CASE = MAX_PATIENT_TURNS * 2; // assistant turns + patient replies + judge
+// Most model calls one conversation can make (see runTrafficCase): one per assistant turn, two per
+// simulated patient reply (one retry when its JSON does not parse), two for the judge (one retry
+// when the verdict does not parse). 3 + 2*2 + 2 = 9. HTTP retries inside callClaude come on top;
+// the call cap counts those, so it still holds.
+const WORST_CASE = MAX_PATIENT_TURNS + 2 * (MAX_PATIENT_TURNS - 1) + 2;
 const RIGHT = new Set(["resolved", "correct_handoff"]);
 
 loadEnvLocal();
@@ -42,7 +46,7 @@ for (let t = 0; t < args.trials; t++) for (const kase of byWeight) jobs.push({ k
 if (args.dryRun) {
   console.log(`Plan: ${jobs.length} conversations (${cases.length} cases x ${args.trials} trials, full record) on ${MODEL}, ${CONCURRENCY} at a time.`);
   jobs.forEach(({ kase, t }, i) => console.log(`  ${String(i + 1).padStart(3)}  ${kase.id.padEnd(20)} #${t + 1}  weight ${kase.weight}`));
-  console.log(`Worst case: ${jobs.length * WORST_CASE} model calls (${WORST_CASE} per conversation, not counting retries). Cap: ${args.maxCalls}.`);
+  console.log(`Worst case: ${jobs.length * WORST_CASE} model calls (${WORST_CASE} per conversation, counting parse retries, not HTTP retries). Cap: ${args.maxCalls}.`);
   console.log("Dry run: no calls made.");
   process.exit(0);
 }

@@ -28,6 +28,9 @@ export function PracticeSide({
   kase,
   view,
   onViewChange,
+  confirmView,
+  onConfirmView,
+  onCancelView,
   ticket,
   onRetryTicket,
   hasReply,
@@ -35,6 +38,9 @@ export function PracticeSide({
   kase: Case;
   view: FeedSetting;
   onViewChange: (v: FeedSetting) => void;
+  confirmView: FeedSetting | null;
+  onConfirmView: () => void;
+  onCancelView: () => void;
   ticket: TicketState;
   onRetryTicket: () => void;
   hasReply: boolean;
@@ -54,7 +60,7 @@ export function PracticeSide({
       <div className="flex flex-col gap-2">
         <h3 className="text-[16px] font-semibold">Staff queue</h3>
         <div aria-live="polite" className="flex flex-col gap-3">
-          {ticket.status === "idle" && <p className="text-ink-2">Nothing for staff yet.</p>}
+          {ticket.status === "idle" && <p className="text-ink-2">Nothing from this conversation yet.</p>}
           {ticket.status === "pending" && <p className="text-ink-3">Writing the handoff for staff</p>}
           {ticket.status === "done" && <TicketCard ticket={ticket.ticket} />}
           {ticket.status === "error" && (
@@ -78,6 +84,24 @@ export function PracticeSide({
               : "The statement balance only. Try both ways."}
           </span>
         </div>
+        {confirmView && (
+          <div role="status" className="flex flex-col gap-2 border-l-2 border-stuck pl-3">
+            <p>
+              {confirmView === "full" ? "All feeds" : "Balance only"} gives the assistant a different record, so
+              the conversation starts over.
+              {ticket.status === "done" && " The ticket already in the staff queue stays there."}
+              {ticket.status === "pending" && " The handoff being written still goes to the staff queue."}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button className="h-8" onClick={onConfirmView}>
+                Start over with {confirmView === "full" ? "all feeds" : "balance only"}
+              </Button>
+              <Button variant="quiet" className="h-8" onClick={onCancelView}>
+                Keep this conversation
+              </Button>
+            </div>
+          </div>
+        )}
         <GateLine gate={gate} balance={balance} />
         {/* The column is narrower than the record's default 200px label width allows for. */}
         <Panel className="px-4 py-1 sm:[&>dl>div]:grid-cols-[132px_minmax(0,1fr)] sm:[&>dl>div]:gap-x-4">

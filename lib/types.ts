@@ -25,6 +25,8 @@ export interface Gate {
   status: "payable" | "not_payable" | "partial" | "unverified";
   owed: number | null;
   reasons: string[];
+  // Collect actions are removed when true. Gates stored in data/traffic.json predate this field.
+  block: boolean;
   removed?: Action[];
 }
 

@@ -9,6 +9,21 @@ export function patientName(patient: string) {
 }
 
 /**
+ * One ticket per patient. A conversation in this browser replaces the recorded ticket for
+ * the same case, and only the newest of this browser's tickets for a case is kept.
+ */
+export function currentTickets(live: Ticket[], recorded: Ticket[]) {
+  const seen = new Set<string>();
+  const mine: Ticket[] = [];
+  for (const t of live) {
+    if (seen.has(t.caseId)) continue;
+    seen.add(t.caseId);
+    mine.push(t);
+  }
+  return { live: mine, recorded: recorded.filter((t) => !seen.has(t.caseId)) };
+}
+
+/**
  * Open tickets: this browser's own (newest first, as the store keeps them) on top so the
  * visitor finds their conversation, then recorded ones oldest first, the way staff work them.
  */
@@ -23,4 +38,19 @@ export function closedTickets(all: Ticket[], closures: Record<string, Closure>) 
   return all
     .filter((t) => closures[t.id])
     .sort((a, b) => closures[b.id].closedAt.localeCompare(closures[a.id].closedAt));
+}
+
+/**
+ * What the patient was told, worded to follow "Patient was told". The ticket writer sometimes
+ * starts the sentence with "Told ..." or "The assistant told him ...", which would say it twice.
+ * `clause` is true when the lead-in was removed and the rest continues the label.
+ */
+export function toldPatient(text: string): { text: string; clause: boolean } {
+  const trimmed = text.trim();
+  const rest = trimmed.replace(
+    /^(?:the (?:assistant|patient) )?(?:was |were |has been |have been )?told(?: (?:him|her|them|the patient))?(?: that)?[:,]?\s+/i,
+    "",
+  );
+  if (rest === trimmed || !rest) return { text: trimmed, clause: false };
+  return { text: rest, clause: true };
 }

@@ -5,13 +5,13 @@
 // agent replies once. "product" runs with the payment gate.
 
 import {
+  checkRequest,
   enforceLimits,
   errorResponse,
-  isProductRequest,
   readJsonBody,
+  resolveAgent,
   resolveCase,
   resolveView,
-  resolveSystemPrompt,
   validateTranscript,
 } from "@/lib/api-request";
 import { agentTurn, productTurn } from "@/lib/run.mjs";
@@ -20,18 +20,15 @@ export const maxDuration = 60;
 
 export async function POST(request: Request) {
   try {
-    enforceLimits(request);
+    checkRequest(request);
     const body = await readJsonBody(request);
     const kase = resolveCase(body);
     const view = resolveView(body);
-    if (isProductRequest(body)) {
-      const transcript = validateTranscript(body.transcript, "patient");
-      return Response.json(await productTurn(kase, transcript, view));
-    }
-    const systemPrompt = resolveSystemPrompt(body);
+    const agent = resolveAgent(body);
     const transcript = validateTranscript(body.transcript, "patient");
-    const reply = await agentTurn(kase, systemPrompt, transcript, view);
-    return Response.json(reply);
+    enforceLimits(request, "chat", agent.kind === "custom");
+    if (agent.kind === "product") return Response.json(await productTurn(kase, transcript, view));
+    return Response.json(await agentTurn(kase, agent.systemPrompt, transcript, view));
   } catch (err) {
     return errorResponse(err);
   }

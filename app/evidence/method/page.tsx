@@ -39,7 +39,7 @@ function Section({ id, title, children }: { id: string; title: string; children:
 }
 
 const VERSIONS: Version[] = ["v1", "v2"];
-const VIEW_LABEL: Record<View, string> = { full: "Full record", statement: "Statement only" };
+const VIEW_LABEL: Record<View, string> = { full: "All feeds", statement: "Balance only" };
 
 // The extra block the judge gets in a statement-view run, cut from the real judge input.
 function statementJudgeNote(caseId: string) {
@@ -104,7 +104,7 @@ export default function MethodPage() {
             {results.generatedAt ? (
               <>
                 The current results were produced on {runDate(results.generatedAt)} with{" "}
-                <span className="num">{results.model}</span> as both the assistant and the judge. {CASES.length} cases, {views.length} record views,{" "}
+                <span className="num">{results.model}</span>, thinking off, as both the assistant and the judge. {CASES.length} cases, {views.length} record views,{" "}
                 {VERSIONS.length} instruction versions and {trials} trials each make {graded} graded conversations.
                 {feedRuns > 0 && (
                   <>
@@ -154,9 +154,9 @@ export default function MethodPage() {
               </table>
             </div>
             <p className="prose-col text-ink-2">
-              With the full record, the two instruction versions are one conversation apart. With the statement only,
-              both fall, and every wrong collect comes from v1. What the assistant can see moves the result more than how
-              it is instructed.
+              With all feeds, the two instruction versions are one conversation apart. With the balance only, both
+              fall. The two wrong collects are both v1 on the same case, which shows the failure exists but is too few
+              to give a rate. Taking the record away moved the result more than changing the instructions did.
             </p>
           </>
         )}
@@ -197,10 +197,10 @@ export default function MethodPage() {
           </li>
         </ol>
 
-        <h3 className="mt-2 text-[15px] font-semibold">The statement view</h3>
+        <h3 className="mt-2 text-[15px] font-semibold">The balance-only view</h3>
         <div className="prose-col flex flex-col gap-3">
           <p>
-            In the statement view the assistant is given only these fields of the record, where the case has them:{" "}
+            In the balance-only view the assistant is given only these fields of the record, where the case has them:{" "}
             {STATEMENT_KEYS.map((k, i) => (
               <span key={k}>
                 <Code>{k}</Code>
@@ -216,7 +216,7 @@ export default function MethodPage() {
             eligibility and practice-management feeds behind it.
           </p>
           <p>
-            The judge always sees the full record. In a statement-view run it is also told what the assistant was shown.
+            The judge always sees the full record. In a balance-only run it is also told what the assistant was shown.
             Outcomes are still graded by what happened to the patient: no answer is a dead end, and money wrongly asked
             for is a wrong collect. The accuracy flag does not count it against the assistant when it truthfully says it
             cannot see something.
@@ -233,30 +233,38 @@ export default function MethodPage() {
             <CodeBlock wrap>{JUDGE_SYSTEM}</CodeBlock>
           </Disclosure>
           <Disclosure summary={`What the assistant sees in each view, for the case “${example.title}”`}>
-            <p className="mb-2 text-[14px] text-ink-2">Full record</p>
+            <p className="mb-2 text-[14px] text-ink-2">All feeds</p>
             <CodeBlock>{JSON.stringify(example.record, null, 2)}</CodeBlock>
-            <p className="mb-2 mt-4 text-[14px] text-ink-2">Statement only</p>
+            <p className="mb-2 mt-4 text-[14px] text-ink-2">Balance only</p>
             <CodeBlock>{JSON.stringify(recordForView(example, "statement"), null, 2)}</CodeBlock>
           </Disclosure>
           {judgeNote && (
-            <Disclosure summary="Extra text the judge gets in a statement-view run, for the same case">
+            <Disclosure summary="Extra text the judge gets in a balance-only run, for the same case">
               <CodeBlock wrap>{judgeNote}</CodeBlock>
             </Disclosure>
           )}
         </div>
       </Section>
 
-      <Section id="scripted" title="Why the patient is scripted">
+      <Section id="scripted" title="Scripted patients here, a simulated patient in the traffic set">
         <div className="prose-col flex flex-col gap-3">
           <p>
-            Every run of a case sends the same two patient messages. That makes runs repeatable: a difference between v1
-            and v2 comes from the instructions, not from what the patient happened to say.
+            Every run of a bench case sends the same two patient messages. That makes runs repeatable: a difference
+            between v1 and v2 comes from the instructions and cannot come from what the patient happened to say. The
+            cost is that the follow-up does not react to the assistant. If the assistant already answered the question,
+            the follow-up can read oddly.
           </p>
           <p>
-            A simulated patient, another model improvising replies, would push back differently each time. Its variance
-            would mix with the assistant&apos;s, and a three-trial sample could not separate the two. The cost is that the
-            follow-up does not react to the assistant. If the assistant already answered the question, the follow-up can read
-            oddly.
+            The{" "}
+            <Link href="/evidence/traffic" className="text-accent underline underline-offset-2">
+              traffic set
+            </Link>{" "}
+            makes the other trade. Ordinary conversations, like a receipt, a card update or a new plan date, need a
+            follow-up that answers the assistant&apos;s question, which a fixed script cannot do. There a simulated
+            patient, another model with a persona and a goal, replies for up to three messages. That costs
+            repeatability: its variance mixes with the assistant&apos;s, and two runs per situation cannot separate the
+            two. So I use the bench to compare instruction versions, and the traffic set to see ordinary conversations
+            through to the end.
           </p>
         </div>
       </Section>
@@ -308,8 +316,15 @@ export default function MethodPage() {
           </p>
           <p>
             {trials} is enough to see instability, not to estimate a rate. With {CASES.length} cases and {trials}{" "}
-            trials, each version in each view has {CASES.length * trials} graded conversations. A gap of one or two
-            conversations between cells is noise.
+            trials, each version in each view has {CASES.length * trials} graded conversations. A rough 95% interval
+            on a rate from {CASES.length * trials} is about 15 points either side, so a gap of fewer than about eight
+            conversations between two cells is within noise.
+          </p>
+          <p>
+            The gaps that clear that line all come from connecting the record: from balance only to all feeds, v2 goes
+            from 28 to 36 right (about 22 points) and v1 from 23 to 35. No gap between v1 and v2 on the same record
+            clears it. Adding eligibility with the check on (28 to 34) is under the line by count, but all six come from
+            two cases that go from none of three to three of three, and the eligibility record holds what both need.
           </p>
         </div>
       </Section>
@@ -317,8 +332,8 @@ export default function MethodPage() {
       <Section id="changes" title="What changed after the first run">
         <div className="prose-col flex flex-col gap-3">
           <p>
-            The first run compared only v1 and v2 on the full record. It found no difference: both were right in 32 of
-            36 conversations, with no wrong collects.
+            The first run compared only v1 and v2 on the full record and found no clear difference between them. That
+            run was replaced and is not kept in the data here, so this page gives no figures for it.
           </p>
           <p>Reading the transcripts showed three problems in the harness, fixed before the final run:</p>
           <ul className="flex list-disc flex-col gap-2 pl-5">
@@ -336,13 +351,13 @@ export default function MethodPage() {
             The answer key for the plan-change case was loosened so that mentioning HSA funds is optional.
           </p>
           <p>
-            Then the statement view was added, to test whether the assistant&apos;s good behaviour came from the
+            Then the balance-only view was added, to test whether the assistant&apos;s good behaviour came from the
             instructions or from the data. Cases, prompts and rubric were not adjusted to favour either version.
           </p>
           <p>
             Last, the record was split into four feeds (remittance, eligibility, account ledger, visit record) and each
             case was run with every partial set of the feeds it draws on: 30 sets, 180 conversations. A case that uses
-            two feeds has two partial sets; a case that uses one has none, because the full and statement runs already
+            two feeds has two partial sets; a case that uses one has none, because the full and balance-only runs already
             cover it. Those runs are what the go-live check reads.
           </p>
         </div>
@@ -378,15 +393,15 @@ export default function MethodPage() {
           <li>
             The scripted patients often volunteer the key fact: &ldquo;I&apos;m on Medicare and Medicaid&rdquo;,
             &ldquo;I hurt my shoulder at work&rdquo;. That protects the assistant even when it cannot see the record, so the
-            statement-only numbers are probably kinder than real traffic would be.
+            balance-only numbers are probably kinder than real traffic would be.
           </li>
           <li>Text only. Voice calls, with interruptions, accents and hold times, are not tested.</li>
           <li>
-            Each answer key is one person&apos;s reading of the rules: CARC group codes (CO is the provider&apos;s
+            I wrote each answer key from the billing rules, and no biller has reviewed them. The rules are CARC group codes (CO is the provider&apos;s
             contractual obligation, PR is patient responsibility), the federal prohibition on billing Qualified
             Medicare Beneficiaries for Medicare cost-sharing, and the No Surprises Act limit on cost-sharing for
-            ancillary out-of-network care at in-network facilities. A senior biller could disagree on details, and
-            payer contracts add exceptions.
+            ancillary out-of-network care at in-network facilities. A biller could disagree on details, and payer
+            contracts add exceptions.
           </li>
           <li>
             State law varies on whether a spouse or the estate is responsible for a deceased patient&apos;s medical
@@ -412,11 +427,11 @@ export default function MethodPage() {
             <code className="num text-[13.5px]">ANTHROPIC_API_KEY=...</code>
           </li>
           <li>
-            Run the bench on the full record: <Code>npm run bench</Code>. It writes{" "}
-            <Code>data/results.json</Code>.
+            Run the bench on the full record: <Code>npm run bench</Code>. It uses the same model as the recorded
+            results, Sonnet 5.5 with thinking off, and writes <Code>data/results.json</Code>.
           </li>
           <li>
-            Run it again with the statement view: <Code>npm run bench -- --view statement</Code>. Each view has its own
+            Run it again with the balance-only view: <Code>npm run bench -- --view statement</Code>. Each view has its own
             section in the file, so this keeps the full-record results.
           </li>
           <li>

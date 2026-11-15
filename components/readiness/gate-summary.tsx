@@ -19,7 +19,7 @@ function joinWith(parts: string[], word: string) {
 const feedPhrase = (ids: FeedId[]) => `the ${joinWith(ids.map((id) => FEED_NAME[id]), "or")} feed`;
 const accounts = (n: number) => `${n} ${n === 1 ? "account" : "accounts"}`;
 
-/** "Payable $612.40", "Part: $420.00", "Not payable", "Cannot verify": the traffic page's wording. */
+/** "Payable $612.40", "Part: $420.00", "Not payable", "Cannot verify, held for staff", "Cannot verify". */
 export function gateLabel(g: GateResult): string {
   switch (g.status) {
     case "payable":
@@ -29,7 +29,7 @@ export function gateLabel(g: GateResult): string {
     case "not_payable":
       return "Not payable";
     default:
-      return "Cannot verify";
+      return g.block ? "Cannot verify, held for staff" : "Cannot verify";
   }
 }
 
@@ -67,7 +67,23 @@ function stateText(g: GateSummary): string {
     out.push(decidingSentence(wrong));
     return out.join(" ");
   }
-  if (g.unverified > 0) return "Where the gate cannot verify, the assistant does not push for payment and staff confirm the amount first.";
+  if (g.unverified > 0) {
+    // Unverified rows split by what the code does: held ones are blocked, the rest are not.
+    const held = g.rows.filter((r) => r.now.status === "unverified" && r.now.block).length;
+    const open = g.rows.filter((r) => r.now.status === "unverified" && !r.now.block).length;
+    const out: string[] = [];
+    if (open > 0) {
+      out.push(
+        "Where there is no remittance to check, the gate says it cannot verify and blocks nothing. The instructions decide, which is where both wrong collects in the bench happened.",
+      );
+    }
+    if (held > 0) {
+      out.push(
+        `${held === 1 ? "One account is" : `${accounts(held)} are`} held for staff: the record shows something to sort out first, and the assistant cannot send a pay link or set up a plan there.`,
+      );
+    }
+    return out.join(" ");
+  }
   return `With these feeds the gate decides all ${g.rows.length} accounts as it would with the full record.`;
 }
 
@@ -81,6 +97,11 @@ export function GateSummaryBlock({ g }: { g: GateSummary }) {
         <Figure value={g.wrong} label="decides wrongly" tone={g.wrong > 0 ? "text-wrong" : ""} wrap />
       </div>
       <p className="mt-3 text-[14.5px]">{stateText(g)}</p>
+      {g.rows.some((r) => r.kase.id === "deceased" && r.now.status === "payable") && (
+        <p className="mt-3 text-[13px] text-ink-3">
+          The gate reads the widow&rsquo;s account as payable because the record still lists the patient as active. Only her message says he died, so not asking her for money rests on the instructions until staff mark the account.
+        </p>
+      )}
       <p className="mt-3 text-[13px] text-ink-3">
         The &ldquo;Check the balance is owed&rdquo; box picks recorded runs with or without that rule in the
         assistant&apos;s instructions. The gate is the same rule written in code, added later, so the box does not

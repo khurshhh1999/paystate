@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { summarizeTrials } from "@/lib/score.mjs";
 import type { Case, Trial, Version, VersionSummary, View } from "@/lib/types";
 import { Button, ErrorText, Money, OutcomeBadge, Panel, Segmented } from "@/components/ui";
-import { postJSON } from "@/components/api";
+import { isLimited, postJSON } from "@/components/api";
 import { StatusBars, type StripCell } from "@/components/obsidian/status-bars";
 import { Transcript, VerdictBlock } from "@/components/case/transcript";
 import { VIEW_OPTIONS } from "@/components/case/views";
@@ -13,6 +13,8 @@ const VIEW_NAME: Record<View, string> = { full: "full record", statement: "state
 
 const STORAGE_KEY = "payable-as-stated:lab-prompt";
 const MAX_IN_FLIGHT = 3;
+// Same cap as MAX_CUSTOM_PROMPT in lib/api-validate.mjs; checked here so a long prompt is not sent.
+const MAX_INSTRUCTIONS = 4000;
 
 type LabCase = Pick<Case, "id" | "title" | "group">;
 
@@ -21,6 +23,7 @@ type Row =
   | { status: "running" }
   | { status: "done"; trial: Trial }
   | { status: "error"; message: string }
+  | { status: "skipped" }
   | { status: "cancelled" };
 
 type Phase = "idle" | "running" | "done" | "cancelled";
@@ -62,7 +65,8 @@ export function LabRunner({
   const [view, setView] = useState<View>("statement");
   // The view the last run used, so the comparison matches it even if the toggle moves afterwards.
   const [runView, setRunView] = useState<View>("statement");
-  const [runError, setRunError] = useState<string | null>(null);
+  // Set when the run stopped at a usage limit; the server message says when runs open again.
+  const [limitNote, setLimitNote] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const restored = useRef(false);
 
@@ -83,17 +87,17 @@ export function LabRunner({
 
   async function runAll() {
     const text = prompt.trim();
-    if (!text) return;
+    if (!text || text.length > MAX_INSTRUCTIONS) return;
     const controller = new AbortController();
     abortRef.current = controller;
-    setRunError(null);
+    setLimitNote(null);
     setRunView(view);
     const chosenView = view;
     setPhase("running");
     setRows(Object.fromEntries(cases.map((c) => [c.id, { status: "queued" } as Row])));
 
     const queue = cases.map((c) => c.id);
-    let rateLimited = false;
+    let limited: string | null = null;
 
     async function worker() {
       while (queue.length && !controller.signal.aborted) {
@@ -107,9 +111,14 @@ export function LabRunner({
             setRows((r) => ({ ...r, [id]: { status: "cancelled" } }));
             return;
           }
-          const message = (e as Error).message;
-          if (message.startsWith("Rate limited")) rateLimited = true;
-          setRows((r) => ({ ...r, [id]: { status: "error", message } }));
+          if (isLimited(e)) {
+            // Every later case would be refused too, so stop sending.
+            limited = (e as Error).message;
+            queue.length = 0;
+            setRows((r) => ({ ...r, [id]: { status: "skipped" } }));
+            return;
+          }
+          setRows((r) => ({ ...r, [id]: { status: "error", message: (e as Error).message } }));
         }
       }
     }
@@ -124,9 +133,14 @@ export function LabRunner({
       );
       setPhase("cancelled");
     } else {
+      if (limited) {
+        setRows((r) =>
+          Object.fromEntries(Object.entries(r).map(([k, v]) => [k, v.status === "queued" ? { status: "skipped" } : v])),
+        );
+      }
       setPhase("done");
     }
-    if (rateLimited) setRunError("Some cases hit the rate limit. Wait a minute and run again.");
+    setLimitNote(limited);
     abortRef.current = null;
   }
 
@@ -143,6 +157,8 @@ export function LabRunner({
     const s = rows[c.id]?.status;
     return s === "done" || s === "error";
   }).length;
+  const skipped = cases.filter((c) => rows[c.id]?.status === "skipped").length;
+  const tooLong = prompt.trim().length > MAX_INSTRUCTIONS;
 
   const cells: StripCell[] = cases.map((c) => {
     const r = rows[c.id];
@@ -188,7 +204,9 @@ export function LabRunner({
             The output-format line is appended automatically, so the judge can read the assistant&apos;s declared actions.
             Your edits are kept in this browser.
           </span>
-          <span className="num">{prompt.length.toLocaleString("en-US")} characters</span>
+          <span className={"num " + (tooLong ? "text-wrong" : "")}>
+            {prompt.length.toLocaleString("en-US")} of {MAX_INSTRUCTIONS.toLocaleString("en-US")} characters
+          </span>
         </div>
         <details className="mt-2 text-[13px]">
           <summary className="cursor-pointer text-ink-2 hover:text-ink">Show the appended format line</summary>
@@ -209,7 +227,7 @@ export function LabRunner({
           </span>
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-3">
-          <Button onClick={runAll} disabled={running || !prompt.trim()}>
+          <Button onClick={runAll} disabled={running || !prompt.trim() || tooLong}>
             {running ? "Running…" : phase === "idle" ? `Run all ${cases.length} cases` : `Run all ${cases.length} cases again`}
           </Button>
           {running && (
@@ -220,14 +238,22 @@ export function LabRunner({
           <span className="num text-[13.5px] text-ink-2" aria-live="polite">
             {phase === "idle"
               ? `One trial per case, ${MAX_IN_FLIGHT} at a time.`
-              : `${finished} of ${cases.length} done${phase === "cancelled" ? ", cancelled" : ""}`}
+              : `${finished} of ${cases.length} done${skipped ? `, ${skipped} not run` : ""}${phase === "cancelled" ? ", cancelled" : ""}`}
           </span>
         </div>
         {!prompt.trim() && <p className="mt-2 text-[13.5px] text-ink-3">Write some instructions first.</p>}
-        {runError && (
+        {tooLong && (
           <div className="mt-2">
-            <ErrorText>{runError}</ErrorText>
+            <ErrorText>
+              Live runs take instructions up to {MAX_INSTRUCTIONS.toLocaleString("en-US")} characters. Shorten these to run
+              them.
+            </ErrorText>
           </div>
+        )}
+        {limitNote && (
+          <p className="prose-col mt-2 text-[13.5px] text-ink-2" aria-live="polite">
+            {limitNote}
+          </p>
         )}
 
         {phase !== "idle" && (
@@ -245,7 +271,7 @@ export function LabRunner({
       {(phase === "done" || phase === "cancelled") && graded.length > 0 && (
         <section aria-labelledby="lab-score">
           <h2 id="lab-score" className="text-[20px] font-semibold">
-            This run against the recorded versions, {VIEW_NAME[runView]}
+            This run beside the recorded versions, {VIEW_NAME[runView]}
           </h2>
           <LabScorecard
             run={summarizeTrials(graded, Object.entries(at_risk).map(([id, r]) => ({ id, at_risk: r })), 1)}
@@ -270,7 +296,15 @@ function ResultRow({ kase, row }: { kase: LabCase; row: Row }) {
           <OutcomeBadge outcome={row.trial.verdict.outcome} />
         ) : (
           <span className="text-[13px] text-ink-3">
-            {row.status === "queued" ? "Waiting" : row.status === "running" ? "Running…" : row.status === "cancelled" ? "Cancelled" : "Failed"}
+            {row.status === "queued"
+              ? "Waiting"
+              : row.status === "running"
+                ? "Running…"
+                : row.status === "cancelled"
+                  ? "Cancelled"
+                  : row.status === "skipped"
+                    ? "Not run"
+                    : "Failed"}
           </span>
         )}
       </span>
@@ -339,8 +373,8 @@ function LabScorecard({
       <p className="prose-col text-[14px] text-ink-2">
         Rates, because the sizes differ: this run is one trial per case ({run.trials} graded
         {partial ? ` of ${caseCount}, so it is partial` : ""}); the recorded numbers are {recordedTrials} trials per
-        case with the same record view ({viewName}). One trial per case is noisy, so read a difference of one or two
-        cases with caution and rerun before drawing a conclusion.
+        case with the same record view ({viewName}). The recorded numbers ran on Sonnet 5.5 and this run uses Opus 5.5, so the columns are not a like-for-like
+        comparison. One trial per case is also noisy: rerun before drawing a conclusion.
       </p>
       <div className="table-scroll mt-4">
         <table className="ledger">

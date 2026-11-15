@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -12,14 +11,6 @@ const LINKS = [
   { href: "/evidence", label: "Evidence" },
 ];
 
-// Fade whichever edge of the link row has more links past it, so a phone shows there is more to scroll.
-const FADE = {
-  none: undefined,
-  right: "linear-gradient(to right, black calc(100% - 32px), transparent)",
-  left: "linear-gradient(to left, black calc(100% - 32px), transparent)",
-  both: "linear-gradient(to right, transparent, black 32px, black calc(100% - 32px), transparent)",
-};
-
 export function SiteNav() {
   const pathname = usePathname();
   const isActive = (href: string) =>
@@ -28,32 +19,6 @@ export function SiteNav() {
       : href === "/evidence"
         ? pathname.startsWith("/evidence") || pathname.startsWith("/cases")
         : pathname.startsWith(href);
-
-  const rowRef = useRef<HTMLDivElement>(null);
-  const [fade, setFade] = useState<keyof typeof FADE>("none");
-
-  useEffect(() => {
-    const row = rowRef.current;
-    if (!row) return;
-    const update = () => {
-      const left = row.scrollLeft > 2;
-      const right = row.scrollLeft + row.clientWidth < row.scrollWidth - 2;
-      setFade(left && right ? "both" : left ? "left" : right ? "right" : "none");
-    };
-    // Centre the current page's link on narrow screens, without moving the page itself.
-    const current = row.querySelector<HTMLElement>('[aria-current="page"]');
-    if (current && row.scrollWidth > row.clientWidth) {
-      row.scrollLeft = current.offsetLeft - (row.clientWidth - current.offsetWidth) / 2;
-    }
-    const frame = requestAnimationFrame(update);
-    row.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    return () => {
-      cancelAnimationFrame(frame);
-      row.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-    };
-  }, [pathname]);
 
   return (
     <header className="border-b border-rule bg-paper">
@@ -79,18 +44,16 @@ export function SiteNav() {
           </svg>
           Paystate
         </Link>
-        <div
-          ref={rowRef}
-          style={{ maskImage: FADE[fade], WebkitMaskImage: FADE[fade] }}
-          className="relative -mx-4 flex items-center gap-1 overflow-x-auto px-3 py-2 text-[14px] [scrollbar-width:none] sm:mx-0 sm:px-0 sm:py-0 [&::-webkit-scrollbar]:hidden"
-        >
+        {/* Every page stays in view on a phone: the links wrap to a second line rather than scroll,
+            three and two, so no link sits alone. */}
+        <div className="-mx-2.5 flex max-w-[19rem] flex-wrap items-center gap-x-0.5 gap-y-1 py-2 text-[14px] sm:mx-0 sm:max-w-none sm:flex-nowrap sm:gap-1 sm:py-0">
           {LINKS.map((l) => (
             <Link
               key={l.href}
               href={l.href}
               aria-current={isActive(l.href) ? "page" : undefined}
               className={
-                "shrink-0 rounded-md px-3 py-1.5 whitespace-nowrap transition-colors focus-visible:outline-offset-[-2px] " +
+                "shrink-0 rounded-md px-2.5 py-1.5 whitespace-nowrap transition-colors sm:px-3 " +
                 (isActive(l.href)
                   ? "bg-accent-soft font-medium text-accent"
                   : "text-ink-2 hover:bg-sunken hover:text-ink")

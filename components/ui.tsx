@@ -111,6 +111,7 @@ export function EmptyDot() {
 }
 
 // A small row of mutually exclusive buttons (trial 1/2/3, v1/v2). Real buttons with aria-pressed.
+// While disabled, only the options not chosen fade: the chosen one still reads as the setting in use.
 export function Segmented<T extends string>({
   options,
   value,
@@ -134,8 +135,10 @@ export function Segmented<T extends string>({
           disabled={disabled}
           onClick={() => onChange(o.value)}
           className={
-            "h-7 min-w-8 rounded px-2.5 text-[13px] transition-colors disabled:cursor-not-allowed disabled:opacity-50 " +
-            (o.value === value ? "bg-accent-soft font-medium text-accent" : "text-ink-2 hover:bg-sunken hover:text-ink")
+            "h-7 min-w-8 rounded px-2.5 text-[13px] transition-colors disabled:cursor-not-allowed " +
+            (o.value === value
+              ? "bg-accent-soft font-medium text-accent"
+              : "text-ink-2 enabled:hover:bg-sunken enabled:hover:text-ink disabled:opacity-50")
           }
         >
           {o.label}

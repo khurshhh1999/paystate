@@ -21,7 +21,9 @@ loadEnvLocal();
 
 const { CASES } = await import("../lib/cases.mjs");
 const { AGENT_PROMPTS } = await import("../lib/prompts.mjs");
-const { runCase, MODEL } = await import("../lib/run.mjs");
+// The recorded bench ran on BENCH_MODEL (thinking off) for agent and judge, not on the live
+// product model, so reruns use the same model to stay comparable with data/results.json.
+const { runCase, BENCH_MODEL } = await import("../lib/run.mjs");
 const { summarizeVersion } = await import("../lib/score.mjs");
 const { partialFeedSets } = await import("../lib/feeds.mjs");
 
@@ -33,17 +35,24 @@ const partial = Boolean(args.only || args.version);
 const BUCKET = args.view === "statement" ? "statementRuns" : args.view === "feeds" ? "feedRuns" : "runs";
 
 // Fresh results for a full run; merge into the existing file for a partial one.
-let results = { generatedAt: null, model: MODEL, trials: args.trials, runs: { v1: {}, v2: {} }, statementRuns: { v1: {}, v2: {} }, feedRuns: { v1: {}, v2: {} } };
+let results = { generatedAt: null, model: BENCH_MODEL, trials: args.trials, runs: { v1: {}, v2: {} }, statementRuns: { v1: {}, v2: {} }, feedRuns: { v1: {}, v2: {} } };
 if (fs.existsSync(OUT)) {
   // Each view is its own bucket in the file. A full run of one view replaces that bucket and keeps the other.
   const existing = JSON.parse(fs.readFileSync(OUT, "utf8"));
+  // Every write keeps some of the existing runs (other cases, versions or views), so runs from two
+  // models would end up in one file under one label. Refuse instead of relabelling.
+  if (existing.model && existing.model !== BENCH_MODEL) {
+    die(
+      `${path.relative(ROOT, OUT)} holds runs on ${existing.model}; this script runs ${BENCH_MODEL}. ` +
+        "Runs from different models are not merged. Move the file aside to start a fresh run.",
+    );
+  }
   const keep = (b) => (partial || b !== BUCKET ? { v1: { ...existing[b]?.v1 }, v2: { ...existing[b]?.v2 } } : { v1: {}, v2: {} });
   results = { ...existing, runs: keep("runs"), statementRuns: keep("statementRuns"), feedRuns: keep("feedRuns") };
   if (existing.trials && existing.trials !== args.trials) {
     console.warn(`Note: file has ${existing.trials} trials per case, this rerun uses ${args.trials}. Setting trials to ${args.trials}.`);
   }
   results.trials = args.trials;
-  results.model = MODEL;
 }
 
 const jobs = [];
@@ -59,7 +68,7 @@ const failures = [];
 let done = 0;
 const started = Date.now();
 
-console.log(`Running ${jobs.length} conversations (${cases.length} cases x ${versions.join("+")} x ${args.trials} trials, ${args.view} record) on ${MODEL}, ${CONCURRENCY} at a time.`);
+console.log(`Running ${jobs.length} conversations (${cases.length} cases x ${versions.join("+")} x ${args.trials} trials, ${args.view} record) on ${BENCH_MODEL}, ${CONCURRENCY} at a time.`);
 
 await pool(jobs, CONCURRENCY, async ({ v, kase, t, key, view }) => {
   const slot = `${v}:${kase.id}:${key ?? ""}`;
@@ -67,7 +76,7 @@ await pool(jobs, CONCURRENCY, async ({ v, kase, t, key, view }) => {
   let lastErr;
   for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
     try {
-      const trial = await runCase(kase, AGENT_PROMPTS[v], view);
+      const trial = await runCase(kase, AGENT_PROMPTS[v], view, BENCH_MODEL);
       (collected[slot] ??= [])[t] = trial;
       done++;
       const acts = trial.transcript.filter((x) => x.role === "agent").map((x) => (x.actions?.length ? x.actions.join("+") : "none")).join(" | ");

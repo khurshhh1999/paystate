@@ -189,8 +189,10 @@ export interface GateSummary {
 const sameOwed = (a: number | null, b: number | null) =>
   a === null || b === null ? a === b : Math.abs(a - b) < 0.005;
 
+// Correct means the same decision and the same enforcement: an unverified that blocks nothing is
+// not the same as one held for staff.
 function standingOfGate(now: GateResult, full: GateResult): GateStanding {
-  if (now.status === full.status && sameOwed(now.owed, full.owed)) return "correct";
+  if (now.status === full.status && sameOwed(now.owed, full.owed) && now.block === full.block) return "correct";
   if (now.status === "unverified") return "unverified";
   return "wrong";
 }

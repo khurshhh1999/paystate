@@ -74,14 +74,15 @@ export function Findings() {
           not: both versions were right almost every time, and neither took money it should not have.
         </p>
         <p>
-          The difference appeared when I took the record away. An assistant that sees only the statement cannot tell a
-          deductible from a denial, so it either explains nothing or, when the patient offers to pay, agrees to take it.
+          The difference appeared when I took the record away. An assistant that sees only the balance cannot tell a
+          deductible from a denial, so it explains nothing useful and hands the patient to staff, or goes on what the
+          patient says.
         </p>
       </div>
 
       {hasStatement && lost.length > 0 && (
         <>
-          <h3 className="mt-8 text-[16px] font-semibold">Where the statement-only assistant lost the patient</h3>
+          <h3 className="mt-8 text-[16px] font-semibold">Where the balance-only assistant lost the patient</h3>
           <div className="table-scroll mt-3">
             <table className="ledger">
               <thead>
@@ -89,8 +90,8 @@ export function Findings() {
                   <th>Case</th>
                   <th>What the assistant needed</th>
                   <th>Where it lives</th>
-                  <th>Full record</th>
-                  <th>Statement only</th>
+                  <th>All feeds</th>
+                  <th>Balance only</th>
                 </tr>
               </thead>
               <tbody>
@@ -121,8 +122,9 @@ export function Findings() {
                 {" "}
                 {held.length} of the cases that should not be paid as stated survived without the record, because the
                 scripted patient says the deciding fact out loud (&ldquo;I&rsquo;m on Medicare and Medicaid&rdquo;,
-                &ldquo;I hurt my shoulder at work&rdquo;). Patients who know to object are protected. The ones who
-                just want to pay are not.
+                &ldquo;I hurt my shoulder at work&rdquo;). What they say protects them. The late-filing patient
+                says nothing like that because she just wants to pay, and she is the one the first instruction version
+                offered to take money from.
               </>
             )}
           </p>
@@ -130,16 +132,35 @@ export function Findings() {
       )}
 
       <h2 className="mt-12 border-t border-rule pt-8 text-[20px] font-semibold">Feed by feed</h2>
-      <p className="prose-col mt-3">
-        Two views is coarse, so I ran every case again with each partial set of feeds: 180 more conversations. The
-        remittance is what stops the wrong collects when the check is off. Eligibility rescues the most answers. The
-        visit record changes almost nothing for these twelve questions. Missing feeds also send more conversations to
-        staff. The{" "}
-        <Link href="/readiness" className="underline decoration-rule-strong underline-offset-2 hover:decoration-ink">
-          go-live check
-        </Link>{" "}
-        lets you pick any combination.
-      </p>
+      <div className="prose-col mt-3 flex flex-col gap-3">
+        <p>
+          Two views is coarse, so I ran every case again with each partial set of feeds: 180 more conversations. Each
+          cell below is 36 conversations. A rough 95% interval on a rate from 36 is about 15 points either side, so a
+          gap of fewer than about eight conversations between two cells is within noise.
+        </p>
+        <p>
+          The gaps that clear that line are all about connecting the record. Going from balance only to all feeds
+          takes the assistant from 28 to 36 right with the check on (about 22 points) and from 23 to 35 with it off.
+          No gap between the two instruction versions on the same feeds clears it. With the check on, eligibility adds
+          the most of any single feed, 28 to 34. That is under the line by count, but all six come from two cases, the
+          deductible and the plan change, which go from none of three right to three of three, and the eligibility
+          record holds the plan details both depend on. With the check off, remittance and eligibility add about the
+          same. The visit record changes almost nothing for these twelve questions. Missing feeds also mean more
+          conversations involve staff.
+        </p>
+        <p>
+          Wrong collects: there were two in all 324 conversations. Both are the late-filing case, first instruction
+          version, balance only. With the remittance connected, or with the check on, it did not happen in these runs.
+          Two events show the failure exists. They are too few to give a rate.
+        </p>
+        <p>
+          The{" "}
+          <Link href="/readiness" className="underline decoration-rule-strong underline-offset-2 hover:decoration-ink">
+            go-live check
+          </Link>{" "}
+          lets you pick any combination.
+        </p>
+      </div>
       <div className="mt-4">
         <FeedTable />
       </div>
@@ -156,10 +177,12 @@ export function Findings() {
           per-customer project into a checklist every launch runs.
         </li>
         <li>
-          <span className="font-medium">Put the payable-as-stated check in front of every payment, and watch its cost.</span>{" "}
-          The rule removed every wrong collect here. Without the record it also refused valid payment plans, because
-          the assistant could no longer tell a good bill from a bad one. It belongs as a guard where a feed is missing, with
-          its handoff volume tracked as the price.
+          <span className="font-medium">Keep the check in front of every payment, and watch what it costs.</span>{" "}
+          None of the 162 conversations with the check on offered to take money that was not owed. Its cost is less clear than I
+          expected. Without the record, both instruction versions refused the valid plan on the deductible case in all
+          six runs, so that came from the missing record. On the Spanish plan request it was the version without the
+          check that failed to set the plan up. The check belongs as a guard where a feed is missing, with its handoff
+          volume tracked as the cost.
         </li>
         <li>
           <span className="font-medium">Run the same check before the statement goes out.</span> If an account can be

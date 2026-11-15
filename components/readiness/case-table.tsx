@@ -70,7 +70,7 @@ export function CaseTable({ rows, trialsPerCase }: { rows: CaseRow[]; trialsPerC
                       <span className={GATE_TONE[r.gate.now.status]}>{gateLabel(r.gate.now)}</span>
                       {r.gate.allowsUnowed && (
                         <span className="mt-0.5 block text-[12.5px] text-wrong">
-                          Full record: {gateLabel(r.gate.full).replace(/^\w/, (c) => c.toLowerCase())}
+                          All feeds: {gateLabel(r.gate.full).replace(/^\w/, (c) => c.toLowerCase())}
                         </span>
                       )}
                     </td>

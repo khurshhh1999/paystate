@@ -4,8 +4,10 @@ import Link from "next/link";
 import type { Ticket } from "@/lib/types";
 import { TICKET_KINDS } from "@/lib/ticket-kinds.mjs";
 import { Money, Panel } from "@/components/ui";
+import { toldPatient } from "@/components/queue/order";
 
 export function TicketCard({ ticket }: { ticket: Ticket }) {
+  const told = toldPatient(ticket.told_patient ?? "");
   return (
     <Panel className="flex flex-col text-[14px]">
       {/* What it is and how much, then why, then what staff do next. */}
@@ -18,10 +20,10 @@ export function TicketCard({ ticket }: { ticket: Ticket }) {
           <Money value={ticket.amount} className="ml-auto text-[14px]" />
         </div>
         <p>{ticket.reason}</p>
-        {ticket.told_patient && (
+        {told.text && (
           <p className="text-ink-2">
             <span className="text-ink-3">Patient was told: </span>
-            {ticket.told_patient}
+            {told.text}
           </p>
         )}
       </div>

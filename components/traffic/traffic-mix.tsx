@@ -10,6 +10,7 @@ import {
   caseRows,
   firstRun,
   hasRuns,
+  interval95,
   isHard,
   isRight,
   presetWeights,
@@ -37,6 +38,8 @@ const word = (n: number) => LOWER[n] ?? String(n);
 
 const FIRST_RUN = firstRun(TRAFFIC);
 const RERUN = rerunCases(TRAFFIC);
+const MODEL_NAME = TRAFFIC.model === "claude-opus-5-5" ? "Opus 5.5 at low effort" : TRAFFIC.model;
+const pct = (r: number) => `${Math.round(r * 100)}%`;
 
 function plural(n: number, one: string, many: string) {
   return `${n} ${n === 1 ? one : many}`;
@@ -48,11 +51,12 @@ export function TrafficMix({ runDate }: { runDate: string | null }) {
 
   const ran = hasRuns(TRAFFIC);
   const summary = useMemo(() => summarize(TRAFFIC, weights), [weights]);
-  const rows = useMemo(() => caseRows(TRAFFIC, weights), [weights]);
+  // The headline and the table are the first run: all 28 situations under one version of the
+  // assistant. Reruns after a product change are reported beside it, never folded into it.
+  const rows = useMemo(() => caseRows(FIRST_RUN ?? TRAFFIC, weights), [weights]);
   const before = useMemo(() => (FIRST_RUN ? summarize(FIRST_RUN, weights) : null), [weights]);
-  // The headline is the first run: all 28 situations under one version of the assistant.
-  // Reruns after a product change are reported beside it, never folded into it.
   const head = before ?? summary;
+  const range = interval95(head.right, head.trials);
   const total = Object.values(weights).reduce((s, v) => s + v, 0);
 
   const choose = (m: MixId | "custom") => {
@@ -78,8 +82,9 @@ export function TrafficMix({ runDate }: { runDate: string | null }) {
         ) : (
           <div aria-live="polite" className="prose-col">
             <p className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              {head.weightedRate !== null && <span className="text-[14.5px] text-ink-2">About</span>}
               <span className="num text-[40px] font-medium leading-none">
-                {head.weightedRate === null ? "–" : `${(head.weightedRate * 100).toFixed(1)}%`}
+                {head.weightedRate === null ? "–" : pct(head.weightedRate)}
               </span>
               <span className="text-[14.5px] text-ink-2">right outcome, weighted by the mix</span>
             </p>
@@ -88,7 +93,16 @@ export function TrafficMix({ runDate }: { runDate: string | null }) {
               <span className="tabular-nums">
                 {head.right} of {head.trials}
               </span>{" "}
-              right, unweighted.{" "}
+              right, unweighted
+              {range && (
+                <>
+                  , with a rough 95% interval of{" "}
+                  <span className="tabular-nums">
+                    {pct(range.low)} to {pct(range.high)}
+                  </span>
+                </>
+              )}
+              .{" "}
               <span className={"tabular-nums " + (head.wrongCollects > 0 ? "text-wrong" : "")}>
                 {plural(head.wrongCollects, "wrong collect", "wrong collects")}
               </span>
@@ -107,7 +121,9 @@ export function TrafficMix({ runDate }: { runDate: string | null }) {
             )}
             <p className="mt-2 text-[14px] text-ink-2">
               {runsPer(TRAFFIC.trialsPerCase)} per situation, so this is a first reading, and the weights are
-              assumptions. Model: <span className="num">{TRAFFIC.model}</span>.{runDate && <> Run {runDate}.</>}
+              assumptions. Assistant, simulated patient and judge: {MODEL_NAME}, the model the live site uses. The
+              bench ran on Sonnet 5.5 with thinking off, so these figures are not comparable with it.
+              {runDate && <> Run {runDate}.</>}
             </p>
           </div>
         )}
@@ -156,7 +172,8 @@ export function TrafficMix({ runDate }: { runDate: string | null }) {
           The {TRAFFIC_CASES.length} situations
         </h2>
         <p className="prose-col mt-1 text-[14px] text-ink-2">
-          Most common first under the current mix. Gate is what the payment gate decides from the full record.
+          The first run, most common first under the current mix. Gate is what the payment gate decides from the full
+          record.
         </p>
         <div className="mt-4">
           <TrafficTable rows={rows} trialsPerCase={TRAFFIC.trialsPerCase} />
@@ -184,7 +201,8 @@ function RerunNote({ before }: { before: ReturnType<typeof summarize> }) {
         {after.filter(isRight).length} of {after.length}
       </span>
       . That is a fix checked on the cases it was written for, so it is not added to the headline. The other{" "}
-      {notRerun} situations were not rerun after the change. The table below shows the latest runs.
+      {notRerun} situations were not rerun after the change. The table below shows the first run; the reruns are
+      under &ldquo;What the misses changed&rdquo;.
     </p>
   );
 }

@@ -8,7 +8,7 @@ import { TICKET_KINDS } from "@/lib/ticket-kinds.mjs";
 import { resetQueue, useClosures, useLiveTickets } from "@/components/ticket-store";
 import { Button, Money, Segmented, money } from "@/components/ui";
 import { TicketDetail } from "./ticket-detail";
-import { closedTickets, openTickets, patientName } from "./order";
+import { closedTickets, currentTickets, openTickets, patientName } from "./order";
 
 type Filter = "open" | "closed";
 
@@ -39,7 +39,6 @@ const useMounted = () =>
 const isMobile = () => window.matchMedia("(max-width: 767px)").matches;
 
 export function Queue({ recorded }: { recorded: Ticket[] }) {
-  const live = useLiveTickets();
   const closures = useClosures();
   const hash = useSyncExternalStore(subscribeHash, readHash, noHash);
   const mounted = useMounted();
@@ -47,19 +46,21 @@ export function Queue({ recorded }: { recorded: Ticket[] }) {
   const listRef = useRef<HTMLDivElement>(null);
   const detailRef = useRef<HTMLDivElement>(null);
 
-  const all = [...live, ...recorded];
-  const open = openTickets(live, recorded, closures);
+  const stored = useLiveTickets();
+  const { live, recorded: shown } = currentTickets(stored, recorded);
+  const all = [...live, ...shown];
+  const open = openTickets(live, shown, closures);
   const closed = closedTickets(all, closures);
   const rows = filter === "open" ? open : closed;
   const liveIds = new Set(live.map((t) => t.id));
 
-  // The ticket in the hash, else the first open one (or the newest closed when none are open).
+  // The ticket in the hash, else the first row of the list on screen.
   const fromHash = hash ? all.find((t) => t.id === hash) : undefined;
-  const selected = mounted ? (fromHash ?? open[0] ?? closed[0]) : undefined;
+  const selected = mounted ? (fromHash ?? rows[0]) : undefined;
 
   // When the hash starts naming a ticket (a deep link, or back from another page), show the
-  // list that holds it so its row is highlighted. Only on a hash change: closing or reopening
-  // the ticket in view leaves the filter alone.
+  // list that holds it so its row is highlighted. Closing and reopening move the list
+  // themselves (see moved below).
   const [seenHash, setSeenHash] = useState<string | null>(null);
   if (mounted && hash !== seenHash) {
     setSeenHash(hash);
@@ -67,11 +68,23 @@ export function Queue({ recorded }: { recorded: Ticket[] }) {
   }
 
   const onHold = open.filter((t) => t.hold).reduce((sum, t) => sum + t.amount, 0);
-  const canReset = live.length > 0 || Object.keys(closures).length > 0;
+  const canReset = stored.length > 0 || Object.keys(closures).length > 0;
 
   function select(id: string) {
     setHash(id);
     if (isMobile()) detailRef.current?.scrollIntoView({ block: "start" });
+  }
+
+  // Switching lists drops the selection, so the detail always belongs to the list on screen.
+  function showList(f: Filter) {
+    setFilter(f);
+    setHash(null);
+  }
+
+  // A ticket just closed or reopened stays in view and its list follows it.
+  function moved(id: string, to: Filter) {
+    setFilter(to);
+    setHash(id);
   }
 
   function reset() {
@@ -99,7 +112,7 @@ export function Queue({ recorded }: { recorded: Ticket[] }) {
           <Segmented<Filter>
             label="Show tickets"
             value={filter}
-            onChange={setFilter}
+            onChange={showList}
             options={[
               { value: "open", label: "Open" },
               { value: "closed", label: "Closed" },
@@ -164,7 +177,13 @@ export function Queue({ recorded }: { recorded: Ticket[] }) {
               >
                 Back to queue
               </button>
-              <TicketDetail key={selected.id} ticket={selected} closure={closures[selected.id]} />
+              <TicketDetail
+                key={selected.id}
+                ticket={selected}
+                closure={closures[selected.id]}
+                onClosed={() => moved(selected.id, "closed")}
+                onReopened={() => moved(selected.id, "open")}
+              />
             </>
           ) : (
             mounted && <p className="text-[14px] text-ink-2">No tickets.</p>

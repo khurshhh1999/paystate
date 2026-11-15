@@ -2,6 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FeedTable, tally } from "@/components/feed-table";
 import { FEED_IDS } from "@/lib/feeds.mjs";
+import { COMMON_CASES } from "@/lib/cases-common.mjs";
+import { GATE_EXPECTED } from "@/lib/traffic.mjs";
+
+// How many of the 28 traffic records are payable as stated, and how many of those are ordinary cases.
+const PAYABLE_IDS = Object.keys(GATE_EXPECTED).filter((id) => GATE_EXPECTED[id].status === "payable");
+const GATE_PAYABLE = PAYABLE_IDS.length;
+const GATE_PAYABLE_ORDINARY = PAYABLE_IDS.filter((id) => COMMON_CASES.some((c) => c.id === id)).length;
 
 export const metadata: Metadata = {
   title: "Decisions · Paystate",
@@ -37,9 +44,9 @@ const PEOPLE = [
 const DECISIONS = [
   {
     title: "A bill in doubt goes on hold before anything else",
-    chose: "The assistant pauses statements and reminders first, then hands off.",
+    chose: "The assistant pauses statements and reminders first, then hands off. A hold lasts 10 business days, then goes back to the billing team, who release it or extend it. One hold per statement: asking again on the same statement goes straight to staff. Holds are counted per practice and per patient, so a pattern of holds shows up in the practice's report.",
     declined: "Handing off and leaving the balance active until staff get to it.",
-    why: "The patient's fear is collections. The Medicare and Medicaid patient says so in her second message and offers $20 a month to make it stop. A hold answers the fear straight away. A handoff alone does not.",
+    why: "The patient's fear is collections. The Medicare and Medicaid patient says so in her second message and offers $20 a month to make it stop. A hold answers the fear straight away. A handoff alone does not. The expiry and the one-per-statement limit stop a patient from pausing a bill indefinitely by saying they doubt it.",
     cost: "Cash is delayed on held balances that turn out to be owed. I would track how many holds are released unchanged.",
   },
   {
@@ -81,22 +88,22 @@ const DECISIONS = [
     title: "A death in the family ends the automation",
     chose: "Condolences, reminders stopped, no payment request, no answer on who owes. Staff phone the family. No close-out text.",
     declined: "Explaining estate liability, or offering the spouse a plan.",
-    why: "Who owes depends on state law and the estate. A wrong answer from software here does real harm to someone grieving.",
-    cost: "Every such case costs staff a phone call. That is the right price.",
+    why: "Who owes depends on state law and the estate. A wrong answer from software here does real harm to someone grieving. The record usually does not know yet: in this case it still lists the patient as active, so the payment gate reads the balance as payable and the stop rests on the instructions until staff mark the account. Once the record shows the death, the gate holds the account.",
+    cost: "Every such case costs staff a phone call. These cases are rare, and I would rather pay for the call than risk software getting it wrong.",
   },
   {
-    title: "Whether money can be taken is decided in code",
-    chose: "A payment gate reads the reason codes, eligibility, ledger and the payer's stated patient share, and returns payable, part payable, not payable or cannot verify. The assistant explains; the gate decides. Collect actions it does not allow are removed.",
-    declined: "Leaving the check as a rule in the assistant's instructions.",
-    why: "A rule in a prompt is a test result. A rule in code is a guarantee, gives the same answer every time, and can be read by the practice's billing lead. It matches the answer key on all 28 records.",
-    cost: "The gate only knows the feeds it can read. With remittance alone it passes the Medicare and Medicaid patient and the copay paid at the desk, so the instruction to hold back when the patient raises something the record does not show stays in.",
+    title: "Blocking a payment the record rules out is done in code",
+    chose: "A payment gate reads the reason codes, eligibility, ledger and the payer's stated patient share, and returns payable, part payable, not payable or cannot verify. The assistant cannot send a pay link or set up a plan on a balance the gate has blocked.",
+    declined: "Leaving the check as a rule in the assistant's instructions only.",
+    why: `The instruction held in the bench runs, but that only tells me about the runs I did. A rule in code gives the same answer every time, and a practice's billing lead can read it. On the 28 records I wrote, the gate returns the decision I expected for each. ${GATE_PAYABLE} of the 28 are payable as stated, ${GATE_PAYABLE_ORDINARY} of them ordinary accounts with nothing wrong, so the test is easier than 28 of 28 sounds.`,
+    cost: "Where there is no remittance to check, the gate says it cannot verify and blocks nothing. The instructions decide, which is where both wrong collects in the bench happened. On a part-payable bill it passes the supported amount to the assistant, but the amount on the pay link is not checked in code. It has no model of secondary payers. And it only knows the feeds it can read: with remittance alone it passes the Medicare and Medicaid patient and the copay paid at the desk, so the instruction to hold back when the patient raises something the record does not show stays in.",
   },
   {
     title: "The owed part of a wrong bill can still be paid",
     chose: "On the out-of-network anesthesia bill the patient owes $420 of $2,310. The assistant may take the $420 and holds the rest.",
     declined: "Refusing all payment until the statement is corrected.",
     why: "The patient asked what they owe. A straight answer and the option to settle it is better service than making them wait.",
-    cost: "The assistant has to be right about the split. It is only allowed when the record states the patient share.",
+    cost: "The assistant has to be right about the split. It is only allowed when the record states the patient share. The gate passes $420 as the supported amount, but nothing in code stops a link for a different figure.",
   },
 ];
 
@@ -189,8 +196,8 @@ export default function DecisionsPage() {
           </p>
           <p>
             So the product has one rule above the others. The assistant does not ask for money the practice&apos;s own
-            record says is not owed. Everything on this site follows from taking that rule seriously for the three
-            people it touches.
+            record says is not owed. The rest of the site works through what that rule means for the three people it
+            touches.
           </p>
         </div>
       </Section>
@@ -260,7 +267,7 @@ export default function DecisionsPage() {
             {hasFeedRuns && (
               <>
                 {" "}
-                With only the statement balance and the check on, the assistant was right in{" "}
+                With the balance only and the check on, the assistant was right in{" "}
                 <span className="tabular-nums">
                   {none.on.right} of {none.on.total}
                 </span>{" "}
@@ -268,13 +275,14 @@ export default function DecisionsPage() {
                 <span className="tabular-nums">
                   {none.on.handoffs}
                 </span>{" "}
-                ended with staff. With everything connected it was right in{" "}
+                involved staff. With all feeds connected it was right in{" "}
                 <span className="tabular-nums">
                   {all.on.right} of {all.on.total}
                 </span>
-                , and <span className="tabular-nums">{all.on.handoffs}</span> still ended with staff, because most of these cases
-                need someone to correct the account. With the check off and no remittance, it offered to
-                take payment on a claim the practice had filed late.
+                , and <span className="tabular-nums">{all.on.handoffs}</span> still involved staff, because most of these
+                cases need someone to correct the account. With the check off and no remittance, it offered a pay link
+                on the late-filed claim in two of three runs. Those are the only two wrong collects in all 324 conversations:
+                enough to show the failure exists, too few to give a rate.
               </>
             )}
           </p>
@@ -288,8 +296,10 @@ export default function DecisionsPage() {
           <FeedTable />
         </div>
         <p className="prose-col mt-3 text-[13.5px] text-ink-2">
-          Twelve cases, three runs each, so 36 conversations per cell. A difference of one or two is within run-to-run
-          variation. Full transcripts and the grading are under{" "}
+          Twelve cases, three runs each, so 36 conversations per cell, recorded on Sonnet 5.5 with thinking off. A
+          rough 95% interval on a rate from 36 is about 15 points either side, so gaps of fewer than about eight
+          conversations are within noise. The gaps that clear it all come from connecting the record. Full transcripts
+          and the grading are under{" "}
           <Link href="/evidence" className={link}>
             Evidence
           </Link>
@@ -323,6 +333,11 @@ export default function DecisionsPage() {
           patient who pays a late-filed claim counts as resolved and collected. Graded against the record, it is the
           worst outcome on this site.
         </p>
+        <p className="prose-col mt-3">
+          A practice still needs to see what came in, so collected dollars are reported, next to wrong-collect dollars
+          and refunds. A payment that is later refunded costs the practice twice: once in the staff time to take it
+          back, and again in a patient who now doubts the next statement.
+        </p>
       </Section>
 
       <Section title="What I left out">
@@ -351,8 +366,7 @@ export default function DecisionsPage() {
           ))}
         </ul>
         <p className="prose-col mt-4 text-ink-2">
-          Each of these could change a decision above. I would rather find that out in the first week than defend the
-          list.
+          Each of these could change a decision above, so they are the first things I would ask a practice.
         </p>
       </Section>
     </div>

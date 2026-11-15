@@ -37,6 +37,20 @@ function planOffer(owed: number) {
 }
 
 export function resolutionsFor(ticket: Ticket): Resolution[] {
+  const options = baseResolutions(ticket);
+  // A credit the patient asked to have back. EXTRA_POLICY.texts_and_documents in
+  // lib/cases-common.mjs: staff refund credits to the original payment method within 30 days.
+  if (mentions(ticket, "refund")) {
+    options.unshift({
+      id: "refunded",
+      label: "Credit refunded",
+      message: `${PREFIX} Hi ${firstName(ticket.patient)}, we are refunding your ${usd(ticket.amount)} credit to the card or account you paid with. We send refunds within 30 days. You do not need to do anything.`,
+    });
+  }
+  return options;
+}
+
+function baseResolutions(ticket: Ticket): Resolution[] {
   const name = firstName(ticket.patient);
   const amount = usd(ticket.amount);
   const balance = usd(ticket.balance);
@@ -61,13 +75,22 @@ export function resolutionsFor(ticket: Ticket): Resolution[] {
 
     case "add_secondary": {
       const medicaid = mentions(ticket, "medicaid");
+      // QMB: federal rules bar billing the patient for Medicare cost sharing, so the practice
+      // can say so outright. Any other secondary may still leave the patient a share.
+      const qmb = mentions(ticket, "qmb");
       const coverage = medicaid ? "your Medicaid coverage" : "your secondary insurance";
       return [
-        {
-          id: "added",
-          label: "Secondary added and billed, balance cleared",
-          message: `${hi} we added ${coverage} to your account and billed it for the ${amount}. You do not owe this amount, and it will not go to collections. Your balance is now ${remaining}, so you can ignore the statement.`,
-        },
+        qmb
+          ? {
+              id: "added",
+              label: "Medicaid added and billed, balance cleared",
+              message: `${hi} we added ${coverage} to your account and billed it for the ${amount}. With Medicare and this Medicaid coverage, we cannot bill you for this amount, and we will not send it to collections. Your balance is now ${remaining}, so you can ignore the statement.`,
+            }
+          : {
+              id: "added",
+              label: "Secondary added and billed",
+              message: `${hi} we added ${coverage} to your account and billed it for the ${amount}. Please do not pay this amount while they process the claim. We will not send it to collections while that claim is open. If anything is left for you to pay afterwards, we will send you a new statement.`,
+            },
         {
           id: "need-member-id",
           label: "Member number needed from the patient",
@@ -120,7 +143,7 @@ export function resolutionsFor(ticket: Ticket): Resolution[] {
         {
           id: "appealed",
           label: "Appealed to the payer",
-          message: `${hi} we have asked your insurance to reconsider the claim for your visit. Whatever they decide, you do not owe the ${amount}. Your account stays on hold while they review it, so no statements will go out.`,
+          message: `${hi} we have asked your insurance to reconsider the claim for your visit. Whatever they decide, we will not bill you for the ${amount}. Your account stays on hold while they review it, so no statements will go out.`,
         },
       ];
     }
@@ -138,7 +161,7 @@ export function resolutionsFor(ticket: Ticket): Resolution[] {
         {
           id: "settling",
           label: "Being settled with the insurer",
-          message: `${hi} ${owed > 0 ? `${amount} of the ${balance}` : `the ${amount}`} on your statement is being settled between us and your insurance and will not be billed to you.${owed > 0 ? ` The most you will owe is ${remaining}.` : ""} Your account stays on hold until this is done, so please do not pay yet. We will text you the final amount.`,
+          message: `${hi} we are working out ${owed > 0 ? `${amount} of the ${balance}` : `the ${amount}`} on your statement with your insurance, and we will not bill you for it.${owed > 0 ? ` We will not bill you more than ${remaining} for this visit.` : ""} Your account stays on hold until this is done, so please do not pay yet. We will text you the final amount.`,
         },
       ];
 
@@ -165,7 +188,7 @@ export function resolutionsFor(ticket: Ticket): Resolution[] {
       // A problem visit billed alongside a preventive one (modifier 25) is the usual dispute.
       const sameDayVisit = mentions(ticket, "-25") || mentions(ticket, "preventive");
       const why = sameDayVisit
-        ? `Your checkup itself was covered in full. At the same visit a separate problem was also examined and treated, and your plan bills that as an office visit with its own copay, so the ${amount} is correct. We are sorry no one explained this at the time.`
+        ? `Your checkup itself was covered in full. At the same visit the doctor also examined a separate problem. We billed that as its own office visit, and your plan applies its copay to it, so the ${amount} is correct. We are sorry no one explained this at the time.`
         : `It was billed correctly, so it stays on your account.`;
       return [
         {

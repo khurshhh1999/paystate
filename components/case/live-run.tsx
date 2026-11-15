@@ -3,14 +3,14 @@
 import { useState } from "react";
 import type { Trial, Version, View } from "@/lib/types";
 import { Button, ErrorText, Panel, Segmented } from "@/components/ui";
-import { postJSON } from "@/components/api";
+import { isLimited, postJSON } from "@/components/api";
 import { Transcript, VerdictBlock } from "./transcript";
 import { VIEW_OPTIONS } from "./views";
 
 type RunState =
   | { status: "idle" }
   | { status: "loading" }
-  | { status: "error"; message: string }
+  | { status: "error"; message: string; limited: boolean }
   | { status: "done"; trial: Trial; at: string; view: View };
 
 const IDLE: RunState = { status: "idle" };
@@ -28,7 +28,7 @@ export function LiveRun({ caseId, defaultView }: { caseId: string; defaultView: 
       const at = new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
       setRuns((r) => ({ ...r, [version]: { status: "done", trial, at, view: runView } }));
     } catch (e) {
-      setRuns((r) => ({ ...r, [version]: { status: "error", message: (e as Error).message } }));
+      setRuns((r) => ({ ...r, [version]: { status: "error", message: (e as Error).message, limited: isLimited(e) } }));
     }
   }
 
@@ -53,12 +53,19 @@ export function LiveRun({ caseId, defaultView }: { caseId: string; defaultView: 
                   </span>
                 )}
               </div>
-              {s.status === "error" && <ErrorText>{s.message}</ErrorText>}
+              {s.status === "error" &&
+                (s.limited ? (
+                  <p className="text-[13.5px] text-ink-2" aria-live="polite">
+                    {s.message}
+                  </p>
+                ) : (
+                  <ErrorText>{s.message}</ErrorText>
+                ))}
               {s.status === "done" && (
                 <Panel className="flex flex-col">
                   <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-rule px-4 py-3">
                     <h3 className="font-semibold">
-                      {v}, live run, {s.view === "full" ? "full record" : "statement only"}
+                      {v}, live run, {s.view === "full" ? "all feeds" : "balance only"}
                     </h3>
                     <span className="text-[13px] text-ink-2">Run at {s.at}. Not saved.</span>
                   </div>

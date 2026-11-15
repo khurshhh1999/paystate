@@ -25,7 +25,7 @@ export function GateText({ gate }: { gate: GateResult }) {
     case "not_payable":
       return <span className="text-wrong">Not payable</span>;
     default:
-      return <span className="text-ink-3">Cannot verify</span>;
+      return <span className="text-ink-3">{gate.block ? "Cannot verify, held for staff" : "Cannot verify"}</span>;
   }
 }
 
@@ -89,6 +89,9 @@ export function TrafficTable({ rows, trialsPerCase }: { rows: CaseRow[]; trialsP
                     </td>
                     <td className="whitespace-nowrap">
                       <GateText gate={r.gate} />
+                      {r.kase.id === "deceased" && r.gate.status === "payable" && (
+                        <span className="block text-[12.5px] text-ink-3">per the record, see note</span>
+                      )}
                     </td>
                     <td className="r">
                       {r.sample && (
