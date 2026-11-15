@@ -5,6 +5,7 @@
 
 import { ApiError, checkRequestShape, parseBody } from "./api-validate.mjs";
 import { COST, checkLimits, clientIp, type Route } from "./limits.mjs";
+import { charged, checkBudget } from "./budget.mjs";
 
 export {
   ApiError,
@@ -54,7 +55,7 @@ export async function readJsonBody(request: Request): Promise<Record<string, unk
  * Counts a validated request against the limits. Call it last, right before the model.
  * Throws a 429 ApiError with Retry-After when limited.
  */
-export function enforceLimits(request: Request, route: Route, custom = false): void {
+export async function enforceLimits(request: Request, route: Route, custom = false): Promise<void> {
   // Switches for the deployment: set LIVE_CALLS=off to stop every model call, or
   // LIVE_CUSTOM_PROMPTS=off to stop only runs on a visitor's own instructions.
   if (process.env.LIVE_CALLS === "off") {
@@ -62,6 +63,17 @@ export function enforceLimits(request: Request, route: Route, custom = false): v
   }
   if (custom && process.env.LIVE_CUSTOM_PROMPTS === "off") {
     throw new ApiError(503, "Runs with custom instructions are switched off right now. The saved instructions and all recorded results still work.");
+  }
+  // The day's dollar budget, shared by every instance, comes before the per-address counters.
+  const budget = await checkBudget({ custom });
+  if (!budget.ok) {
+    throw new ApiError(
+      429,
+      budget.scope === "custom"
+        ? "Runs with custom instructions have used today's budget for this site. They open again at midnight UTC. The saved instructions and all recorded results still work."
+        : "Live conversations have used today's budget for this site, since each one costs money to run. They open again at midnight UTC. Recorded results on every page still work.",
+      { "Retry-After": String(budget.retryAfterSeconds) },
+    );
   }
   const verdict = checkLimits(clientIp(request.headers), { units: COST[route], custom });
   if (!verdict.ok) {
@@ -76,3 +88,6 @@ export const MAX_REPLY_CHARS = 1200;
 export function clipReply<T extends { text: string }>(reply: T): T {
   return reply.text.length > MAX_REPLY_CHARS ? { ...reply, text: `${reply.text.slice(0, MAX_REPLY_CHARS).trimEnd()}…` } : reply;
 }
+
+/** Runs the model work of a request with its token cost charged to the daily budget. */
+export { charged };

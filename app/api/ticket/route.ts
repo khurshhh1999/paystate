@@ -1,7 +1,7 @@
 // POST /api/ticket  { caseId, transcript }  ->  the work item billing staff receive
 // Called once a conversation has handed off. The transcript must end with an agent turn.
 
-import { ApiError, checkRequest, enforceLimits, errorResponse, readJsonBody, resolveCase, validateTranscript } from "@/lib/api-request";
+import { ApiError, charged, checkRequest, enforceLimits, errorResponse, readJsonBody, resolveCase, validateTranscript } from "@/lib/api-request";
 import { MODEL } from "@/lib/run.mjs";
 import { needsTicket, writeTicket } from "@/lib/tickets.mjs";
 
@@ -16,8 +16,8 @@ export async function POST(request: Request) {
     if (!needsTicket(transcript)) {
       throw new ApiError(400, "This conversation has no handoff to staff, so there is nothing to put in the queue.");
     }
-    enforceLimits(request, "ticket");
-    return Response.json(await writeTicket(kase, transcript, MODEL));
+    await enforceLimits(request, "ticket");
+    return Response.json(await charged(false, () => writeTicket(kase, transcript, MODEL)));
   } catch (err) {
     return errorResponse(err);
   }
